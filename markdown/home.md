@@ -39,5 +39,6 @@ and correctness.
 Scotch takes great inspiration from Haskell, but does not attempt to be a Haskell
 on the JVM (check out [Frege](https://github.com/Frege/frege) for that.) There are
 several reasons for this, primarily to maintain accessibility to the average developer,
-but especially to allow breakage from Haskell in cases where Haskell idioms aren't
-directly supported within the JVM and must be written differently.
+but especially to allow breakage from Haskell in cases where Haskell idioms
+[aren't directly supported](http://fregepl.blogspot.com/2013/03/adding-concurrency-to-frege-part-ii.html)
+within the JVM and must be written differently.
