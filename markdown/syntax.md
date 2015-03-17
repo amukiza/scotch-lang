@@ -3,24 +3,133 @@
 Scotch borrows a great deal of syntax from Haskell, but also adds some of its
 own as well. This guide outlines most of what currently exists in the language.
 
+## Values
+
+### Declared Values
+
+Values may be declared with a name and referenced from within other values. The
+order of declaration is not important.
+
+```
+// constant expression consisting of Toast object
+myFavoriteToast = Toast { burnLevel = 2, kind = Sourdough }
+
+// capturing pattern
+identity x = x
+
+// capturing function literal
+identity = \x -> x
+
+// destructuring pattern
+secondElement (_, b) = b
+
+// destructuring function literal
+secondElement = \(_, b) -> b
+
+// constant expression using two declarations
+isItTrue? = identity myFavoriteToast == myFavoriteToast
+```
+
+### Type Signatures
+
+Declared values may be explicitly typed if necessary. This allows enforcement of
+interfaces and compiler support in cases when types are undecidable. Type signatures
+consist of the name of the declaration followed by a double-colon and the type
+signature itself.
+
+```
+// precede the declaration with the signature
+secondElement :: (a, b) -> b
+secondElement (_, b) = b
+```
+
+When two declarations reference each other and both do not have a value signature,
+then one must be explicitly typed or the compiler will not be able to infer the types
+of either declaration (halting problem).
+
+```
+// these two values' types can't be determined because they depend on each other
+fn a = fn2 a
+fn2 b = fn b
+```
+
+### Function Literals
+
+Function literals start with a backslash because it looks like a lambda (as in
+Lambda Calculus) then list the arguments of the function. An arrow separates
+the arguments from the body of the function. Function literals may be placed
+anywhere a function value is expected.
+
+```
+// an example function which squares its argument
+\x -> x * x
+```
+
+### Patterns
+
+Patterns function similarly to functions in that they accept arguments and return
+values. The key difference is that they also function as conditionals by matching
+on values and can pull apart objects (destructuring).
+
+```
+// fibonacci sequence using value matching
+nthFibonacci 0 = 0
+nthFibonacci 1 = 1
+nthFibonacci n = fib (n - 1) + fib (n - 2)
+
+// destructuring 2-tuple objects,
+// capturing properties with variable names and ignoring properties with underscores
+firstElement (a, _) = a
+secondElement (_, b) = b
+```
+
+#### Pattern Literals
+
+Pattern literals look almost exactly like literal functions, except their arguments
+can be replaced with destructuring and ignored pattern matches.
+
+```
+// grabbing the first element of a 2-tuple and ignoring the second
+\(firstElement, _) -> firstElement
+
+// ignoring the only argument of a function
+\_ -> 2
+```
+
+### Function Application
+
+Functions are curried to accept only single arguments at a time. As a consequence,
+the syntax to apply a function to an argument requires only separation by whitespace
+or parentheses between the function and argument. This means no superfluous parentheses
+or commas!
+
+| Scotch   | C-based Languages |
+|----------|-------------------|
+| fn b     | fn(b)             |
+| fn b c   | fn(b, c)          |
+| fn (b c) | fn(b(c))          |
+| fn b(c)  | fn(b, c)          |
+
+[Functions](#syntax-values-function-literals) and [patterns](#syntax-values-patterns) are both curried.
+
 ## Data Types
 
 Data types describe values. They can be declared with one or more *constructors*,
-each of which can have zero or more fields. When constructors have fields, the
-fields may optionally be named.
+each of which can have zero or more properties. When constructors have properties,
+the properties may optionally be named.
 
 ```
-// Toast as a record type with a single constructor having unnamed fields
+// Toast as a record type with a single constructor having unnamed properties
 data Toast Bread Int
 
-// Toast as a record type with a single constructor having named fields
-data Toast { kind Bread, // the field name 'kind' is followed by the type 'Bread'
+// Toast as a record type with a single constructor having named properties
+data Toast { kind Bread, // the property name 'kind' is followed by the type 'Bread'
              burnLevel Int }
 
 // Singly-linked sausages with two constructors
 data SausageLinks
-    = NoSausage // NoSausage has no fields
-    | SausageLink Sausage SausageLinks // SausageLink has two unnamed fields of type Sausage and SausageLinks
+    = NoSausage // NoSausage has no properties
+    | SausageLink Sausage SausageLinks // SausageLink has two unnamed properties of type Sausage and SausageLinks
 
 // French-to-Spanish dictionary as a bi-map
 data FrenchSpanishDictionary
@@ -62,7 +171,7 @@ valueOf (Just x) = x
 ### Constructors
 
 Constructors are used to create value instances of a particular data type.
-Constructors themselves are not types. This is reflected in [value signatures](#syntax-values-value-signatures)
+Constructors themselves are not types. This is reflected in [value signatures](#syntax-values-type-signatures)
 where only type names used.
 
 ```
@@ -106,10 +215,10 @@ If using a property bag, then all properties must be present or the compiler
 will emit an error listing the missing properties. Likewise, the compiler emits
 an error for properties that don't exist.
 
-### Generic Types
+### Generic Data Types
 
 Data types may accept type arguments so any type can be stored in their affected
-fields. The most common use case for type arguments are collection types.
+properties. The most common use case for type arguments are collection types.
 
 ```
 // The built-in list type
@@ -128,144 +237,3 @@ Read [here](#syntax-lists) for the list type.
 
 Generic type arguments are generally given using single, lower-case letters. Full
 names are perfectly fine for clarity as long as the first letter is lower case.
-
-## Values
-
-Values are patterns, functions, and expressions.
-
-```
-// function literal
-\x -> x * x
-
-// expression
-2 + 2 * f x
-
-// pattern literal
-\(_, b) = b
-```
-
-### Declared Values
-
-Values may be declared with a name and referenced from within other values. The
-order of declaration is not important.
-
-```
-// constant expression
-myFavoriteToast = Toast { burnLevel = 2, kind = Sourdough }
-
-// named pattern
-snd (_, b) = b
-
-// named function
-id = \x -> x
-
-// named capturing pattern
-id x = x
-
-// using two declarations
-isItTrue? = id myFavoriteToast == myFavoriteToast
-```
-
-### Value Signatures
-
-Declared values may be explicitly typed if necessary. Signatures consist of the
-name of the declaration followed by a double-colon and the type signature itself.
-
-```
-// precede the declaration with the signature
-snd :: (a, b) -> b
-snd (_, b) = b
-```
-
-When two declarations reference each other and both do not have a value signature,
-then one must be explicitly typed or the compiler will not be able to infer the types
-of either declaration (halting problem).
-
-### Function Application
-
-Functions are curried to accept only single arguments at a time. As a consequence,
-the syntax to apply a function to an argument requires only separation by whitespace
-or parentheses between the function and argument. This means no superfluous parentheses
-or commas!
-
-| Scotch  | C-based Languages |
-|---------|-------------------|
-| a b     | a(b)              |
-| a b c   | a(b, c)           |
-| a (b c) | a(b(c))           |
-| a b(c)  | a(b, c)           |
-
-[Patterns](#syntax-patterns), [pattern literals](#syntax-patterns-pattern-literals),
-and [functions](#syntax-functions) are all curried.
-
-## Lists
-
-Lists in Scotch are persistent, singly-linked lists. They can be created using either
-the literal syntax, or using the operator syntax.
-
-```
-// literal syntax
-[1, 2, 3]
-
-// operator syntax
-1:2:3:[]
-```
-
-The cons `(:)` operator is used to join a new head to the list on its right. The
-`[]` is an empty list.
-
-### Conceptual List Definition
-
-The Scotch list is actually defined in Java for optimization opportunities, but
-the Scotch definition would look like so:
-
-```
-right infix 5 (:)
-data [a] = [] | a : [a]
-```
-
-This is only an example. Please note that operator syntax within data type
-declarations is unsupported.
-
-### List Patterns
-
-Lists may be easily destructured and matched using the cons operator `(:)` and
-empty list `[]`.
-
-```
-length [] = 0
-length (x:xs) = 1 + length xs
-```
-
-## Function Literals
-
-A value that accepts one or more arguments as they are, and returns a value.
-
-```
-// an example function
-\x -> x * x
-```
-
-## Patterns
-
-Similar to a function, except the arguments are matched for value or structure
-to decide which values to return.
-
-```
-// fibonacci sequence using patterns
-fib 0 = 0
-fib 1 = 1
-fib n = fib (n - 1) + fib (n - 2)
-
-// destructuring 2-tuple
-fst (a, _) = a
-snd (_, b) = b
-```
-
-### Pattern Literals
-
-Like a function, but with destructuring arguments.
-
-```
-\(fst, _) -> fst
-```
