@@ -237,3 +237,16 @@ Read [here](#syntax-lists) for the list type.
 
 Generic type arguments are generally given using single, lower-case letters. Full
 names are perfectly fine for clarity as long as the first letter is lower case.
+
+## Comments
+
+Scotch borrows C's single-line and multi-line comments:
+
+```
+// ignore this line
+
+/* ignore
+   all of
+   these
+   lines */
+```
