@@ -77,6 +77,12 @@ anywhere a function value is expected.
 ```
 // an example function which squares its argument
 \x -> x * x
+
+// grabbing the first element of a 2-tuple and ignoring the second
+\(firstElement, _) -> firstElement
+
+// ignoring the only argument of a function
+\_ -> 2
 ```
 
 ## Patterns
@@ -97,15 +103,113 @@ firstElement (a, _) = a
 secondElement (_, b) = b
 ```
 
-### Pattern Literals
+## Data Type Definitions
 
-Pattern literals look almost exactly like literal functions, except their arguments
-can be replaced with destructuring and ignored pattern matches.
+A data type in Scotch is a single umbrella over a closed number of variants, called
+"constructors". Data types are declared using the `data` keyword, followed by the
+*capitalized* type name, then an equals sign and a pipe-separated list of constructors.
+
+### Creating Data Types
+
+Data types require a list of type constructors. Type constructors create objects
+of their parent type. To create a constructor, provide a *capitalized* name, then
+optionally follow it with properties enclosed in curly braces. If there are no
+properties, the constructor creates constants, otherwise it will produce objects.
+
+Note that all data type names and constructor names must be capitalized. Data
+types will fail to compile otherwise. Conversely, the first letter of property
+names must be lower case.
+
+As an example, here is a [Binary Tree Map](http://pages.cs.wisc.edu/~skrentny/cs367-common/readings/Binary-Search-Trees/):
 
 ```
-// grabbing the first element of a 2-tuple and ignoring the second
-\(firstElement, _) -> firstElement
+// A data type with both a constant constructor and a complex constructor.
 
-// ignoring the only argument of a function
-\_ -> 2
+data InventoryTree = InventoryLeaf // this constructor has no properties and thus is a constant
+                   | InventoryNode { item String, // property name 'item' is followed by type 'String'
+                                     count Int,
+                                     leftBranch InventoryTree,
+                                     rightBranch InventoryTree }
+```
+
+The `InventoryNode` constructor is particularly verbose with its property definitions.
+In its particular case, this helps clarify what its objects will contain. However,
+there are cases where objects are so simple you may not want to name their properties:
+
+```
+// A data type describing a singly-linked list of sausage links
+data SausageLinks = NoMoreSausage
+                  | SausageLink Sausage SausageLinks // No properties after the constructor name, just a list of types
+```
+
+When a constructor has its properties declared as a list of types, each property
+is implicitly named in the order it was declared as `_0`, `_1`, etc. and may be
+referenced as any other property.
+
+## Object Constructors
+
+Objects are instantiated from [complex constructors](#syntax-data-type-definitions-creating-data-types).
+There are two ways that objects can be instantiated:
+
+### Property Bag Instantiation
+
+Property bag instantiation requires providing a list of properties enclosed in
+curly braces after the name of the constructor to create a new object. The properties
+within the property bag can be in any order.
+
+```
+// The data type definitions
+data Bread = Sourdough | Pumpernickle | Rye
+data Toast { kind Bread, burnLevel Int }
+
+// instantiating Toast
+myFavoriteToast = Toast { burnLevel = 2, kind = Sourdough } // properties in any order! :)
+
+```
+
+### Positioned Instantiation
+
+Positioned instantiation is used with objects that have unnamed or positioned
+properties. Even objects with named properties can be instantiated in this manner
+as long as their arguments are provided in the order they were declared.
+
+```
+// The data type definitions
+data Bread = Sourdough | Pumpernickle | Rye
+data Toast { kind Bread, burnLevel Int }
+
+data Sausage = Sausage
+data SausageLinks = NoMoreSausage
+                  | SausageLink Sausage SausageLinks
+
+// instantiating constructor with unnamed properties
+threeSausages = SausageLink Sausage (SausageLink Sausage (SausageLink Sausage NoMoreSausage))
+
+// instantiating constructor with named properties without property names
+myLeaseFavoriteToast = Toast Pumpernickle 5
+```
+
+## Constant Constructors
+
+Constants are [constructors](#syntax-data-type-definitions-creating-data-types)
+which have no arguments. They are singleton values and are declared in their
+respective data types with no properties.
+
+```
+// A complex data type consisting of three constant constructors
+data Color = Red | Blue | Green
+
+// A complex data type having both a constant constructor and a complex constructor
+data SausageLinks = NoMoreSausage // a constant constructor
+                  | SausageLink Sausage SausageLinks // a complex constructor
+```
+
+Using constants in a value is really easy. You just reference it by name.
+
+```
+// A list of colors
+colors = [Red, Blue, Green]
+
+// two sausage links
+twoSausages = SausageLink Sausage (SausageLink Sausage NoMoreSausage)
 ```
