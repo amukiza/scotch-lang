@@ -192,7 +192,7 @@ Constant constructors take no arguments and are referenced by name only.
 
 ```
 // the constructor Nothing is a constant
-data Maybe somethings = Nothing | Just something
+data Maybe something = Nothing | Just something
 ```
 
 ### Object Constructors
