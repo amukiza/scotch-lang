@@ -65,7 +65,7 @@ illustrates what is required to support the equivalent Scotch code:
 // Scotch declaration for Maybe
 module scotch.data.maybe
 
-data Maybe something = Nothing | Just { value something }
+data Maybe something = Nothing | Just { value :: something }
 ```
 
 ```java
