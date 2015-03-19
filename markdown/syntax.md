@@ -160,10 +160,10 @@ As an example, here is a [Binary Tree Map](http://pages.cs.wisc.edu/~skrentny/cs
 // A data type with both a constant constructor and a complex constructor.
 
 data InventoryTree = InventoryLeaf // this constructor has no properties and thus is a constant
-                   | InventoryNode { item String, // property name 'item' is followed by type 'String'
-                                     count Int,
-                                     leftBranch InventoryTree,
-                                     rightBranch InventoryTree }
+                   | InventoryNode { item :: String, // property name 'item' is followed by a double colon and type 'String'
+                                     count :: Int,
+                                     leftBranch :: InventoryTree,
+                                     rightBranch :: InventoryTree }
 ```
 
 The `InventoryNode` constructor is particularly verbose with its property definitions.
@@ -194,7 +194,7 @@ within the property bag can be in any order.
 ```
 // The data type definitions
 data Bread = Sourdough | Pumpernickle | Rye
-data Toast { kind Bread, burnLevel Int }
+data Toast { kind :: Bread, burnLevel :: Int }
 
 // instantiating Toast
 myFavoriteToast = Toast { burnLevel = 2, kind = Sourdough } // properties in any order! :)
@@ -210,7 +210,7 @@ as long as their arguments are provided in the order they were declared.
 ```
 // The data type definitions
 data Bread = Sourdough | Pumpernickle | Rye
-data Toast { kind Bread, burnLevel Int }
+data Toast { kind :: Bread, burnLevel :: Int }
 
 data Sausage = Sausage
 data SausageLinks = NoMoreSausage
