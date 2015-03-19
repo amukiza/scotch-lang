@@ -2,6 +2,17 @@
 
 "Thought of it while drinking"
 
+## Inspiration
+
+Scotch takes great inspiration from Haskell, but does not attempt to be a Haskell
+on the JVM (check out [Frege](https://github.com/Frege/frege) for that.) There are
+several reasons for this, primarily to maintain accessibility to the average developer,
+but especially to allow breakage from Haskell in cases where Haskell idioms
+[aren't directly supported](http://fregepl.blogspot.com/2013/03/adding-concurrency-to-frege-part-ii.html)
+within the JVM and must be written differently.
+
+## Project Purpose
+
 Scotch arose out of frustration from years of working with Java and other
 C/C++-like programming languages. Specifically, Scotch sets out to alleviate:
 
@@ -33,12 +44,3 @@ Dynamic typing, while popular among newer languages like [Go](https://golang.org
 was not a goal due to the huge safety net provided by a strong type system. Scotch
 is both very strongly and statically typed. This ensures a high degree of code safety
 and correctness.
-
-## Inspiration
-
-Scotch takes great inspiration from Haskell, but does not attempt to be a Haskell
-on the JVM (check out [Frege](https://github.com/Frege/frege) for that.) There are
-several reasons for this, primarily to maintain accessibility to the average developer,
-but especially to allow breakage from Haskell in cases where Haskell idioms
-[aren't directly supported](http://fregepl.blogspot.com/2013/03/adding-concurrency-to-frege-part-ii.html)
-within the JVM and must be written differently.
