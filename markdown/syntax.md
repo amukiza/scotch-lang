@@ -3,6 +3,40 @@
 Scotch borrows a great deal of syntax from Haskell, but also adds some of its
 own as well. This guide outlines most of what currently exists in the language.
 
+## Identifiers
+
+Scotch is extraordinarily liberal in what it accepts as an identifier. Identifiers
+can contain numbers, hyphens, exclamation points, weird symbols, and end in single
+quotes!
+
+Here is a short list of some valid identifiers:
+
+- `EggsAndBacon`
+- `ham-n-eggs`
+- `burnedToast`
+- `really?`
+- `yes!`
+- `what?!`
+- `2+2` *yes, 2+2 is really a single identifier!*
+- `prime'`
+- `doublePrime''`
+- `12@9--$'`
+
+### Naming Conventions
+
+| Element         | Naming Convention |
+|-----------------|-------------------|
+| Type Name       | UpperCamel        |
+| Declared Value  | lowerCamel or operator symbol |
+| Variables       | lowerCamel        |
+| Type Variable   | single lower-case letter\* |
+| Constructor     | UpperCamel        |
+| Object Property | lowerCamel        |
+| Operator        | Non-alpha symbols |
+| Module Name     | Valid Java package name |
+
+\* Type variables are normally single letters, though full names can be used for clarity
+
 ## Function Application
 
 Functions are curried to accept only single arguments at a time. As a consequence,
