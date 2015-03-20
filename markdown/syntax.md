@@ -137,6 +137,31 @@ firstElement (a, _) = a
 secondElement (_, b) = b
 ```
 
+## Conditionals
+
+Conditionals are expressions and can be placed where any other expression is expected.
+The syntax is very simple and follows these forms:
+
+```
+// single-line if/else
+if condition then trueCase else falseCase
+
+// single-line compound conditional
+if condition then trueCase else if otherCondition then otherCase else falseCase
+
+// multi-line if/else
+if condition
+  then trueCase
+  else falseCase
+
+// multi-line compound conditional
+if condition
+  then trueCase
+  else if otherCondition
+  then otherCase
+  else falseCase  
+```
+
 ## Data Type Definitions
 
 A data type in Scotch is a single umbrella over a closed number of variants, called
