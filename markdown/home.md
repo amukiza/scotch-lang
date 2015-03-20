@@ -40,7 +40,6 @@ These problems are addressed by providing the following features:
 - [Off-side rule](http://en.wikipedia.org/wiki/Off-side_rule) syntax to remove need for curly braces and semicolons
 - All values are immutable, special references to values may be mutable (as in [Clojure](http://blog.jayfields.com/2011/04/clojure-state-management.html))
 
-Dynamic typing, while popular among newer languages like [Go](https://golang.org/),
-was not a goal due to the huge safety net provided by a strong type system. Scotch
-is both very strongly and statically typed. This ensures a high degree of code safety
-and correctness.
+Dynamic typing was not a goal due to the huge safety net provided by a strong,
+static type system. Scotch is both very strongly and statically typed. This
+ensures a high degree of code safety and correctness.
