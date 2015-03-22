@@ -126,7 +126,7 @@ probablyPositive n =
 
 main = do
 	x <- actuallyNumber
-	y <- probablyPositive $ negate 4
+	y <- probablyPositive (-4)
 	return $ x * y
 ```
 
