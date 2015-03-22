@@ -66,7 +66,81 @@ $ scotch -m hello
 $ main = 4
 ```
 
-## More Complicated Examples
+## Now Something More
+
+### Introducing Maybe
+
+The `Maybe` is a container for a value that may or may not be present. As long
+as a value is present, we can operate on it and return the result wrapped in a
+new `Maybe`. Take the following example:
+
+```
+// maybe/numbers.scotch
+module maybe.numbers
+import scotch.control.monad
+import scotch.control.int
+import scotch.data.function
+import scotch.data.maybe
+import scotch.data.num
+
+actuallyNumber = Just 1
+actuallyAnotherNumber = Just 2
+
+main = do
+	x <- actuallyNumber
+	y <- actuallyAnotherNumber
+	return $ x + y
+```
+
+Running gives:
+
+```
+$ scotch -m maybe.numbers
+$ main = Just 3
+```
+
+We get a `Just 3` back because we were able to draw out the values `1` and `2`
+from the `actuallyNumber` and `actuallyAnotherNumber`, operate on them and give
+back the result in a new `Maybe` using the `return` function.
+
+### More Possibilities
+
+We can draw a value from `Just` but what happens if one of those functions gives
+us back `Nothing`?
+
+```
+// maybe/numbers.scotch
+module maybe.numbers
+import scotch.control.monad
+import scotch.control.int
+import scotch.data.function
+import scotch.data.maybe
+import scotch.data.num
+import scotch.data.ord
+
+actuallyNumber = Just 3
+probablyPositive n =
+	if n >= 0
+		then Just n
+		else Nothing
+
+main = do
+	x <- actuallyNumber
+	y <- probablyPositive $ negate 4
+	return $ x * y
+```
+
+Running gives:
+
+```
+$ scotch -m maybe.numbers
+$ main = Nothing
+```
+
+We get `Nothing` because our argument to `probablyPositive` was not positive, so
+`Nothing` was returned rather than evaluating the expression `return $ x * y`.
+
+## More Examples
 
 The test code found [here](https://github.com/lmcgrath/scotch-lang/blob/master/src/test/java/scotch/compiler/steps/BytecodeGeneratorTest.java)
 will show some more complicated examples you can run.
