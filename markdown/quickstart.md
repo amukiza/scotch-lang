@@ -9,6 +9,23 @@ the console. This is useful for quick iteration and debugging, and currently
 used just to poke at the compiler to see what it's capable of doing given its
 current state in development.
 
+## Quickstart Installation
+
+Scotch can be installed with one command.  Copy and paste the below into a terminal session and the script will complete the last round of distilling.
+
+```
+$ sh <(curl -s https://raw.githubusercontent.com/lmcgrath/scotch-lang/master/quickstart.sh)
+```
+
+Be sure to add the Scotch bin directory to your sessions path or to your shells initialization files, and then source them.
+
+What's happening underneath the hood:
+- Create a workspace for Scotch
+- Checkout the latest code from master
+- Remove any old installations
+- Build the compliler
+- Install to the workspace
+
 ## Building The Compiler
 
 Currently Scotch must be built in order to be used. [Clone the repo](https://github.com/lmcgrath/scotch-lang)
