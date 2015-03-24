@@ -9,9 +9,15 @@ the console. This is useful for quick iteration and debugging, and currently
 used just to poke at the compiler to see what it's capable of doing given its
 current state in development.
 
-## Quickstart Installation
+### Requirements
 
-Scotch can be installed with one command.  Copy and paste the below into a terminal session and the script will complete the last round of distilling.
+- Java 8
+
+## Installation
+
+### Quickstart Install For Linux And OS X
+
+Scotch can be installed with one command on Linux and OS X. Copy and paste the below into a terminal session and the script will complete the last round of distilling.
 
 ```
 $ sh <(curl -s https://raw.githubusercontent.com/lmcgrath/scotch-lang/master/quickstart.sh)
@@ -26,13 +32,17 @@ What's happening underneath the hood:
 - Build the compiler
 - Install to the workspace
 
-## Building The Compiler
+### Building From Source
 
 Currently Scotch must be built in order to be used. [Clone the repo](https://github.com/lmcgrath/scotch-lang)
 and run the following command within the repo folder:
 
 ```
+# Linux / OS X
 $ ./gradlew distZip
+
+# Windows
+$ gradlew distZip
 ```
 
 This will create a zip distribution in `build/distributions/scotch-${VERSION}.zip`. Simply
