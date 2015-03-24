@@ -23,7 +23,7 @@ What's happening underneath the hood:
 - Create a workspace for Scotch
 - Checkout the latest code from master
 - Remove any old installations
-- Build the compliler
+- Build the compiler
 - Install to the workspace
 
 ## Building The Compiler
