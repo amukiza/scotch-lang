@@ -2,6 +2,8 @@ package scotch.compiler.steps;
 
 import static java.util.Arrays.asList;
 import static scotch.compiler.syntax.value.Values.apply;
+import static scotch.compiler.text.SourceLocation.source;
+import static scotch.compiler.text.SourcePoint.point;
 import static scotch.compiler.util.TestUtil.arg;
 import static scotch.compiler.util.TestUtil.capture;
 import static scotch.compiler.util.TestUtil.equal;
@@ -11,11 +13,13 @@ import static scotch.compiler.util.TestUtil.literal;
 import static scotch.compiler.util.TestUtil.matcher;
 import static scotch.compiler.util.TestUtil.pattern;
 import static scotch.compiler.util.TestUtil.valueRef;
+import static scotch.symbol.Symbol.symbol;
 import static scotch.symbol.type.Types.t;
 
 import java.util.function.Function;
 import org.junit.Test;
 import scotch.compiler.IsolatedCompilerTest;
+import scotch.compiler.steps.PrecedenceParser.ArityMismatch;
 import scotch.compiler.syntax.definition.DefinitionGraph;
 
 public class ParsePrecedenceTest extends IsolatedCompilerTest {
@@ -96,6 +100,17 @@ public class ParsePrecedenceTest extends IsolatedCompilerTest {
             ))),
             literal(0)
         )));
+    }
+
+    @Test
+    public void shouldReportArityMismatchInPattern() {
+        compile(
+            "module scotch.test",
+            "fn a b = a b",
+            "fn a b c = a c"
+        );
+        shouldHaveErrors(new ArityMismatch(symbol("scotch.test.(fn#0)"), 2, 3,
+            source("test://shouldReportArityMismatchInPattern", point(32, 3, 1), point(46, 3, 15))));
     }
 
     @Override

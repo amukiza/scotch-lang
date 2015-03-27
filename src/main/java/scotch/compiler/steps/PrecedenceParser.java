@@ -6,6 +6,7 @@ import static scotch.compiler.syntax.definition.DefinitionEntry.entry;
 import static scotch.compiler.syntax.definition.Definitions.scopeDef;
 import static scotch.compiler.syntax.reference.DefinitionReference.rootRef;
 import static scotch.compiler.syntax.reference.DefinitionReference.valueRef;
+import static scotch.compiler.text.TextUtil.repeat;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -17,11 +18,11 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import com.google.common.collect.ImmutableList;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import scotch.compiler.error.SymbolNotFoundError;
 import scotch.compiler.error.SyntaxError;
-import scotch.symbol.Operator;
-import scotch.symbol.Symbol;
-import scotch.symbol.type.Type;
 import scotch.compiler.syntax.Scoped;
 import scotch.compiler.syntax.definition.Definition;
 import scotch.compiler.syntax.definition.DefinitionEntry;
@@ -36,6 +37,8 @@ import scotch.compiler.syntax.value.PatternMatcher;
 import scotch.compiler.syntax.value.UnshuffledValue;
 import scotch.compiler.syntax.value.Value;
 import scotch.compiler.text.SourceLocation;
+import scotch.symbol.Symbol;
+import scotch.symbol.type.Type;
 
 public class PrecedenceParser {
 
@@ -59,6 +62,10 @@ public class PrecedenceParser {
         scope().getParent().addPattern(symbol, matcher);
     }
 
+    public void defineValue(Symbol symbol, Type type) {
+        scope().defineValue(symbol, type);
+    }
+
     public void enterScope(Definition definition) {
         enterScope(definition.getReference());
     }
@@ -69,6 +76,10 @@ public class PrecedenceParser {
 
     public Optional<Definition> getDefinition(DefinitionReference reference) {
         return graph.getDefinition(reference);
+    }
+
+    public boolean isOperator(Symbol symbol) {
+        return scope().isOperator(symbol);
     }
 
     @SuppressWarnings("unchecked")
@@ -124,21 +135,21 @@ public class PrecedenceParser {
             SourceLocation sourceLocation = patternCases.subList(1, patternCases.size()).stream()
                 .map(PatternCase::getSourceLocation)
                 .reduce(patternCases.get(0).getSourceLocation(), SourceLocation::extend);
-            PatternMatcher function = buildMatcher(patternCases, sourceLocation);
+            PatternMatcher matcher = buildMatcher(patternCases, sourceLocation);
 
             patternCases.stream()
                 .map(this::collect)
                 .map(Definition::getReference)
                 .map(this::getScope)
-                .forEach(scope -> scope.setParent(getScope(function.getReference())));
+                .forEach(scope -> scope.setParent(getScope(matcher.getReference())));
 
             Scope scope = scope().enterScope();
             patternScopes.put(valueRef(symbol), scope);
-            getScope(function.getReference()).setParent(scope);
+            getScope(matcher.getReference()).setParent(scope);
             ValueDefinition.builder()
                 .withSourceLocation(sourceLocation)
                 .withSymbol(symbol)
-                .withBody(function)
+                .withBody(matcher)
                 .build()
                 .parsePrecedence(this)
                 .map(Definition::getReference)
@@ -216,7 +227,7 @@ public class PrecedenceParser {
     }
 
     private PatternMatcher buildMatcher(List<PatternCase> patternCases, SourceLocation sourceLocation) {
-        List<Argument> arguments = buildFunctionArguments(patternCases, sourceLocation);
+        List<Argument> arguments = buildMatcherArguments(patternCases, sourceLocation);
         PatternMatcher matcher = PatternMatcher.builder()
             .withSourceLocation(sourceLocation)
             .withSymbol(scope().reserveSymbol(ImmutableList.of()))
@@ -228,7 +239,7 @@ public class PrecedenceParser {
         return matcher;
     }
 
-    private List<Argument> buildFunctionArguments(List<PatternCase> patterns, SourceLocation sourceLocation) {
+    private List<Argument> buildMatcherArguments(List<PatternCase> patterns, SourceLocation sourceLocation) {
         int arity = patterns.get(0).getArity();
         List<Argument> arguments = new ArrayList<>();
         for (int i = 0; i < arity; i++) {
@@ -260,15 +271,29 @@ public class PrecedenceParser {
                 () -> entries.get(reference).getScope()));
     }
 
-    public void defineOperator(Symbol symbol, Operator operator) {
-        scope().defineOperator(symbol, operator);
-    }
+    @AllArgsConstructor
+    @EqualsAndHashCode(callSuper = false)
+    @ToString
+    public static final class ArityMismatch extends SyntaxError {
 
-    public void defineValue(Symbol symbol, Type type) {
-        scope().defineValue(symbol, type);
-    }
+        private final Symbol symbol;
+        private final int expectedArity;
+        private final int actualArity;
+        private final SourceLocation sourceLocation;
 
-    public boolean isOperator(Symbol symbol) {
-        return scope().isOperator(symbol);
+        @Override
+        public String prettyPrint() {
+            return prettyPrint_() + " " + sourceLocation.prettyPrint();
+        }
+
+        @Override
+        public String report(String indent, int indentLevel) {
+            return sourceLocation.report(indent, indentLevel) + "\n"
+                + repeat(indent, indentLevel + 1) + prettyPrint_();
+        }
+
+        private String prettyPrint_() {
+            return "Arity mismatch in pattern " + symbol + ": expected arity " + expectedArity + " but got arity " + actualArity;
+        }
     }
 }

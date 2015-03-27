@@ -33,6 +33,7 @@ import scotch.compiler.steps.DependencyAccumulator;
 import scotch.compiler.steps.NameAccumulator;
 import scotch.compiler.steps.OperatorAccumulator;
 import scotch.compiler.steps.PrecedenceParser;
+import scotch.compiler.steps.PrecedenceParser.ArityMismatch;
 import scotch.compiler.steps.ScopedNameQualifier;
 import scotch.compiler.steps.TypeChecker;
 import scotch.compiler.syntax.Scoped;
@@ -164,6 +165,10 @@ public class PatternMatcher extends Value implements Scoped {
     @Override
     public Value parsePrecedence(PrecedenceParser state) {
         Symbol s = symbol.getMemberNames().size() == 1 ? state.reserveSymbol() : symbol;
+        patternCases.stream()
+            .filter(pattern -> pattern.getArity() != arguments.size())
+            .map(pattern -> new ArityMismatch(s, arguments.size(), pattern.getArity(), pattern.getSourceLocation()))
+            .forEach(state::error);
         return state.named(s, () -> state.scoped(this, () -> withSymbol(s).withPatternCases(patternCases.stream()
             .map(matcher -> matcher.parsePrecedence(state))
             .collect(toList()))));

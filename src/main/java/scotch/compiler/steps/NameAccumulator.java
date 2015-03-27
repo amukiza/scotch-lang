@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
+import scotch.compiler.error.CompileException;
 import scotch.compiler.error.SyntaxError;
 import scotch.symbol.descriptor.DataConstructorDescriptor;
 import scotch.symbol.descriptor.DataTypeDescriptor;
@@ -44,12 +45,16 @@ public class NameAccumulator {
     }
 
     public DefinitionGraph accumulateNames() {
-        Definition root = getDefinition(rootRef()).orElseThrow(() -> new IllegalStateException("No root found!"));
-        scoped(root, () -> root.accumulateNames(this));
-        return graph
-            .copyWith(entries.values())
-            .appendErrors(errors)
-            .build();
+        if (graph.hasErrors()) {
+            throw new CompileException(graph.getErrors());
+        } else {
+            Definition root = getDefinition(rootRef()).orElseThrow(() -> new IllegalStateException("No root found!"));
+            scoped(root, () -> root.accumulateNames(this));
+            return graph
+                .copyWith(entries.values())
+                .appendErrors(errors)
+                .build();
+        }
     }
 
     public List<DefinitionReference> accumulateNames(List<DefinitionReference> references) {

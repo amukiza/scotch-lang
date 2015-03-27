@@ -2,10 +2,11 @@ package scotch.compiler;
 
 import java.net.URI;
 import java.util.List;
-import scotch.compiler.error.CompileException;
 import scotch.compiler.intermediate.IntermediateGenerator;
 import scotch.compiler.intermediate.IntermediateGraph;
 import scotch.compiler.output.GeneratedClass;
+import scotch.compiler.parser.InputParser;
+import scotch.compiler.scanner.Scanner;
 import scotch.compiler.steps.BytecodeGenerator;
 import scotch.compiler.steps.DependencyAccumulator;
 import scotch.compiler.steps.NameAccumulator;
@@ -13,10 +14,8 @@ import scotch.compiler.steps.OperatorAccumulator;
 import scotch.compiler.steps.PrecedenceParser;
 import scotch.compiler.steps.ScopedNameQualifier;
 import scotch.compiler.steps.TypeChecker;
-import scotch.compiler.parser.InputParser;
-import scotch.compiler.scanner.Scanner;
-import scotch.symbol.SymbolResolver;
 import scotch.compiler.syntax.definition.DefinitionGraph;
+import scotch.symbol.SymbolResolver;
 
 // TODO multiple file compilation
 // TODO incremental compilation
@@ -63,12 +62,7 @@ public class Compiler {
     }
 
     public DefinitionGraph parsePrecedence() {
-        DefinitionGraph graph = new PrecedenceParser(accumulateOperators()).parsePrecedence();
-        if (graph.hasErrors()) {
-            throw new CompileException(graph.getErrors());
-        } else {
-            return graph;
-        }
+        return new PrecedenceParser(accumulateOperators()).parsePrecedence();
     }
 
     public DefinitionGraph qualifyNames() {
