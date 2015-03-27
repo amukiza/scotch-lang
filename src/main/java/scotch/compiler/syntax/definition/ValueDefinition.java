@@ -106,7 +106,7 @@ public class ValueDefinition extends Definition {
 
     @Override
     public void generateIntermediateCode(IntermediateGenerator state) {
-        state.scoped(this, () -> state.defineValue(getReference(), body.generateIntermediateCode(state)));
+        state.scoped(this, () -> state.defineValue(getReference(), body.getType(), body.generateIntermediateCode(state)));
     }
 
     public Value getBody() {

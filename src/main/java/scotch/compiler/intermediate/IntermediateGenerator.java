@@ -13,6 +13,7 @@ import scotch.compiler.syntax.Scoped;
 import scotch.compiler.syntax.definition.DefinitionGraph;
 import scotch.compiler.syntax.reference.DefinitionReference;
 import scotch.compiler.syntax.scope.Scope;
+import scotch.symbol.type.Type;
 
 public class IntermediateGenerator {
 
@@ -26,8 +27,8 @@ public class IntermediateGenerator {
         this.scopes = new ArrayDeque<>();
     }
 
-    public void defineValue(DefinitionReference reference, IntermediateValue body) {
-        definitions.add(value(reference, body));
+    public void defineValue(DefinitionReference reference, Type type, IntermediateValue body) {
+        definitions.add(value(reference, type, body));
     }
 
     public IntermediateGraph generateIntermediateCode() {

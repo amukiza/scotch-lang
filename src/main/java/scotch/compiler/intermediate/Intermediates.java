@@ -11,12 +11,17 @@ import scotch.compiler.syntax.reference.DefinitionReference;
 import scotch.compiler.syntax.reference.InstanceReference;
 import scotch.compiler.syntax.reference.ValueReference;
 import scotch.symbol.descriptor.TypeParameterDescriptor;
+import scotch.symbol.type.Type;
 import scotch.symbol.type.Types;
 
 public final class Intermediates {
 
     public static IntermediateApply apply(List<String> captures, IntermediateValue function, IntermediateValue argument) {
         return new IntermediateApply(captures, function, argument);
+    }
+
+    public static IntermediateAssign assign(String variable, IntermediateValue value, IntermediateValue body) {
+        return new IntermediateAssign(variable, value, body);
     }
 
     public static IntermediateConditional conditional(IntermediateValue condition, IntermediateValue truePath, IntermediateValue falsePath) {
@@ -46,12 +51,12 @@ public final class Intermediates {
         return new IntermediateLiteral(value);
     }
 
-    public static IntermediateDefinition value(String name, IntermediateValue value) {
-        return value(DefinitionReference.valueRef(symbol(name)), value);
+    public static IntermediateDefinition value(String name, Type type, IntermediateValue value) {
+        return value(DefinitionReference.valueRef(symbol(name)), type, value);
     }
 
-    public static IntermediateDefinition value(DefinitionReference name, IntermediateValue value) {
-        return new IntermediateDefinition(name, value);
+    public static IntermediateDefinition value(DefinitionReference name, Type type, IntermediateValue value) {
+        return new IntermediateDefinition(name, type, value);
     }
 
     public static IntermediateReference valueRef(String name) {
@@ -60,6 +65,10 @@ public final class Intermediates {
 
     public static IntermediateReference valueRef(ValueReference valueReference) {
         return new IntermediateReference(valueReference);
+    }
+
+    public static IntermediateVariable variable(String name) {
+        return new IntermediateVariable(name);
     }
 
     private Intermediates() {
