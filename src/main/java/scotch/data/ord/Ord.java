@@ -26,75 +26,75 @@ import scotch.symbol.type.Type;
 })
 public interface Ord<A> {
 
-    static final Type a = var("a", asList("scotch.data.ord.Ord", "scotch.data.eq.Eq"));
+    Type a = var("a", asList("scotch.data.ord.Ord", "scotch.data.eq.Eq"));
 
     @Value(memberName = "compare")
-    public static <A> Applicable<Eq<A>, Applicable<Ord<A>, Applicable<A, Applicable<A, Ordering>>>> compare() {
+    static <A> Applicable<Eq<A>, Applicable<Ord<A>, Applicable<A, Applicable<A, Ordering>>>> compare() {
         return applicable(eq -> applicable(ord -> applicable(left -> applicable(right -> flatCallable(() -> ord.call().compare(eq, left, right))))));
     }
 
     @ValueType(forMember = "compare")
-    public static Type compare$type() {
+    static Type compare$type() {
         return fn(a, fn(a, Ordering.TYPE));
     }
 
     @Value(memberName = ">", fixity = LEFT_INFIX, precedence = 5)
-    public static <A> Applicable<Eq<A>, Applicable<Ord<A>, Applicable<A, Applicable<A, Boolean>>>> greaterThan() {
+    static <A> Applicable<Eq<A>, Applicable<Ord<A>, Applicable<A, Applicable<A, Boolean>>>> greaterThan() {
         return applicable(eq -> applicable(ord -> applicable(left -> applicable(right -> flatCallable(() -> ord.call().greaterThan(eq, left, right))))));
     }
 
     @ValueType(forMember = ">")
-    public static Type greaterThan$type() {
+    static Type greaterThan$type() {
         return fn(a, fn(a, Bool.TYPE));
     }
 
     @Value(memberName = ">=", fixity = LEFT_INFIX, precedence = 5)
-    public static <A> Applicable<Eq<A>, Applicable<Ord<A>, Applicable<A, Applicable<A, Boolean>>>> greaterThanEquals() {
+    static <A> Applicable<Eq<A>, Applicable<Ord<A>, Applicable<A, Applicable<A, Boolean>>>> greaterThanEquals() {
         return applicable(eq -> applicable(ord -> applicable(left -> applicable(right -> flatCallable(() -> ord.call().greaterThanEquals(eq, left, right))))));
     }
 
     @ValueType(forMember = ">=")
-    public static Type greaterThanEquals$type() {
+    static Type greaterThanEquals$type() {
         return fn(a, fn(a, Bool.TYPE));
     }
 
     @Value(memberName = "<", fixity = LEFT_INFIX, precedence = 5)
-    public static <A> Applicable<Eq<A>, Applicable<Ord<A>, Applicable<A, Applicable<A, Boolean>>>> lessThan() {
+    static <A> Applicable<Eq<A>, Applicable<Ord<A>, Applicable<A, Applicable<A, Boolean>>>> lessThan() {
         return applicable(eq -> applicable(ord -> applicable(left -> applicable(right -> flatCallable(() -> ord.call().lessThan(eq, left, right))))));
     }
 
     @ValueType(forMember = "<")
-    public static Type lessThan$type() {
+    static Type lessThan$type() {
         return fn(a, fn(a, Bool.TYPE));
     }
 
     @Value(memberName = "<=", fixity = LEFT_INFIX, precedence = 5)
-    public static <A> Applicable<Eq<A>, Applicable<Ord<A>, Applicable<A, Applicable<A, Boolean>>>> lessThanEquals() {
+    static <A> Applicable<Eq<A>, Applicable<Ord<A>, Applicable<A, Applicable<A, Boolean>>>> lessThanEquals() {
         return applicable(eq -> applicable(ord -> applicable(left -> applicable(right -> flatCallable(() -> ord.call().lessThanEquals(eq, left, right))))));
     }
 
     @ValueType(forMember = "<=")
-    public static Type lessThanEquals$type() {
+    static Type lessThanEquals$type() {
         return fn(a, fn(a, Bool.TYPE));
     }
 
     @Value(memberName = "max")
-    public static <A> Applicable<Eq<A>, Applicable<Ord<A>, Applicable<A, Applicable<A, A>>>> max() {
+    static <A> Applicable<Eq<A>, Applicable<Ord<A>, Applicable<A, Applicable<A, A>>>> max() {
         return applicable(eq -> applicable(ord -> applicable(left -> applicable(right -> flatCallable(() -> ord.call().max(eq, left, right))))));
     }
 
     @ValueType(forMember = "max")
-    public static Type max$type() {
+    static Type max$type() {
         return fn(a, fn(a, a));
     }
 
     @Value(memberName = "min")
-    public static <A> Applicable<Eq<A>, Applicable<Ord<A>, Applicable<A, Applicable<A, A>>>> min() {
+    static <A> Applicable<Eq<A>, Applicable<Ord<A>, Applicable<A, Applicable<A, A>>>> min() {
         return applicable(eq -> applicable(ord -> applicable(left -> applicable(right -> flatCallable(() -> ord.call().min(eq, left, right))))));
     }
 
     @ValueType(forMember = "min")
-    public static Type min$type() {
+    static Type min$type() {
         return fn(a, fn(a, a));
     }
 

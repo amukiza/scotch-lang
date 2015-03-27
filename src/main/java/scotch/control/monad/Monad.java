@@ -24,10 +24,10 @@ import scotch.runtime.Callable;
 })
 public interface Monad {
 
-    static final Type m = var("m", asList("scotch.control.monad.Monad"));
+    Type m = var("m", asList("scotch.control.monad.Monad"));
 
     @Value(memberName = ">>=", fixity = LEFT_INFIX, precedence = 1)
-    public static Applicable bind() {
+    static Applicable bind() {
         return applicable(
             instance -> applicable(
                 arg -> applicable(
@@ -36,12 +36,12 @@ public interface Monad {
     }
 
     @ValueType(forMember = ">>=")
-    public static Type bind$type() {
+    static Type bind$type() {
         return fn(ctor(m, var("a")), fn(fn(var("a"), ctor(m, var("b"))), ctor(m, var("b"))));
     }
 
     @Value(memberName = "fail")
-    public static Applicable fail() {
+    static Applicable fail() {
         return applicable(
             instance -> applicable(
                 message -> callable(
@@ -49,12 +49,12 @@ public interface Monad {
     }
 
     @ValueType(forMember = "fail")
-    public static Type fail$type() {
+    static Type fail$type() {
         return fn(sum("scotch.data.string.String"), ctor(m, var("a")));
     }
 
     @Value(memberName = ">>", fixity = LEFT_INFIX, precedence = 1)
-    public static Applicable then() {
+    static Applicable then() {
         return applicable(
             instance -> applicable(
                 firstValue -> applicable(
@@ -63,12 +63,12 @@ public interface Monad {
     }
 
     @ValueType(forMember = ">>")
-    public static Type then$type() {
+    static Type then$type() {
         return fn(ctor(m, var("a")), fn(ctor(m, var("b")), ctor(m, var("b"))));
     }
 
     @Value(memberName = "return")
-    public static Applicable wrap() {
+    static Applicable wrap() {
         return applicable(
             instance -> applicable(
                 value -> callable(
@@ -76,7 +76,7 @@ public interface Monad {
     }
 
     @ValueType(forMember = "return")
-    public static Type wrap$type() {
+    static Type wrap$type() {
         return fn(var("a"), ctor(m, var("a")));
     }
 

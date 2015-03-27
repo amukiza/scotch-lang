@@ -35,7 +35,7 @@ public abstract class Ordering {
     }
 
     @ValueType(forMember = "GreaterThan")
-    public static Type egreaterThan$type() {
+    public static Type greaterThan$type() {
         return TYPE;
     }
 
