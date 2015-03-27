@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static scotch.compiler.Compiler.compiler;
 import static scotch.compiler.intermediate.Intermediates.apply;
+import static scotch.compiler.intermediate.Intermediates.conditional;
 import static scotch.compiler.intermediate.Intermediates.instanceRef;
 import static scotch.compiler.intermediate.Intermediates.literal;
 import static scotch.compiler.intermediate.Intermediates.value;
@@ -42,6 +43,29 @@ public class IntermediateGeneratorTest {
                 literal(2)
             ),
             literal(2)
+        ));
+    }
+
+    @Test
+    public void shouldCreateIntermediateConditional() {
+        compile(
+            "module scotch.test",
+            "import scotch.data.ord",
+            "",
+            "max = if 2 >= 1 then 2",
+            "                else 1"
+        );
+        shouldHaveValue("scotch.test.max", conditional(
+            apply(emptyList(),
+                apply(emptyList(),
+                    apply(emptyList(),
+                        apply(emptyList(),
+                            valueRef("scotch.data.ord.(>=)"), instanceRef("scotch.data.eq.Eq", "scotch.data.eq", "scotch.data.int.Int")),
+                        instanceRef("scotch.data.ord.Ord", "scotch.data.ord", "scotch.data.int.Int")),
+                    literal(2)),
+                literal(1)),
+            literal(2),
+            literal(1)
         ));
     }
 

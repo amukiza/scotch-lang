@@ -34,12 +34,6 @@ public abstract class Value {
 
     public abstract Value accumulateNames(NameAccumulator state);
 
-    public abstract IntermediateValue generateIntermediateCode(IntermediateGenerator state);
-
-    public WithArguments withArguments() {
-        return withoutArguments(this);
-    }
-
     public Optional<Value> asInitializer(Initializer initializer, TypeChecker state) {
         Value checkedValue = checkTypes(state);
         if (checkedValue.getType() instanceof SumType) {
@@ -58,9 +52,9 @@ public abstract class Value {
         return Optional.empty();
     }
 
-    public abstract Value bindTypes(TypeChecker state);
-
     public abstract Value bindMethods(TypeChecker state);
+
+    public abstract Value bindTypes(TypeChecker state);
 
     public abstract Value checkTypes(TypeChecker state);
 
@@ -78,6 +72,8 @@ public abstract class Value {
     public abstract boolean equals(Object o);
 
     public abstract CodeBlock generateBytecode(BytecodeGenerator state);
+
+    public abstract IntermediateValue generateIntermediateCode(IntermediateGenerator state);
 
     public abstract SourceLocation getSourceLocation();
 
@@ -103,6 +99,10 @@ public abstract class Value {
 
     public Value unwrap() {
         return this;
+    }
+
+    public WithArguments withArguments() {
+        return withoutArguments(this);
     }
 
     public abstract Value withType(Type type);

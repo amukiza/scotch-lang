@@ -19,6 +19,10 @@ public final class Intermediates {
         return new IntermediateApply(captures, function, argument);
     }
 
+    public static IntermediateConditional conditional(IntermediateValue condition, IntermediateValue truePath, IntermediateValue falsePath) {
+        return new IntermediateConditional(condition, truePath, falsePath);
+    }
+
     public static IntermediateFunction function(List<String> captures, String argument, IntermediateValue body) {
         return new IntermediateFunction(captures, argument, body);
     }
@@ -40,10 +44,6 @@ public final class Intermediates {
 
     public static IntermediateLiteral literal(Object value) {
         return new IntermediateLiteral(value);
-    }
-
-    public static IntermediatePattern pattern(DecisionTree tree) {
-        return new IntermediatePattern(tree);
     }
 
     public static IntermediateDefinition value(String name, IntermediateValue value) {

@@ -2,9 +2,9 @@ package scotch.compiler.syntax.value;
 
 import static me.qmx.jitescript.util.CodegenUtils.p;
 import static me.qmx.jitescript.util.CodegenUtils.sig;
+import static scotch.compiler.intermediate.Intermediates.conditional;
 import static scotch.compiler.syntax.TypeError.typeError;
 import static scotch.compiler.syntax.builder.BuilderUtil.require;
-import static scotch.compiler.syntax.value.Values.conditional;
 import static scotch.symbol.type.Types.sum;
 
 import java.util.Optional;
@@ -64,13 +64,8 @@ public class Conditional extends Value {
     }
 
     @Override
-    public IntermediateValue generateIntermediateCode(IntermediateGenerator state) {
-        throw new UnsupportedOperationException(); // TODO
-    }
-
-    @Override
     public Value bindMethods(TypeChecker state) {
-        return parse(state, (value, s) -> value.bindMethods(s));
+        return parse(state, Value::bindMethods);
     }
 
     @Override
@@ -89,7 +84,7 @@ public class Conditional extends Value {
                 state.error(typeError(unification, sourceLocation));
                 return type;
             });
-        return conditional(sourceLocation, c, t, f, resultType);
+        return new Conditional(sourceLocation, c, t, f, resultType);
     }
 
     @Override
@@ -111,6 +106,15 @@ public class Conditional extends Value {
             append(whenFalse.generateBytecode(state));
             label(end);
         }};
+    }
+
+    @Override
+    public IntermediateValue generateIntermediateCode(IntermediateGenerator state) {
+        return conditional(
+            condition.generateIntermediateCode(state),
+            whenTrue.generateIntermediateCode(state),
+            whenFalse.generateIntermediateCode(state)
+        );
     }
 
     @Override
@@ -157,7 +161,7 @@ public class Conditional extends Value {
 
         @Override
         public Conditional build() {
-            return conditional(
+            return new Conditional(
                 require(sourceLocation, "Source location"),
                 require(condition, "Condition"),
                 require(whenTrue, "True case"),
