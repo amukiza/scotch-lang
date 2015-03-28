@@ -126,21 +126,6 @@ public class AccumulateDependenciesTest extends IsolatedCompilerTest {
             .build()));
     }
 
-    @Test
-    public void shouldOrderDependenciesWithinLet() {
-        compile(
-            "module scotch.test",
-            "import scotch.data.num",
-            "main = let",
-            "    f x = a x",
-            "    a g = g + g",
-            "  f 2"
-        );
-        shouldNotHaveErrors();
-        shouldNotHaveDependencies("scotch.test.(main#a)");
-        shouldHaveDependencies("scotch.test.(main#f)", asList("scotch.test.(main#a)"));
-    }
-
     private void shouldHaveDependencies(String name, List<String> dependencies) {
         assertThat(getScope(valueRef(name)).getDependencies(), is(dependencies.stream().map(Symbol::symbol).collect(toSet())));
     }

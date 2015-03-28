@@ -2,17 +2,16 @@ package scotch.compiler.syntax.value;
 
 import java.util.List;
 import java.util.Optional;
-import scotch.symbol.FieldSignature;
-import scotch.symbol.Symbol;
-import scotch.symbol.type.Type;
 import scotch.compiler.syntax.definition.DefinitionEntry;
 import scotch.compiler.syntax.definition.Definitions;
 import scotch.compiler.syntax.pattern.PatternCase;
-import scotch.compiler.syntax.reference.DefinitionReference;
 import scotch.compiler.syntax.reference.InstanceReference;
 import scotch.compiler.syntax.reference.ValueReference;
 import scotch.compiler.syntax.scope.Scope;
 import scotch.compiler.text.SourceLocation;
+import scotch.symbol.FieldSignature;
+import scotch.symbol.Symbol;
+import scotch.symbol.type.Type;
 
 public class Values {
 
@@ -62,10 +61,6 @@ public class Values {
 
     public static Instance instance(SourceLocation sourceLocation, InstanceReference reference, Type type) {
         return new Instance(sourceLocation, reference, type);
-    }
-
-    public static Let let(SourceLocation sourceLocation, Symbol symbol, List<DefinitionReference> definitions, Value body) {
-        return new Let(sourceLocation, symbol, definitions, body);
     }
 
     public static BoolLiteral literal(SourceLocation sourceLocation, boolean value) {

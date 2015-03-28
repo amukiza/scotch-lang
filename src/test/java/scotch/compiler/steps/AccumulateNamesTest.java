@@ -32,17 +32,6 @@ public class AccumulateNamesTest extends IsolatedCompilerTest {
         shouldBeDefined(scopeRef("scotch.test.(fn#0#0)"), "b");
     }
 
-    @Test
-    public void shouldAliasLetDeclarations() {
-        compile(
-            "module scotch.test",
-            "main = let",
-            "    f x = a x",
-            "    a g = g + g",
-            "  f 2"
-        );
-    }
-
     @Override
     protected Function<scotch.compiler.Compiler, DefinitionGraph> compile() {
         return Compiler::accumulateNames;

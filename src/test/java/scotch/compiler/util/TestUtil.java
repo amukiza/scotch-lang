@@ -31,10 +31,10 @@ import scotch.compiler.syntax.definition.ValueDefinition;
 import scotch.compiler.syntax.pattern.CaptureMatch;
 import scotch.compiler.syntax.pattern.EqualMatch;
 import scotch.compiler.syntax.pattern.IgnorePattern;
-import scotch.compiler.syntax.pattern.TupleField;
 import scotch.compiler.syntax.pattern.PatternCase;
 import scotch.compiler.syntax.pattern.PatternMatch;
 import scotch.compiler.syntax.pattern.Patterns;
+import scotch.compiler.syntax.pattern.TupleField;
 import scotch.compiler.syntax.pattern.TupleMatch;
 import scotch.compiler.syntax.pattern.UnshuffledStructureMatch;
 import scotch.compiler.syntax.reference.ClassReference;
@@ -57,7 +57,6 @@ import scotch.compiler.syntax.value.Initializer;
 import scotch.compiler.syntax.value.InitializerField;
 import scotch.compiler.syntax.value.Instance;
 import scotch.compiler.syntax.value.IntLiteral;
-import scotch.compiler.syntax.value.Let;
 import scotch.compiler.syntax.value.PatternMatcher;
 import scotch.compiler.syntax.value.StringLiteral;
 import scotch.compiler.syntax.value.UnshuffledValue;
@@ -216,10 +215,6 @@ public class TestUtil {
 
     public static Type intType() {
         return sum("scotch.data.int.Int");
-    }
-
-    public static Let let(String name, List<DefinitionReference> definitions, Value body) {
-        return Values.let(NULL_SOURCE, symbol(name), definitions, body);
     }
 
     public static BoolLiteral literal(boolean value) {

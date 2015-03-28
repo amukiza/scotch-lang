@@ -105,19 +105,6 @@ public class BytecodeGeneratorTest {
     }
 
     @Test
-    public void shouldCompileLet() {
-        int result = exec(
-            "module scotch.test",
-            "import scotch.data.num",
-            "run = let",
-            "    f x = a x * 2",
-            "    a g = g + g",
-            "  f 2"
-        );
-        assertThat(result, is(8));
-    }
-
-    @Test
     public void shouldCompileConditional() {
         String result = exec(
             "module scotch.test",

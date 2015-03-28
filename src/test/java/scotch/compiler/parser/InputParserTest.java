@@ -27,7 +27,6 @@ import static scotch.compiler.util.TestUtil.fn;
 import static scotch.compiler.util.TestUtil.id;
 import static scotch.compiler.util.TestUtil.ignore;
 import static scotch.compiler.util.TestUtil.initializer;
-import static scotch.compiler.util.TestUtil.let;
 import static scotch.compiler.util.TestUtil.literal;
 import static scotch.compiler.util.TestUtil.matcher;
 import static scotch.compiler.util.TestUtil.operatorDef;
@@ -291,55 +290,6 @@ public class InputParserTest extends IsolatedCompilerTest {
         shouldHaveValue("scotch.test.fn", matcher("scotch.test.(fn#0)", t(0), arg("#0", t(2)), pattern(
             "scotch.test.(fn#0#0)", asList(ignore(t(1))), unshuffled(id("ignored", t(3)))
         )));
-    }
-
-    @Test
-    public void shouldParseLet() {
-        compile(
-            "module scotch.test",
-            "main = let",
-            "    f x = a x",
-            "    a g = g + g",
-            "  f 2"
-        );
-        shouldHavePattern("scotch.test.(main#1)", asList(capture("f", t(0)), capture("x", t(1))), unshuffled(id("a", t(2)), id("x", t(3))));
-        shouldHavePattern("scotch.test.(main#2)", asList(capture("a", t(4)), capture("g", t(5))), unshuffled(id("g", t(6)), id("+", t(7)), id("g", t(8))));
-        shouldHaveValue("scotch.test.main", let(
-            "scotch.test.(main#0)",
-            asList(scopeRef("scotch.test.(main#1)"), scopeRef("scotch.test.(main#2)")),
-            unshuffled(id("f", t(9)), literal(2))
-        ));
-    }
-
-    @Test
-    public void shouldParseLetWithSignature() {
-        compile(
-            "module scotch.test",
-            "main = let",
-            "    f :: Int -> Int",
-            "    f x = x * x",
-            "  f 2"
-        );
-        shouldHaveSignature("scotch.test.(main#f)", fn(sum("Int"), sum("Int")));
-        shouldHavePattern("scotch.test.(main#1)", asList(capture("f", t(0)), capture("x", t(1))), unshuffled(id("x", t(2)), id("*", t(3)), id("x", t(4))));
-        shouldHaveValue("scotch.test.main", let(
-            "scotch.test.(main#0)",
-            asList(signatureRef("scotch.test.(main#f)"), scopeRef("scotch.test.(main#1)")),
-            unshuffled(id("f", t(5)), literal(2))
-        ));
-    }
-
-    @Test
-    public void shouldParseNestedLet() {
-        compile(
-            "module scotch.test",
-            "main = let",
-            "    f = let",
-            "        g = \\x y -> 2 + x + y",
-            "      g 3",
-            "  f 4"
-        );
-        shouldHaveValue("scotch.test.(main#f#g)");
     }
 
     @Test

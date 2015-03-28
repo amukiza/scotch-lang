@@ -25,8 +25,6 @@ import static scotch.compiler.scanner.Token.TokenKind.INT_LITERAL;
 import static scotch.compiler.scanner.Token.TokenKind.KEYWORD_DO;
 import static scotch.compiler.scanner.Token.TokenKind.KEYWORD_ELSE;
 import static scotch.compiler.scanner.Token.TokenKind.KEYWORD_IF;
-import static scotch.compiler.scanner.Token.TokenKind.KEYWORD_IN;
-import static scotch.compiler.scanner.Token.TokenKind.KEYWORD_LET;
 import static scotch.compiler.scanner.Token.TokenKind.KEYWORD_THEN;
 import static scotch.compiler.scanner.Token.TokenKind.KEYWORD_WHERE;
 import static scotch.compiler.scanner.Token.TokenKind.LEFT_CURLY_BRACE;
@@ -108,7 +106,6 @@ import scotch.compiler.syntax.value.FunctionValue;
 import scotch.compiler.syntax.value.Identifier;
 import scotch.compiler.syntax.value.Initializer;
 import scotch.compiler.syntax.value.InitializerField;
-import scotch.compiler.syntax.value.Let;
 import scotch.compiler.syntax.value.Literal;
 import scotch.compiler.syntax.value.PatternMatcher;
 import scotch.compiler.syntax.value.UnshuffledValue;
@@ -643,31 +640,6 @@ public class InputParser {
         }
     }
 
-    private Value parseLet() {
-        return scoped(() -> node(Let.builder(),
-            let -> definition(ScopeDefinition.builder(), scope -> {
-                Symbol symbol = reserveSymbol();
-                List<DefinitionReference> definitions = new ArrayList<>();
-                require(KEYWORD_LET);
-                require(LEFT_CURLY_BRACE);
-                while (!expects(RIGHT_CURLY_BRACE)) {
-                    if (expectsValueSignatures()) {
-                        definitions.addAll(parseValueSignatures());
-                    } else {
-                        definitions.add(parseValueDefinition());
-                    }
-                    require(SEMICOLON);
-                }
-                require(RIGHT_CURLY_BRACE);
-                require(KEYWORD_IN);
-                scope.withSymbol(symbol);
-                let.withSymbol(symbol)
-                    .withDefinitions(definitions)
-                    .withBody(parseExpression());
-            })
-        ));
-    }
-
     private Value parseList() {
         return node(ListBuilder.builder(symbolGenerator), builder -> {
             require(LEFT_SQUARE_BRACE);
@@ -913,8 +885,6 @@ public class InputParser {
             value = parseList();
         } else if (expects(BACKSLASH)) {
             value = parsePatternLiteral();
-        } else if (expects(KEYWORD_LET)) {
-            value = parseLet();
         } else if (expects(KEYWORD_DO)) {
             value = parseDoStatement();
         } else if (expects(KEYWORD_IF)) {

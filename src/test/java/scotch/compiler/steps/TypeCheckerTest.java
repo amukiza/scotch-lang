@@ -30,7 +30,6 @@ import static scotch.compiler.util.TestUtil.equal;
 import static scotch.compiler.util.TestUtil.fieldDef;
 import static scotch.compiler.util.TestUtil.instance;
 import static scotch.compiler.util.TestUtil.instanceRef;
-import static scotch.compiler.util.TestUtil.intType;
 import static scotch.compiler.util.TestUtil.literal;
 import static scotch.compiler.util.TestUtil.matcher;
 import static scotch.compiler.util.TestUtil.method;
@@ -477,23 +476,6 @@ public class TypeCheckerTest extends IsolatedCompilerTest {
         shouldNotHaveErrors();
         shouldHaveLocals(scopeRef("scotch.test.(fn#0#1)"), asList("#0", "#1", "x", "y"));
         shouldHaveLocals(scopeRef("scotch.test.(fn#0)"), asList("#0", "#1", "a", "b"));
-    }
-
-    @Test
-    public void shouldGetTypeOfLet() {
-        compile(
-            "module scotch.test",
-            "import scotch.data.num",
-            "main = let",
-            "    f x = a x",
-            "    a g = g + g",
-            "  f 2"
-        );
-        Type num = t(17, asList("scotch.data.num.Num"));
-        shouldNotHaveErrors();
-        shouldHaveValue("scotch.test.main", t(10));
-        shouldHaveValue("scotch.test.(main#f)", fn(intType(), intType()));
-        shouldHaveValue("scotch.test.(main#a)", fn(num, num));
     }
 
     @Test
