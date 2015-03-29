@@ -60,14 +60,14 @@ public class SyntaxParseIntegrationTest extends IsolatedCompilerTest {
             "fib n = fib (n - 1) + fib (n - 2)"
         );
         shouldHaveValue("scotch.test.fib", matcher("scotch.test.(fib#0)", t(16), asList(arg("#0", t(15))),
-            pattern("scotch.test.(fib#0#0)", asList(equal("#0", apply(
+            pattern("scotch.test.(fib#0#0)", asList(equal("#0", literal(0), value -> apply(
                 apply(id("scotch.data.eq.(==)", t(17)), id("#0", t(18)), t(19)),
-                literal(0),
+                value,
                 t(20)
             ))), literal(0)),
-            pattern("scotch.test.(fib#0#1)", asList(equal("#0", apply(
+            pattern("scotch.test.(fib#0#1)", asList(equal("#0", literal(1), value -> apply(
                 apply(id("scotch.data.eq.(==)", t(21)), id("#0", t(22)), t(23)),
-                literal(1),
+                value,
                 t(24)
             ))), literal(1)),
             pattern("scotch.test.(fib#0#2)", asList(capture("#0", "n", t(3))), apply(

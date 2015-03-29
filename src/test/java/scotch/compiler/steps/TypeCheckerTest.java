@@ -490,7 +490,7 @@ public class TypeCheckerTest extends IsolatedCompilerTest {
         shouldNotHaveErrors();
         shouldHaveValue("scotch.test.fib", matcher("scotch.test.(fib#0)", fn(intType, intType), arg("#0", intType), pattern(
             "scotch.test.(fib#0#0)",
-            asList(equal("#0", apply(
+            asList(equal("#0", literal(0), value -> apply(
                 apply(
                     apply(
                         method("scotch.data.eq.(==)", asList(instance), fn(instance, fn(intType, fn(intType, boolType)))),
@@ -500,7 +500,7 @@ public class TypeCheckerTest extends IsolatedCompilerTest {
                     arg("#0", intType),
                     fn(intType, boolType)
                 ),
-                literal(0),
+                value,
                 boolType
             ))),
             literal(0)

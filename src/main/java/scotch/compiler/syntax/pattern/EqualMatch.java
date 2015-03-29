@@ -10,6 +10,7 @@ import static scotch.symbol.Symbol.symbol;
 import static scotch.util.StringUtil.stringify;
 
 import java.util.Optional;
+import java.util.function.Function;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import me.qmx.jitescript.CodeBlock;
@@ -37,10 +38,11 @@ public class EqualMatch extends PatternMatch {
     private final SourceLocation   sourceLocation;
     private final Optional<String> argument;
     private final Value            value;
+    private final Optional<Value>  match;
 
     @Override
     public PatternMatch accumulateDependencies(DependencyAccumulator state) {
-        return withValue(value.accumulateDependencies(state));
+        return map(value -> value.accumulateDependencies(state));
     }
 
     @Override
@@ -53,7 +55,7 @@ public class EqualMatch extends PatternMatch {
         if (this.argument.isPresent()) {
             throw new IllegalStateException();
         } else {
-            return new EqualMatch(sourceLocation, Optional.of(argument), apply(
+            return new EqualMatch(sourceLocation, Optional.of(argument), value, Optional.of(apply(
                 apply(
                     id(sourceLocation, symbol("scotch.data.eq.(==)"), scope.reserveType()),
                     id(sourceLocation, symbol(argument), scope.reserveType()),
@@ -61,29 +63,31 @@ public class EqualMatch extends PatternMatch {
                 ),
                 value,
                 scope.reserveType()
-            ));
+            )));
         }
     }
 
     @Override
     public PatternMatch bindMethods(TypeChecker state) {
-        return withValue(value.bindMethods(state));
+        return map(value -> value.bindMethods(state));
     }
 
     @Override
     public PatternMatch bindTypes(TypeChecker state) {
-        return withValue(value.bindTypes(state));
+        return map(value -> value.bindTypes(state));
     }
 
     @Override
     public PatternMatch checkTypes(TypeChecker state) {
-        return withValue(value.checkTypes(state));
+        return map(value -> value.checkTypes(state));
     }
 
     @Override
     public CodeBlock generateBytecode(BytecodeGenerator state) {
         return new CodeBlock() {{
-            append(value.generateBytecode(state));
+            append(match
+                .orElseThrow(() -> new IllegalStateException("No match found"))
+                .generateBytecode(state));
             invokestatic(p(RuntimeSupport.class), "unboxBool", sig(boolean.class, Callable.class));
             iffalse(state.nextCase());
         }};
@@ -114,16 +118,25 @@ public class EqualMatch extends PatternMatch {
     }
 
     public EqualMatch withSourceLocation(SourceLocation sourceLocation) {
-        return new EqualMatch(sourceLocation, argument, value);
+        return new EqualMatch(sourceLocation, argument, value, match);
     }
 
     @Override
     public EqualMatch withType(Type type) {
-        return new EqualMatch(sourceLocation, argument, value);
+        throw new UnsupportedOperationException(); // TODO
     }
 
-    public EqualMatch withValue(Value value) {
-        return new EqualMatch(sourceLocation, argument, value);
+    private PatternMatch map(Function<Value, Value> function) {
+        return new EqualMatch(
+            sourceLocation,
+            argument,
+            function.apply(value),
+            match.map(function)
+        );
+    }
+
+    private EqualMatch withValue(Value value) {
+        return new EqualMatch(sourceLocation, argument, value, match);
     }
 
     public static class Builder implements SyntaxBuilder<EqualMatch> {
@@ -140,7 +153,8 @@ public class EqualMatch extends PatternMatch {
             return Patterns.equal(
                 require(sourceLocation, "Source location"),
                 Optional.empty(),
-                require(value, "Capture value")
+                require(value, "Capture value"),
+                Optional.empty()
             );
         }
 

@@ -13,8 +13,8 @@ public final class Patterns {
         return new CaptureMatch(sourceLocation, argument, symbol, type);
     }
 
-    public static EqualMatch equal(SourceLocation sourceLocation, Optional<String> argument, Value value) {
-        return new EqualMatch(sourceLocation, argument, value);
+    public static EqualMatch equal(SourceLocation sourceLocation, Optional<String> argument, Value value, Optional<Value> match) {
+        return new EqualMatch(sourceLocation, argument, value, match);
     }
 
     public static IgnorePattern ignore(SourceLocation sourceLocation, Type type) {

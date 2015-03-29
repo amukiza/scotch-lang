@@ -12,6 +12,7 @@ import static scotch.symbol.type.Types.sum;
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import scotch.compiler.ClassLoaderResolver;
 import scotch.compiler.output.GeneratedClass;
 import scotch.compiler.scanner.Scanner;
@@ -161,11 +162,11 @@ public class TestUtil {
     }
 
     public static EqualMatch equal(Value value) {
-        return Patterns.equal(NULL_SOURCE, Optional.empty(), value);
+        return Patterns.equal(NULL_SOURCE, Optional.empty(), value, Optional.empty());
     }
 
-    public static EqualMatch equal(String argument, Value value) {
-        return Patterns.equal(NULL_SOURCE, Optional.of(argument), value);
+    public static EqualMatch equal(String argument, Value value, Function<Value, Value> matchTransform) {
+        return Patterns.equal(NULL_SOURCE, Optional.of(argument), value, Optional.of(matchTransform.apply(value)));
     }
 
     public static InitializerField field(String name, Value value) {

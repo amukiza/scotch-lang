@@ -64,10 +64,8 @@ public class ParsePrecedenceTest extends IsolatedCompilerTest {
         );
         shouldHaveValue("scotch.test.fib", matcher("scotch.test.(fib#0)", t(2), arg("#0", t(1)), pattern(
             "scotch.test.fib#0#0",
-            asList(equal("#0", apply(
-                apply(id("scotch.data.eq.(==)", t(3)), id("#0", t(4)), t(5)),
-                literal(0),
-                t(6)
+            asList(equal("#0", literal(0), value -> apply(
+                apply(id("scotch.data.eq.(==)", t(3)), id("#0", t(4)), t(5)), value, t(6)
             ))),
             literal(0)
         )));
