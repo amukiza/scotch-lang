@@ -1,18 +1,25 @@
 package scotch.compiler.syntax.definition;
 
-import static scotch.symbol.Symbol.qualified;
+import static lombok.AccessLevel.PACKAGE;
 import static scotch.compiler.syntax.builder.BuilderUtil.require;
-import static scotch.util.StringUtil.stringify;
+import static scotch.symbol.Symbol.qualified;
 
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import scotch.symbol.Symbol;
-import scotch.symbol.SymbolResolver;
-import scotch.symbol.type.Type;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import scotch.compiler.syntax.builder.SyntaxBuilder;
 import scotch.compiler.text.SourceLocation;
+import scotch.symbol.Symbol;
+import scotch.symbol.SymbolEntry;
+import scotch.symbol.SymbolResolver;
+import scotch.symbol.type.Type;
 
+@AllArgsConstructor(access = PACKAGE)
+@EqualsAndHashCode(callSuper = false)
+@ToString(exclude = "sourceLocation")
 public final class ModuleImport extends Import {
 
     public static Builder builder() {
@@ -22,24 +29,9 @@ public final class ModuleImport extends Import {
     private final SourceLocation sourceLocation;
     private final String         moduleName;
 
-    ModuleImport(SourceLocation sourceLocation, String moduleName) {
-        this.sourceLocation = sourceLocation;
-        this.moduleName = moduleName;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        return o == this || o instanceof ModuleImport && Objects.equals(moduleName, ((ModuleImport) o).moduleName);
-    }
-
     @Override
     public Set<Symbol> getContext(Type type, SymbolResolver resolver) {
         return getContext_(moduleName, type, resolver);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(moduleName);
     }
 
     @Override
@@ -49,16 +41,7 @@ public final class ModuleImport extends Import {
 
     @Override
     public Optional<Symbol> qualify(String name, SymbolResolver resolver) {
-        if (resolver.isDefined(qualified(moduleName, name))) {
-            return Optional.of(qualified(moduleName, name));
-        } else {
-            return Optional.empty();
-        }
-    }
-
-    @Override
-    public String toString() {
-        return stringify(this) + "(" + moduleName + ")";
+        return resolver.getEntry(qualified(moduleName, name)).map(SymbolEntry::getSymbol);
     }
 
     @Override
@@ -68,12 +51,11 @@ public final class ModuleImport extends Import {
 
     public static class Builder implements SyntaxBuilder<ModuleImport> {
 
-        private Optional<SourceLocation> sourceLocation;
-        private Optional<String>         moduleName;
+        private Optional<SourceLocation> sourceLocation = Optional.empty();
+        private Optional<String>         moduleName     = Optional.empty();
 
         private Builder() {
-            moduleName = Optional.empty();
-            sourceLocation = Optional.empty();
+            // intentionally empty
         }
 
         @Override

@@ -5,15 +5,15 @@ import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static me.qmx.jitescript.util.CodegenUtils.p;
-import static scotch.symbol.descriptor.DataFieldDescriptor.field;
+import static scotch.compiler.util.Pair.pair;
 import static scotch.symbol.Operator.operator;
 import static scotch.symbol.Symbol.qualified;
 import static scotch.symbol.Symbol.symbol;
+import static scotch.symbol.Value.Fixity.NONE;
+import static scotch.symbol.descriptor.DataFieldDescriptor.field;
 import static scotch.symbol.descriptor.TypeClassDescriptor.typeClass;
 import static scotch.symbol.descriptor.TypeInstanceDescriptor.typeInstance;
-import static scotch.symbol.Value.Fixity.NONE;
 import static scotch.symbol.type.Types.var;
-import static scotch.compiler.util.Pair.pair;
 import static scotch.util.StringUtil.quote;
 
 import java.lang.annotation.Annotation;
@@ -21,11 +21,13 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import com.google.common.collect.ImmutableSet;
+import lombok.Getter;
 import scotch.symbol.DataConstructor;
 import scotch.symbol.DataField;
 import scotch.symbol.DataFieldType;
@@ -33,6 +35,8 @@ import scotch.symbol.DataType;
 import scotch.symbol.InstanceGetter;
 import scotch.symbol.Member;
 import scotch.symbol.MethodSignature;
+import scotch.symbol.Module;
+import scotch.symbol.ReExportModule;
 import scotch.symbol.Symbol;
 import scotch.symbol.SymbolEntry;
 import scotch.symbol.SymbolEntry.ImmutableEntryBuilder;
@@ -49,7 +53,6 @@ import scotch.symbol.exception.IncompleteTypeInstanceError;
 import scotch.symbol.exception.InvalidMethodSignatureError;
 import scotch.symbol.exception.SymbolResolutionError;
 import scotch.symbol.type.Type;
-import scotch.compiler.util.Pair;
 
 public class ModuleScanner {
 
@@ -57,15 +60,18 @@ public class ModuleScanner {
     private final List<Class<?>>                     classes;
     private final Map<Symbol, ImmutableEntryBuilder> builders;
     private final Set<TypeInstanceDescriptor>        typeInstances;
+    private final Map<String, String>                reExports;
 
     public ModuleScanner(String moduleName, List<Class<?>> classes) {
         this.moduleName = moduleName;
         this.classes = classes;
         this.builders = new HashMap<>();
         this.typeInstances = new HashSet<>();
+        this.reExports = new LinkedHashMap<>();
     }
 
-    public Pair<Set<SymbolEntry>, Set<TypeInstanceDescriptor>> scan() {
+    public ScanResult scan() {
+        classes.forEach(this::processModules);
         classes.forEach(this::processDataTypes);
         classes.forEach(this::processDataConstructors);
         classes.forEach(clazz -> {
@@ -73,9 +79,10 @@ public class ModuleScanner {
             processTypeInstances(clazz);
             processValues(clazz);
         });
-        return pair(
+        return new ScanResult(
             builders.values().stream().map(ImmutableEntryBuilder::build).collect(toSet()),
-            ImmutableSet.copyOf(typeInstances)
+            typeInstances,
+            reExports
         );
     }
 
@@ -207,6 +214,19 @@ public class ModuleScanner {
         });
     }
 
+    private void processModules(Class<?> clazz) {
+        if (!reExports.isEmpty()) {
+            throw new SymbolResolutionError(
+                "Multiple classes in module " + quote(moduleName) + " found with annotation @Module:"
+                    + " duplicate class is " + quote(clazz.getName())
+            );
+        } else if (clazz.isAnnotationPresent(Module.class)) {
+            for (ReExportModule module : clazz.getAnnotation(Module.class).reExports()) {
+                stream(module.members()).forEach(member -> reExports.put(member.memberName(), module.moduleName()));
+            }
+        }
+    }
+
     private void processValues(Class<?> clazz) {
         stream(clazz.getDeclaredMethods()).forEach(method -> {
             Optional.ofNullable(method.getAnnotation(Value.class)).ifPresent(value -> {
@@ -243,6 +263,25 @@ public class ModuleScanner {
             throw new InvalidMethodSignatureError("Method " + pp(parametersGetter)
                 + " annotated by " + pp(TypeParameters.class)
                 + " should not accept arguments");
+        }
+    }
+
+    public static final class ScanResult {
+
+        @Getter
+        private final Set<SymbolEntry>            entries;
+        @Getter
+        private final Set<TypeInstanceDescriptor> instances;
+        private final Map<String, String>         reExports;
+
+        public ScanResult(Set<SymbolEntry> entries, Set<TypeInstanceDescriptor> instances, Map<String, String> reExports) {
+            this.entries = ImmutableSet.copyOf(entries);
+            this.instances = ImmutableSet.copyOf(instances);
+            this.reExports = new LinkedHashMap<>(reExports);
+        }
+
+        public Map<String, String> getReExports() {
+            return new LinkedHashMap<>(reExports);
         }
     }
 }

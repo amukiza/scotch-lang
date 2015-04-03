@@ -33,9 +33,6 @@ public class TypeCheckerIntegrationTest extends CompilerTest<ClassLoaderResolver
     public void shouldHaveTypeOfTuple3OfInts() {
         compile(
             "module scotch.test",
-            "import scotch.data.int",
-            "import scotch.data.tuple",
-            "",
             "tuple = (1, 2, 3)"
         );
         shouldNotHaveErrors();
@@ -43,18 +40,14 @@ public class TypeCheckerIntegrationTest extends CompilerTest<ClassLoaderResolver
     }
 
     @Test
-    public void shouldHaveError_whenStringIsHeterogeneous() {
+    public void shouldHaveError_whenListIsHeterogeneous() {
         compile(
             "module scotch.test",
-            "import scotch.data.int",
-            "import scotch.data.list",
-            "import scotch.data.string",
-            "",
             "list = [1, 2, \"oops\"]"
         );
         shouldHaveErrors(typeError(
             mismatch(intType, stringType),
-            source("test://shouldHaveError_whenStringIsHeterogeneous", point(107, 6, 15), point(113, 6, 21))
+            source("test://shouldHaveError_whenListIsHeterogeneous", point(33, 2, 15), point(39, 2, 21))
         ));
     }
 
@@ -62,11 +55,6 @@ public class TypeCheckerIntegrationTest extends CompilerTest<ClassLoaderResolver
     public void shouldDetermineTypeOfSuccessfulChainedMaybe() {
         compile(
             "module scotch.test",
-            "import scotch.control.monad",
-            "import scotch.data.function",
-            "import scotch.data.int",
-            "import scotch.data.maybe",
-            "import scotch.data.num",
             "",
             "addedStuff = do",
             "    x <- Just 3",
@@ -81,11 +69,6 @@ public class TypeCheckerIntegrationTest extends CompilerTest<ClassLoaderResolver
     public void shouldDetermineTypeOfFailedChainedMaybe() {
         compile(
             "module scotch.test",
-            "import scotch.control.monad",
-            "import scotch.data.function",
-            "import scotch.data.int",
-            "import scotch.data.maybe",
-            "import scotch.data.num",
             "",
             "addedStuff = do",
             "    x <- Just 3",
@@ -100,8 +83,6 @@ public class TypeCheckerIntegrationTest extends CompilerTest<ClassLoaderResolver
     public void shouldDestructure2Tuples() {
         compile(
             "module scotch.test",
-            "import scotch.data.int",
-            "",
             "second (_, b) = b",
             "third (_, (_, c)) = c"
         );

@@ -8,15 +8,15 @@ import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertThat;
 import static org.junit.rules.ExpectedException.none;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyList;
+import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static scotch.compiler.syntax.scope.Scope.scope;
+import static scotch.compiler.util.TestUtil.intType;
 import static scotch.symbol.Symbol.qualified;
 import static scotch.symbol.Symbol.symbol;
 import static scotch.symbol.Symbol.unqualified;
 import static scotch.symbol.type.Types.t;
-import static scotch.compiler.syntax.scope.Scope.scope;
-import static scotch.compiler.util.TestUtil.intType;
 
 import java.util.Optional;
 import com.google.common.collect.ImmutableSet;
@@ -27,10 +27,10 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import scotch.symbol.Operator;
-import scotch.symbol.util.SymbolGenerator;
-import scotch.symbol.SymbolResolver;
 import scotch.compiler.syntax.definition.Import;
+import scotch.symbol.Operator;
+import scotch.symbol.SymbolResolver;
+import scotch.symbol.util.SymbolGenerator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ModuleScopeTest {
@@ -47,7 +47,7 @@ public class ModuleScopeTest {
         moduleName = "scotch.test";
         SymbolGenerator symbolGenerator = new SymbolGenerator();
         moduleScope = scope(rootScope, new DefaultTypeScope(symbolGenerator, resolver), resolver, symbolGenerator, moduleName, asList(import_));
-        when(rootScope.enterScope(any(String.class), anyList())).thenReturn(moduleScope);
+        when(rootScope.enterScope(any(String.class), anyListOf(Import.class))).thenReturn(moduleScope);
         when(import_.qualify(any(String.class), any(SymbolResolver.class))).thenReturn(Optional.empty());
     }
 

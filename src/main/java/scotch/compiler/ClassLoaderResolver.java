@@ -5,6 +5,7 @@ import static java.util.regex.Pattern.compile;
 import static java.util.stream.Collectors.toList;
 import static scotch.symbol.Symbol.getPackageName;
 import static scotch.symbol.Symbol.getPackagePath;
+import static scotch.symbol.Symbol.qualified;
 import static scotch.symbol.Symbol.toJavaName;
 
 import java.io.File;
@@ -17,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -26,6 +28,7 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import com.google.common.collect.ImmutableSet;
+import scotch.compiler.ModuleScanner.ScanResult;
 import scotch.compiler.output.GeneratedClass;
 import scotch.symbol.Symbol;
 import scotch.symbol.Symbol.QualifiedSymbol;
@@ -54,6 +57,7 @@ public class ClassLoaderResolver extends URLClassLoader implements SymbolResolve
     private final Map<List<TypeParameterDescriptor>, Set<TypeInstanceDescriptor>>              typeInstancesByArguments;
     private final Map<String, Set<TypeInstanceDescriptor>>                                     typeInstancesByModule;
     private final Map<String, Set<Class<?>>>                                                   definedClasses;
+    private final Map<String, Map<String, String>>                                             reExports;
 
     public ClassLoaderResolver(Optional<File> optionalOutputPath, ClassLoader parent) {
         this(optionalOutputPath, new URL[0], parent);
@@ -70,6 +74,7 @@ public class ClassLoaderResolver extends URLClassLoader implements SymbolResolve
         this.typeInstancesByArguments = new HashMap<>();
         this.typeInstancesByModule = new HashMap<>();
         this.definedClasses = new HashMap<>();
+        this.reExports = new HashMap<>();
     }
 
     public Class<?> define(GeneratedClass generatedClass) {
@@ -100,7 +105,25 @@ public class ClassLoaderResolver extends URLClassLoader implements SymbolResolve
     @Override
     public Optional<SymbolEntry> getEntry(Symbol symbol) {
         search(symbol);
-        return Optional.ofNullable(namedSymbols.get(symbol));
+        if (namedSymbols.containsKey(symbol)) {
+            return Optional.ofNullable(namedSymbols.get(symbol));
+        } else {
+            return symbol.accept(new SymbolVisitor<Optional<SymbolEntry>>() {
+                @Override
+                public Optional<SymbolEntry> visit(QualifiedSymbol symbol) {
+                    if (reExports.containsKey(symbol.getModuleName()) && reExports.get(symbol.getModuleName()).containsKey(symbol.getMemberName())) {
+                        return getEntry(qualified(reExports.get(symbol.getModuleName()).get(symbol.getMemberName()), symbol.getMemberName()));
+                    } else {
+                        return Optional.empty();
+                    }
+                }
+
+                @Override
+                public Optional<SymbolEntry> visit(UnqualifiedSymbol symbol) {
+                    return Optional.empty();
+                }
+            });
+        }
     }
 
     @Override
@@ -141,6 +164,20 @@ public class ClassLoaderResolver extends URLClassLoader implements SymbolResolve
             return true;
         }
         return false;
+    }
+
+    private void processScan(String moduleName, ScanResult scan) {
+        reExports.computeIfAbsent(moduleName, k -> new LinkedHashMap<>()).putAll(scan.getReExports());
+        scan.getEntries().forEach(entry -> namedSymbols.put(entry.getSymbol(), entry));
+        scan.getInstances().forEach(typeInstance -> {
+            typeInstances
+                .computeIfAbsent(typeInstance.getTypeClass(), k -> new HashMap<>())
+                .computeIfAbsent(typeInstance.getParameters(), k -> new HashSet<>())
+                .add(typeInstance);
+            typeInstancesByClass.computeIfAbsent(typeInstance.getTypeClass(), k -> new HashSet<>()).add(typeInstance);
+            typeInstancesByArguments.computeIfAbsent(typeInstance.getParameters(), k -> new HashSet<>()).add(typeInstance);
+            typeInstancesByModule.computeIfAbsent(typeInstance.getModuleName(), k -> new HashSet<>()).add(typeInstance);
+        });
     }
 
     private Optional<Class<?>> resolveClass(String className) {
@@ -228,19 +265,7 @@ public class ClassLoaderResolver extends URLClassLoader implements SymbolResolve
         }
         classes.removeIf(c -> searchedClasses.contains(c.getName()));
         classes.stream().map(Class::getName).forEach(searchedClasses::add);
-        new ModuleScanner(moduleName, classes).scan().into((entries, instances) -> {
-            entries.forEach(entry -> namedSymbols.put(entry.getSymbol(), entry));
-            instances.forEach(typeInstance -> {
-                typeInstances
-                    .computeIfAbsent(typeInstance.getTypeClass(), k -> new HashMap<>())
-                    .computeIfAbsent(typeInstance.getParameters(), k -> new HashSet<>())
-                    .add(typeInstance);
-                typeInstancesByClass.computeIfAbsent(typeInstance.getTypeClass(), k -> new HashSet<>()).add(typeInstance);
-                typeInstancesByArguments.computeIfAbsent(typeInstance.getParameters(), k -> new HashSet<>()).add(typeInstance);
-                typeInstancesByModule.computeIfAbsent(typeInstance.getModuleName(), k -> new HashSet<>()).add(typeInstance);
-            });
-            return null;
-        });
+        processScan(moduleName, new ModuleScanner(moduleName, classes).scan());
     }
 
     private void writeClass(GeneratedClass generatedClass, byte[] bytes, File outputPath) {

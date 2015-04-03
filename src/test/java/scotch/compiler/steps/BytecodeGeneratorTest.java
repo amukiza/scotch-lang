@@ -43,7 +43,6 @@ public class BytecodeGeneratorTest {
     public void shouldCompile2Plus2() {
         int result = exec(
             "module scotch.test",
-            "import scotch.data.num",
             "run = 2 + 2"
         );
         assertThat(result, is(4));
@@ -53,7 +52,6 @@ public class BytecodeGeneratorTest {
     public void shouldCompileDelegated2Plus2() {
         int result = exec(
             "module scotch.test",
-            "import scotch.data.num",
             "add = \\x y -> x + y",
             "run = add 2 2"
         );
@@ -64,7 +62,6 @@ public class BytecodeGeneratorTest {
     public void shouldCompile2Plus2WithDoubles() {
         double result = exec(
             "module scotch.test",
-            "import scotch.data.num",
             "add = \\x y -> x + y",
             "run = add 2.2 2.2"
         );
@@ -75,7 +72,6 @@ public class BytecodeGeneratorTest {
     public void shouldFailCompilation_whenThereAreErrors() {
         exec(
             "module scotch.test",
-            "import scotch.data.num",
             "add = \\x y -> x + y",
             "run = add 2.2 2"
         );
@@ -85,7 +81,6 @@ public class BytecodeGeneratorTest {
     public void shouldPassNamedFunctionAsArgument() {
         int result = exec(
             "module scotch.test",
-            "import scotch.data.num",
             "fn a b c d = d a b c",
             "run = fn 1 2 3 add3",
             "add3 x y z = x + y + z"
@@ -97,7 +92,6 @@ public class BytecodeGeneratorTest {
     public void shouldPassAnonymousFunctionAsArgument() {
         int result = exec(
             "module scotch.test",
-            "import scotch.data.num",
             "fn a b c d = d a b c",
             "run = fn 1 2 3 (\\x y z -> x + y + z)"
         );
@@ -117,8 +111,6 @@ public class BytecodeGeneratorTest {
     public void shouldCompileChainedConditional() {
         int result = exec(
             "module scotch.test",
-            "import scotch.data.eq",
-            "import scotch.data.num",
             "",
             "run = fib 20",
             "fib = \\n -> if n == 0 then 0",
@@ -132,8 +124,6 @@ public class BytecodeGeneratorTest {
     public void shouldCompileConditionalPattern() {
         int result = exec(
             "module scotch.test",
-            "import scotch.data.eq",
-            "import scotch.data.num",
             "",
             "run = fib 20",
             "fib 0 = 0",
@@ -170,8 +160,6 @@ public class BytecodeGeneratorTest {
         boolean result = exec(
             "module scotch.test",
             "import scotch.java",
-            "import scotch.data.eq",
-            "import scotch.data.function",
             "",
             "data Thing n { value :: n }",
             "",
@@ -185,10 +173,6 @@ public class BytecodeGeneratorTest {
         boolean result = exec(
             "module scotch.test",
             "import scotch.java",
-            "import scotch.data.eq",
-            "import scotch.data.function",
-            "import scotch.data.int",
-            "import scotch.data.string",
             "",
             "data QuantifiedThing a { howMany :: Int, what :: a }",
             "",
@@ -204,10 +188,6 @@ public class BytecodeGeneratorTest {
         boolean result = exec(
             "module scotch.test",
             "import scotch.java",
-            "import scotch.data.eq",
-            "import scotch.data.function",
-            "import scotch.data.int",
-            "import scotch.data.string",
             "",
             "data QuantifiedThing a { howMany Int, what a }",
             "",
@@ -223,7 +203,6 @@ public class BytecodeGeneratorTest {
         exec(
             "module scotch.test",
             "import scotch.java",
-            "import scotch.data.eq",
             "",
             "data Thing n { value :: n }",
             "",
@@ -239,8 +218,6 @@ public class BytecodeGeneratorTest {
     public void shouldCompileBind() {
         Left result = exec(
             "module scotch.test",
-            "import scotch.control.monad",
-            "import scotch.data.either",
             "run = Right \"Yes\" >>= \\which -> Left 0"
         );
         assertThat(result, is(left(0)));
@@ -250,11 +227,6 @@ public class BytecodeGeneratorTest {
     public void shouldCompileDoNotation() {
         Maybe result = exec(
             "module scotch.test",
-            "",
-            "import scotch.control.monad",
-            "import scotch.data.function",
-            "import scotch.data.maybe",
-            "import scotch.data.num",
             "",
             "run = do",
             "    val <- Just 3",
@@ -267,8 +239,6 @@ public class BytecodeGeneratorTest {
     public void shouldCompileTupleLiteral() {
         Tuple3<Integer, Integer, Tuple2<Integer, Integer>> tuple = exec(
             "module scotch.test",
-            "import scotch.data.int",
-            "",
             "run = (1, 2, (3, 4))"
         );
         assertThat(tuple, is(tuple3(1, 2, tuple2(3, 4))));
@@ -278,10 +248,6 @@ public class BytecodeGeneratorTest {
     public void listsShouldEqual() {
         boolean result = exec(
             "module scotch.test",
-            "import scotch.data.eq",
-            "import scotch.data.int",
-            "import scotch.data.list",
-            "",
             "run = [1, 2, 3] == [1, 2, 3]"
         );
         assertThat(result, is(true));
@@ -291,9 +257,6 @@ public class BytecodeGeneratorTest {
     public void emptyListsShouldEqual() {
         boolean result = exec(
             "module scotch.test",
-            "import scotch.data.eq",
-            "import scotch.data.list",
-            "",
             "run = [] == []"
         );
         assertThat(result, is(true));
@@ -303,10 +266,6 @@ public class BytecodeGeneratorTest {
     public void listShouldEqualConsList() {
         boolean result = exec(
             "module scotch.test",
-            "import scotch.data.eq",
-            "import scotch.data.int",
-            "import scotch.data.list",
-            "",
             "run = [1, 2, 3] == 1:2:3:[]"
         );
         assertThat(result, is(true));
@@ -342,8 +301,6 @@ public class BytecodeGeneratorTest {
     public void shouldCreatePickleWithEnumConstants() {
         Object pickle = exec(
             "module scotch.test",
-            "import scotch.data.num",
-            "import scotch.data.int",
             "",
             "data Texture = Soft | Crunchy",
             "data Pickle { kind :: Texture, pimples :: Int }",
@@ -357,10 +314,6 @@ public class BytecodeGeneratorTest {
     public void shouldGetOrdering() {
         boolean shouldBeTruthy = exec(
             "module scotch.test",
-            "import scotch.data.bool",
-            "import scotch.data.eq",
-            "import scotch.data.ord",
-            "import scotch.data.int",
             "",
             "run = max 2 3 == 3 && max 2 3 == max 3 2",
             "   && min 2 3 == 2 && min 2 3 == min 3 2",
@@ -379,8 +332,6 @@ public class BytecodeGeneratorTest {
     public void shouldDestructureTuple() {
         int value = exec(
             "module scotch.test",
-            "import scotch.data.int",
-            "",
             "second (_, b) = b",
             "run = second (3, 2)"
         );
@@ -391,8 +342,6 @@ public class BytecodeGeneratorTest {
     public void shouldDestructureNestedTuple() {
         int value = exec(
             "module scotch.test",
-            "import scotch.data.int",
-            "",
             "third (_, (_, c)) = c",
             "run = third (1, (5, 3))"
         );
@@ -403,8 +352,6 @@ public class BytecodeGeneratorTest {
     public void shouldNegateNumber() {
         int value = exec(
             "module scotch.test",
-            "import scotch.data.num",
-            "",
             "run = -4"
         );
         assertThat(value, is(-4));

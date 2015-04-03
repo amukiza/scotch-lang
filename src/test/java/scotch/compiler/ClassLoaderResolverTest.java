@@ -7,6 +7,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static scotch.symbol.MethodSignature.methodSignature;
 import static scotch.symbol.Operator.operator;
+import static scotch.symbol.Symbol.qualified;
 import static scotch.symbol.Symbol.symbol;
 import static scotch.symbol.Value.Fixity.LEFT_INFIX;
 import static scotch.symbol.descriptor.DataFieldDescriptor.field;
@@ -109,5 +110,11 @@ public class ClassLoaderResolverTest {
             asList(sum("scotch.data.list.[]", asList(intType())))
         );
         assertThat(typeInstances, hasSize(1));
+    }
+
+    @Test
+    public void shouldGetIntThroughScotchLang() {
+        Optional<SymbolEntry> maybeEntry = resolver.getEntry(qualified("scotch.lang", "Int"));
+        assertThat(maybeEntry.map(SymbolEntry::getSymbol), is(Optional.of(qualified("scotch.data.int", "Int"))));
     }
 }

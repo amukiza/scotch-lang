@@ -2,7 +2,7 @@ def tuplesPath = project.file("${projectDir}/src/generated/tuples")
 
 task generateTuples (type: GenerateTuples) {
     sourcePath tuplesPath
-    count 24
+    count 12
 }
 
 task cleanTuples (type: Delete) {

@@ -102,7 +102,7 @@ public class ValueShuffler {
             return value.asOperator(scope)
                 .map(pair -> pair.into((identifier, operator) -> {
                     if (expectsPrefix && symbol("-").equals(identifier.getSymbol())) {
-                        return getOperator(identifier.withSymbol(symbol("scotch.data.num.(-prefix)")), true);
+                        return getOperator(identifier.withSymbol(symbol("scotch.lang.(-prefix)")), true);
                     } else if (expectsPrefix && !operator.isPrefix()) {
                         throw new ShuffleException(parseError("Unexpected binary operator " + identifier.getSymbol(), identifier.getSourceLocation()));
                     } else {

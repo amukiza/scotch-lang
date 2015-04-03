@@ -89,7 +89,7 @@ public class ModuleScope extends BlockScope {
                     return imports.stream()
                         .filter(i -> i.isFrom(symbol.getModuleName()))
                         .findFirst()
-                        .flatMap(i -> i.qualify(symbol.getSimpleName(), resolver));
+                        .flatMap(i -> i.qualify(symbol.getMemberName(), resolver));
                 }
             }
 
@@ -100,7 +100,7 @@ public class ModuleScope extends BlockScope {
                     return Optional.of(qualified);
                 } else {
                     return imports.stream()
-                        .map(i -> i.qualify(symbol.getSimpleName(), resolver))
+                        .map(i -> i.qualify(symbol.getMemberName(), resolver))
                         .filter(Optional::isPresent)
                         .findFirst()
                         .flatMap(s -> s);
