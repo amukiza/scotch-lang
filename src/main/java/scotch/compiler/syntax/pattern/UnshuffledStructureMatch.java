@@ -17,6 +17,7 @@ import scotch.compiler.steps.ScopedNameQualifier;
 import scotch.compiler.steps.TypeChecker;
 import scotch.compiler.syntax.builder.SyntaxBuilder;
 import scotch.compiler.syntax.scope.Scope;
+import scotch.compiler.syntax.value.Value;
 import scotch.compiler.text.SourceLocation;
 import scotch.symbol.type.Type;
 
@@ -51,7 +52,7 @@ public class UnshuffledStructureMatch extends PatternMatch {
     }
 
     @Override
-    public PatternMatch bind(String argument, Scope scope) {
+    public PatternMatch bind(Value argument, Scope scope) {
         throw new UnsupportedOperationException(); // TODO
     }
 
@@ -77,6 +78,11 @@ public class UnshuffledStructureMatch extends PatternMatch {
 
     @Override
     public PatternMatch qualifyNames(ScopedNameQualifier state) {
+        throw new UnsupportedOperationException(); // TODO
+    }
+
+    @Override
+    public void reducePatterns(PatternReducer reducer) {
         throw new UnsupportedOperationException(); // TODO
     }
 

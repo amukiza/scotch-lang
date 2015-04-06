@@ -1,8 +1,6 @@
 package scotch.compiler.syntax.pattern;
 
 import static lombok.AccessLevel.PACKAGE;
-import static scotch.compiler.error.SymbolNotFoundError.symbolNotFound;
-import static scotch.symbol.Symbol.unqualified;
 import static scotch.compiler.syntax.TypeError.typeError;
 import static scotch.compiler.syntax.builder.BuilderUtil.require;
 import static scotch.compiler.util.Either.right;
@@ -18,15 +16,16 @@ import scotch.compiler.steps.DependencyAccumulator;
 import scotch.compiler.steps.NameAccumulator;
 import scotch.compiler.steps.ScopedNameQualifier;
 import scotch.compiler.steps.TypeChecker;
-import scotch.symbol.Operator;
-import scotch.symbol.Symbol;
-import scotch.symbol.type.Type;
 import scotch.compiler.syntax.builder.SyntaxBuilder;
 import scotch.compiler.syntax.scope.Scope;
 import scotch.compiler.syntax.value.Identifier;
+import scotch.compiler.syntax.value.Value;
 import scotch.compiler.text.SourceLocation;
 import scotch.compiler.util.Either;
 import scotch.compiler.util.Pair;
+import scotch.symbol.Operator;
+import scotch.symbol.Symbol;
+import scotch.symbol.type.Type;
 
 @AllArgsConstructor(access = PACKAGE)
 @EqualsAndHashCode(callSuper = false, doNotUseGetters = true)
@@ -38,7 +37,7 @@ public class CaptureMatch extends PatternMatch {
     }
 
     private final SourceLocation   sourceLocation;
-    private final Optional<String> argument;
+    private final Optional<Value> argument;
     private final Symbol           symbol;
     private final Type             type;
 
@@ -67,51 +66,47 @@ public class CaptureMatch extends PatternMatch {
     }
 
     @Override
-    public PatternMatch bind(String argument, Scope scope) {
-        if (this.argument.isPresent() && !argument.equals(this.argument.get())) {
-            throw new IllegalStateException("Can't rebind-bind capture match argument '" + this.argument.get() + "' to argument '" + argument + "'");
-        } else {
-            return Patterns.capture(sourceLocation, Optional.of(argument), symbol, type);
-        }
+    public PatternMatch bind(Value argument, Scope scope) {
+        return new CaptureMatch(sourceLocation, Optional.of(argument), symbol, type);
     }
 
     @Override
     public PatternMatch bindMethods(TypeChecker state) {
-        return this;
+        return new CaptureMatch(sourceLocation, Optional.of(getArgument().bindMethods(state)), symbol, type);
     }
 
     @Override
     public PatternMatch bindTypes(TypeChecker state) {
-        return withType(state.generate(type));
+        return new CaptureMatch(sourceLocation, Optional.of(getArgument().bindTypes(state)), symbol, state.generate(type));
     }
 
     @Override
     public PatternMatch checkTypes(TypeChecker state) {
         Scope scope = state.scope();
         state.addLocal(symbol);
-        return scope.getValue(unqualified(getArgument()))
-            .map(argument -> withType(scope.generate(type)
-                .unify(argument, scope)
+        Value checkedArgument = getArgument().checkTypes(state);
+        return new CaptureMatch(
+            sourceLocation,
+            Optional.of(checkedArgument),
+            symbol,
+            type.unify(checkedArgument.getType(), scope)
                 .orElseGet(unification -> {
                     state.error(typeError(unification, sourceLocation));
                     return type;
-                })))
-            .orElseGet(() -> {
-                state.error(symbolNotFound(unqualified(getArgument()), sourceLocation));
-                return this;
-            });
+                })
+        );
     }
 
     @Override
     public CodeBlock generateBytecode(BytecodeGenerator state) {
         return new CodeBlock() {{
             state.addMatch(getName());
-            aload(state.getVariable(getArgument()));
+            append(getArgument().generateBytecode(state));
             astore(state.getVariable(getName()));
         }};
     }
 
-    public String getArgument() {
+    public Value getArgument() {
         return argument.orElseThrow(IllegalStateException::new);
     }
 
@@ -141,6 +136,11 @@ public class CaptureMatch extends PatternMatch {
     @Override
     public PatternMatch qualifyNames(ScopedNameQualifier state) {
         return this;
+    }
+
+    @Override
+    public void reducePatterns(PatternReducer reducer) {
+        throw new UnsupportedOperationException(); // TODO
     }
 
     public CaptureMatch withSourceLocation(SourceLocation sourceLocation) {

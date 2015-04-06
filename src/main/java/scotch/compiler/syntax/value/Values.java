@@ -15,6 +15,10 @@ import scotch.symbol.type.Type;
 
 public class Values {
 
+    public static Accessor access(SourceLocation sourceLocation, Value target, String field, Type type) {
+        return new Accessor(sourceLocation, target, field, type);
+    }
+
     public static Apply apply(Value function, Value argument, Type type) {
         return new Apply(function.getSourceLocation().extend(argument.getSourceLocation()), function, argument, type);
     }

@@ -16,13 +16,14 @@ import scotch.compiler.steps.OperatorAccumulator;
 import scotch.compiler.steps.PrecedenceParser;
 import scotch.compiler.steps.ScopedNameQualifier;
 import scotch.compiler.steps.TypeChecker;
-import scotch.symbol.Operator;
-import scotch.symbol.type.SumType;
-import scotch.symbol.type.Type;
+import scotch.compiler.syntax.pattern.PatternReducer;
 import scotch.compiler.syntax.scope.Scope;
 import scotch.compiler.text.SourceLocation;
 import scotch.compiler.util.Either;
 import scotch.compiler.util.Pair;
+import scotch.symbol.Operator;
+import scotch.symbol.type.SumType;
+import scotch.symbol.type.Type;
 
 public abstract class Value {
 
@@ -93,6 +94,8 @@ public abstract class Value {
     }
 
     public abstract Value qualifyNames(ScopedNameQualifier state);
+
+    public abstract Value reducePatterns(PatternReducer reducer);
 
     @Override
     public abstract String toString();

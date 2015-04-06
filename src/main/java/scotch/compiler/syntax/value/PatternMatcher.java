@@ -40,6 +40,7 @@ import scotch.compiler.syntax.Scoped;
 import scotch.compiler.syntax.builder.SyntaxBuilder;
 import scotch.compiler.syntax.definition.Definition;
 import scotch.compiler.syntax.pattern.PatternCase;
+import scotch.compiler.syntax.pattern.PatternReducer;
 import scotch.compiler.syntax.reference.DefinitionReference;
 import scotch.compiler.text.SourceLocation;
 import scotch.runtime.Applicable;
@@ -180,6 +181,17 @@ public class PatternMatcher extends Value implements Scoped {
             argument -> argument.qualifyNames(state),
             patternCase -> patternCase.qualifyNames(state)
         )));
+    }
+
+    @Override
+    public Value reducePatterns(PatternReducer reducer) {
+        reducer.beginPattern(arguments);
+        try {
+            patternCases.forEach(patternCase -> patternCase.reducePatterns(reducer));
+            return reducer.reducePattern();
+        } finally {
+            reducer.endPattern();
+        }
     }
 
     @Override

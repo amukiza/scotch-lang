@@ -5,7 +5,6 @@ import static me.qmx.jitescript.util.CodegenUtils.p;
 import static me.qmx.jitescript.util.CodegenUtils.sig;
 import static scotch.compiler.syntax.builder.BuilderUtil.require;
 import static scotch.compiler.text.TextUtil.repeat;
-import static scotch.symbol.Symbol.symbol;
 import static scotch.symbol.type.Types.sum;
 
 import java.util.ArrayList;
@@ -25,6 +24,7 @@ import scotch.compiler.steps.ScopedNameQualifier;
 import scotch.compiler.steps.TypeChecker;
 import scotch.compiler.syntax.builder.SyntaxBuilder;
 import scotch.compiler.syntax.scope.Scope;
+import scotch.compiler.syntax.value.Value;
 import scotch.compiler.text.SourceLocation;
 import scotch.runtime.Callable;
 import scotch.symbol.Symbol;
@@ -40,13 +40,13 @@ public class TupleMatch extends PatternMatch {
 
     @Getter
     private final SourceLocation   sourceLocation;
-    private final Optional<String> argument;
+    private final Optional<Value> argument;
     private final Symbol           constructor;
     @Getter
     private final Type             type;
     private final List<TupleField> fields;
 
-    TupleMatch(SourceLocation sourceLocation, Optional<String> argument, Symbol constructor, Type type, List<TupleField> fields) {
+    TupleMatch(SourceLocation sourceLocation, Optional<Value> argument, Symbol constructor, Type type, List<TupleField> fields) {
         this.sourceLocation = sourceLocation;
         this.argument = argument;
         this.constructor = constructor;
@@ -65,7 +65,7 @@ public class TupleMatch extends PatternMatch {
     }
 
     @Override
-    public PatternMatch bind(String argument, Scope scope) {
+    public PatternMatch bind(Value argument, Scope scope) {
         return withArgument(argument).map((field, ordinal) -> field.bind(argument, ordinal, scope));
     }
 
@@ -76,7 +76,9 @@ public class TupleMatch extends PatternMatch {
 
     @Override
     public PatternMatch bindTypes(TypeChecker state) {
-        return map((field, ordinal) -> field.bindTypes(state)).withType(state.generate(type));
+        return map((field, ordinal) -> field.bindTypes(state)).withType(state.generate(type)).withArgument(argument
+            .orElseThrow(IllegalStateException::new)
+            .bindTypes(state));
     }
 
     @Override
@@ -87,13 +89,13 @@ public class TupleMatch extends PatternMatch {
     @Override
     public CodeBlock generateBytecode(BytecodeGenerator state) {
         return new CodeBlock() {{
-            aload(state.getVariable(argument.get()));
+            append(argument.orElseThrow(IllegalStateException::new).generateBytecode(state));
             invokeinterface(p(Callable.class), "call", sig(Object.class));
             String className = "scotch/data/tuple/Tuple" + fields.size();
             checkcast(className);
             for (TupleField field : fields) {
                 dup();
-                append(field.generateBytecode(className, state));
+                append(field.generateBytecode(state));
             }
         }};
     }
@@ -101,6 +103,11 @@ public class TupleMatch extends PatternMatch {
     @Override
     public PatternMatch qualifyNames(ScopedNameQualifier state) {
         return this;
+    }
+
+    @Override
+    public void reducePatterns(PatternReducer reducer) {
+        throw new UnsupportedOperationException(); // TODO
     }
 
     @Override
@@ -114,7 +121,7 @@ public class TupleMatch extends PatternMatch {
             fields.stream()
                 .map(TupleField::getType)
                 .collect(toList()));
-        argument.flatMap(arg -> state.scope().getValue(symbol(arg))).map(argType -> type.unify(argType, state));
+        argument.map(arg -> type.unify(arg.getType(), state));
         return withType(type);
     }
 
@@ -128,7 +135,7 @@ public class TupleMatch extends PatternMatch {
         );
     }
 
-    private TupleMatch withArgument(String argument) {
+    private TupleMatch withArgument(Value argument) {
         return new TupleMatch(sourceLocation, Optional.of(argument), constructor, type, fields);
     }
 

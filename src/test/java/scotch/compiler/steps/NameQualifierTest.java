@@ -48,11 +48,11 @@ public class NameQualifierTest extends IsolatedCompilerTest {
         shouldHaveValue("scotch.test.fn1",
             matcher("scotch.test.(fn1#0)", t(13), asList(arg("#0", t(11)), arg("#1", t(12))), pattern(
                 "scotch.test.(fn1#0#0)",
-                asList(capture("#0", "a", t(1)), capture("#1", "b", t(2))),
+                asList(capture(arg("#0", t(14)), "a", t(1)), capture(arg("#1", t(15)), "b", t(2))),
                 apply(
-                    apply(id("scotch.test.fn2", t(3)), id("a", t(4)), t(14)),
+                    apply(id("scotch.test.fn2", t(3)), id("a", t(4)), t(16)),
                     id("b", t(5)),
-                    t(15)
+                    t(17)
                 )
             ))
         );
@@ -73,8 +73,8 @@ public class NameQualifierTest extends IsolatedCompilerTest {
                 t(7)
             ),
             matcher("scotch.test.(run#0)", t(2), arg("#0", t(4)), pattern(
-                "scotch.test.(run#0#1)", asList(capture("#0", "which", t(3))),
-                apply(id("scotch.data.either.Left", t(5)), literal("No"), t(9))
+                "scotch.test.(run#0#1)", asList(capture(arg("#0", t(9)), "which", t(3))),
+                apply(id("scotch.data.either.Left", t(5)), literal("No"), t(10))
             )),
             t(8)
         ));

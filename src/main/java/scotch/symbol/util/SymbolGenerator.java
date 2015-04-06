@@ -1,7 +1,6 @@
 package scotch.symbol.util;
 
 import static scotch.symbol.Symbol.unqualified;
-import static scotch.symbol.type.Types.t;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,5 +34,9 @@ public class SymbolGenerator {
 
     public VariableType reserveType() {
         return Types.t(nextType++);
+    }
+
+    public void startTypesAt(int counter) {
+        nextType = counter;
     }
 }

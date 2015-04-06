@@ -9,6 +9,7 @@ import scotch.compiler.steps.BytecodeGenerator;
 import scotch.compiler.steps.DependencyAccumulator;
 import scotch.compiler.steps.NameAccumulator;
 import scotch.compiler.steps.OperatorAccumulator;
+import scotch.compiler.steps.PatternReducerStep;
 import scotch.compiler.steps.PrecedenceParser;
 import scotch.compiler.steps.ScopedNameQualifier;
 import scotch.compiler.steps.TypeChecker;
@@ -67,6 +68,10 @@ public abstract class Definition implements Scoped {
     public abstract Optional<Definition> parsePrecedence(PrecedenceParser state);
 
     public abstract Definition qualifyNames(ScopedNameQualifier state);
+
+    public Definition reducePatterns(PatternReducerStep state) {
+        return this;
+    }
 
     @Override
     public abstract String toString();

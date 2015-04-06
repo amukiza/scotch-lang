@@ -21,12 +21,13 @@ import scotch.compiler.steps.OperatorAccumulator;
 import scotch.compiler.steps.PrecedenceParser;
 import scotch.compiler.steps.ScopedNameQualifier;
 import scotch.compiler.steps.TypeChecker;
+import scotch.compiler.syntax.pattern.PatternReducer;
+import scotch.compiler.syntax.reference.ValueReference;
+import scotch.compiler.text.SourceLocation;
 import scotch.symbol.Symbol;
 import scotch.symbol.type.FunctionType;
 import scotch.symbol.type.InstanceType;
 import scotch.symbol.type.Type;
-import scotch.compiler.syntax.reference.ValueReference;
-import scotch.compiler.text.SourceLocation;
 
 public class Method extends Value {
 
@@ -150,6 +151,11 @@ public class Method extends Value {
     @Override
     public Value qualifyNames(ScopedNameQualifier state) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Value reducePatterns(PatternReducer reducer) {
+        throw new UnsupportedOperationException(); // TODO
     }
 
     @Override

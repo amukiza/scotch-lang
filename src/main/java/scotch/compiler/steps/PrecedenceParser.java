@@ -167,6 +167,10 @@ public class PrecedenceParser {
         return scope().reserveSymbol(memberNames.peek());
     }
 
+    public Type reserveType() {
+        return scope().reserveType();
+    }
+
     public Scope scope() {
         return scopes.peek();
     }

@@ -7,6 +7,7 @@ import static scotch.compiler.intermediate.Intermediates.literal;
 import me.qmx.jitescript.CodeBlock;
 import scotch.compiler.intermediate.IntermediateGenerator;
 import scotch.compiler.intermediate.IntermediateValue;
+import scotch.compiler.syntax.pattern.PatternReducer;
 import scotch.compiler.text.SourceLocation;
 import scotch.symbol.type.Types;
 
@@ -19,6 +20,11 @@ public class IntLiteral extends LiteralValue<Integer> {
     @Override
     public IntermediateValue generateIntermediateCode(IntermediateGenerator state) {
         return literal(value);
+    }
+
+    @Override
+    public Value reducePatterns(PatternReducer reducer) {
+        throw new UnsupportedOperationException(); // TODO
     }
 
     @Override

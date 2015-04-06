@@ -208,7 +208,7 @@ public class TypeCheckerTest extends IsolatedCompilerTest {
             "import scotch.data.num",
             "add a b = a + b"
         );
-        Type a = t(10, asList("scotch.data.num.Num"));
+        Type a = t(12, asList("scotch.data.num.Num"));
         shouldNotHaveErrors();
         shouldHaveValue("scotch.test.add", fn(a, fn(a, a)));
     }
@@ -219,7 +219,7 @@ public class TypeCheckerTest extends IsolatedCompilerTest {
             "module scotch.test",
             "apply = \\x y -> x y"
         );
-        shouldHaveValue("scotch.test.apply", fn(fn(t(2), t(7)), fn(t(2), t(7))));
+        shouldHaveValue("scotch.test.apply", fn(fn(t(2), t(9)), fn(t(2), t(9))));
     }
 
     @Test
@@ -257,13 +257,13 @@ public class TypeCheckerTest extends IsolatedCompilerTest {
         );
         shouldNotHaveErrors();
         Type bool = sum("scotch.data.bool.Bool");
-        Type t = t(16, asList("scotch.data.num.Num", "scotch.data.eq.Eq"));
+        Type t = t(18, asList("scotch.data.num.Num", "scotch.data.eq.Eq"));
         InstanceType numType = instance("scotch.data.num.Num", t(16));
         InstanceType eqType = instance("scotch.data.eq.Eq", t(16));
         shouldNotHaveErrors();
         shouldHaveValue("scotch.test.fn", matcher("scotch.test.(fn#0)", fn(t, fn(t, bool)),
             asList(arg("#0i", eqType), arg("#1i", numType), arg("#0", t), arg("#1", t)),
-            pattern("scotch.test.(fn#0#0)", asList(capture("#0", "a", t), capture("#1", "b", t)), apply(
+            pattern("scotch.test.(fn#0#0)", asList(capture(arg("#0", t), "a", t), capture(arg("#1", t), "b", t)), apply(
                 apply(
                     apply(
                         method("scotch.data.eq.(==)", asList(eqType), fn(eqType, fn(t, fn(t, bool)))),
@@ -319,7 +319,7 @@ public class TypeCheckerTest extends IsolatedCompilerTest {
         shouldNotHaveErrors();
         shouldHaveValue("scotch.test.(commutative?)", matcher(
             "scotch.test.(commutative?#0)", fn(t, fn(t, bool)), asList(arg("#0i", eqType), arg("#1i", numType), arg("#0", t), arg("#1", t)),
-            pattern("scotch.test.(commutative?#0#0)", asList(capture("#0", "a", t), capture("#1", "b", t)), apply(
+            pattern("scotch.test.(commutative?#0#0)", asList(capture(arg("#0", t), "a", t), capture(arg("#1", t), "b", t)), apply(
                 apply(
                     apply(
                         apply(
@@ -377,12 +377,12 @@ public class TypeCheckerTest extends IsolatedCompilerTest {
             "fn a b = a + b"
         );
         String num = "scotch.data.num.Num";
-        Type t = t(10, asList(num));
+        Type t = t(12, asList(num));
         InstanceType instance = instance(num, t(10));
         shouldNotHaveErrors();
         shouldHaveValue("scotch.test.fn", matcher("scotch.test.(fn#0)", fn(t, fn(t, t)),
             asList(arg("#0i", instance), arg("#0", t), arg("#1", t)),
-            pattern("scotch.test.(fn#0#0)", asList(capture("#0", "a", t), capture("#1", "b", t)), apply(
+            pattern("scotch.test.(fn#0#0)", asList(capture(arg("#0", t), "a", t), capture(arg("#1", t), "b", t)), apply(
                 apply(
                     apply(
                         method("scotch.data.num.(+)", asList(instance), fn(instance, fn(t, fn(t, t)))),
@@ -406,15 +406,15 @@ public class TypeCheckerTest extends IsolatedCompilerTest {
             "fn = \\x y -> x + y"
         );
         String num = "scotch.data.num.Num";
-        Type t = t(9, asList(num));
-        InstanceType instance = instance(num, t(9));
+        Type t = t(11, asList(num));
+        InstanceType instance = instance(num, t(11));
         shouldNotHaveErrors();
         shouldHaveValue("scotch.test.fn", matcher(
             "scotch.test.(fn#0)",
             fn(t, fn(t, t)),
             asList(arg("#0i", instance), arg("#0", t), arg("#1", t)),
             pattern(
-                "scotch.test.(fn#0#1)", asList(capture("#0", "x", t), capture("#1", "y", t)), apply(
+                "scotch.test.(fn#0#1)", asList(capture(arg("#0", t), "x", t), capture(arg("#1", t), "y", t)), apply(
                     apply(
                         apply(
                             method("scotch.data.num.(+)", asList(instance(num, var("a"))), fn(instance, fn(t, fn(t, t)))),
@@ -490,7 +490,7 @@ public class TypeCheckerTest extends IsolatedCompilerTest {
         shouldNotHaveErrors();
         shouldHaveValue("scotch.test.fib", matcher("scotch.test.(fib#0)", fn(intType, intType), arg("#0", intType), pattern(
             "scotch.test.(fib#0#0)",
-            asList(equal("#0", literal(0), value -> apply(
+            asList(equal(arg("#0", intType), literal(0), value -> apply(
                 apply(
                     apply(
                         method("scotch.data.eq.(==)", asList(instance), fn(instance, fn(intType, fn(intType, boolType)))),
@@ -538,7 +538,7 @@ public class TypeCheckerTest extends IsolatedCompilerTest {
             "run = Right 1 >>= \\i -> Left \"Oops\""
         );
         shouldNotHaveErrors();
-        shouldHaveValue("scotch.test.run", sum("scotch.data.either.Either", stringType, t(17)));
+        shouldHaveValue("scotch.test.run", sum("scotch.data.either.Either", stringType, t(18)));
     }
 
     @Test

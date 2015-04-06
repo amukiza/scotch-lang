@@ -21,10 +21,11 @@ import scotch.compiler.steps.OperatorAccumulator;
 import scotch.compiler.steps.PrecedenceParser;
 import scotch.compiler.steps.ScopedNameQualifier;
 import scotch.compiler.steps.TypeChecker;
-import scotch.symbol.type.Type;
 import scotch.compiler.syntax.builder.SyntaxBuilder;
+import scotch.compiler.syntax.pattern.PatternReducer;
 import scotch.compiler.text.SourceLocation;
 import scotch.compiler.util.Either;
+import scotch.symbol.type.Type;
 
 public class UnshuffledValue extends Value {
 
@@ -140,6 +141,11 @@ public class UnshuffledValue extends Value {
     @Override
     public Value qualifyNames(ScopedNameQualifier state) {
         return withValues(state.qualifyValueNames(values));
+    }
+
+    @Override
+    public Value reducePatterns(PatternReducer reducer) {
+        throw new UnsupportedOperationException(); // TODO
     }
 
     @Override

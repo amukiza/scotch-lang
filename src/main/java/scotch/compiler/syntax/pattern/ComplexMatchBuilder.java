@@ -85,7 +85,7 @@ public class ComplexMatchBuilder implements SyntaxBuilder<PatternMatch> {
                 .withType(symbolGenerator.reserveType())
                 .withConstructor(constructor);
             patternMatches.stream()
-                .map(match -> field(match.getSourceLocation(), Optional.empty(), Optional.empty(), symbolGenerator.reserveType(), match))
+                .map(match -> field(match.getSourceLocation(), Optional.empty(), symbolGenerator.reserveType(), match))
                 .forEach(structureMatch::withField);
             return structureMatch.build();
         }

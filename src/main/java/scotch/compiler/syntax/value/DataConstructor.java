@@ -21,6 +21,7 @@ import scotch.compiler.steps.PrecedenceParser;
 import scotch.compiler.steps.ScopedNameQualifier;
 import scotch.compiler.steps.TypeChecker;
 import scotch.compiler.syntax.builder.SyntaxBuilder;
+import scotch.compiler.syntax.pattern.PatternReducer;
 import scotch.compiler.text.SourceLocation;
 import scotch.symbol.Symbol;
 import scotch.symbol.type.Type;
@@ -119,6 +120,11 @@ public class DataConstructor extends Value {
     public Value qualifyNames(ScopedNameQualifier state) {
         return withArguments(state.qualifyValueNames(arguments))
             .withType(type.qualifyNames(state));
+    }
+
+    @Override
+    public Value reducePatterns(PatternReducer reducer) {
+        throw new UnsupportedOperationException(); // TODO
     }
 
     @Override

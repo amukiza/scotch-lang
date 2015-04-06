@@ -19,9 +19,10 @@ import scotch.compiler.steps.OperatorAccumulator;
 import scotch.compiler.steps.PrecedenceParser;
 import scotch.compiler.steps.ScopedNameQualifier;
 import scotch.compiler.steps.TypeChecker;
-import scotch.symbol.type.Type;
 import scotch.compiler.syntax.builder.SyntaxBuilder;
+import scotch.compiler.syntax.pattern.PatternReducer;
 import scotch.compiler.text.SourceLocation;
+import scotch.symbol.type.Type;
 
 @EqualsAndHashCode(callSuper = false)
 @ToString(exclude = "sourceLocation")
@@ -138,6 +139,11 @@ public class Initializer extends Value {
             .withFields(fields.stream()
                 .map(field -> field.qualifyNames(state))
                 .collect(toList()));
+    }
+
+    @Override
+    public Value reducePatterns(PatternReducer reducer) {
+        throw new UnsupportedOperationException(); // TODO
     }
 
     @Override

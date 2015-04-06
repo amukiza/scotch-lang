@@ -4,6 +4,7 @@ import static java.util.stream.Collectors.toList;
 import static scotch.compiler.syntax.builder.BuilderUtil.require;
 import static scotch.compiler.syntax.definition.Definitions.scopeDef;
 import static scotch.compiler.syntax.reference.DefinitionReference.scopeRef;
+import static scotch.compiler.syntax.value.Values.arg;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,14 +20,14 @@ import scotch.compiler.steps.OperatorAccumulator;
 import scotch.compiler.steps.PrecedenceParser;
 import scotch.compiler.steps.ScopedNameQualifier;
 import scotch.compiler.steps.TypeChecker;
-import scotch.symbol.Symbol;
-import scotch.symbol.type.Type;
 import scotch.compiler.syntax.Scoped;
 import scotch.compiler.syntax.builder.SyntaxBuilder;
 import scotch.compiler.syntax.definition.Definition;
 import scotch.compiler.syntax.reference.DefinitionReference;
 import scotch.compiler.syntax.value.Value;
 import scotch.compiler.text.SourceLocation;
+import scotch.symbol.Symbol;
+import scotch.symbol.type.Type;
 
 @EqualsAndHashCode(callSuper = false)
 @ToString(exclude = "sourceLocation")
@@ -58,7 +59,7 @@ public class PatternCase implements Scoped {
             withMatches(patternMatches.stream()
                 .map(match -> match.accumulateNames(state))
                 .collect(toList()))
-            .withBody(body.accumulateNames(state)));
+                .withBody(body.accumulateNames(state)));
     }
 
     public PatternCase bindMethods(TypeChecker state) {
@@ -145,7 +146,9 @@ public class PatternCase implements Scoped {
         return state.scoped(this, () -> {
             AtomicInteger counter = new AtomicInteger();
             List<PatternMatch> boundMatches = patternMatches.stream()
-                .map(match -> match.bind("#" + counter.getAndIncrement(), state.scope()))
+                .map(match -> match.bind(
+                    arg(sourceLocation.getStartPoint(), "#" + counter.getAndIncrement(), state.reserveType()),
+                    state.scope()))
                 .collect(toList());
             return withSymbol(state.reserveSymbol())
                 .withMatches(boundMatches)
@@ -158,6 +161,12 @@ public class PatternCase implements Scoped {
             .map(match -> match.qualifyNames(state))
             .collect(toList()))
             .withBody(body.qualifyNames(state)));
+    }
+
+    public void reducePatterns(PatternReducer reducer) {
+        reducer.beginPatternCase(body);
+        patternMatches.forEach(patternMatch -> patternMatch.reducePatterns(reducer));
+        reducer.endPatternCase();
     }
 
     public PatternCase withBody(Value body) {

@@ -9,11 +9,11 @@ import scotch.compiler.text.SourceLocation;
 
 public final class Patterns {
 
-    public static CaptureMatch capture(SourceLocation sourceLocation, Optional<String> argument, Symbol symbol, Type type) {
+    public static CaptureMatch capture(SourceLocation sourceLocation, Optional<Value> argument, Symbol symbol, Type type) {
         return new CaptureMatch(sourceLocation, argument, symbol, type);
     }
 
-    public static EqualMatch equal(SourceLocation sourceLocation, Optional<String> argument, Value value, Optional<Value> match) {
+    public static EqualMatch equal(SourceLocation sourceLocation, Optional<Value> argument, Value value, Optional<Value> match) {
         return new EqualMatch(sourceLocation, argument, value, match);
     }
 
@@ -21,15 +21,15 @@ public final class Patterns {
         return new IgnorePattern(sourceLocation, type);
     }
 
-    public static TupleField field(SourceLocation sourceLocation, Optional<String> argument, Optional<String> field, Type type, PatternMatch patternMatch) {
-        return new TupleField(sourceLocation, argument, field, type, patternMatch);
+    public static TupleField field(SourceLocation sourceLocation, Optional<String> field, Type type, PatternMatch patternMatch) {
+        return new TupleField(sourceLocation, field, type, patternMatch);
     }
 
     public static PatternCase pattern(SourceLocation sourceLocation, Symbol symbol, List<PatternMatch> patternMatches, Value body) {
         return new PatternCase(sourceLocation, symbol, patternMatches, body);
     }
 
-    public static TupleMatch tuple(SourceLocation sourceLocation, Optional<String> argument, Symbol dataType, Type type, List<TupleField> fields) {
+    public static TupleMatch tuple(SourceLocation sourceLocation, Optional<Value> argument, Symbol dataType, Type type, List<TupleField> fields) {
         return new TupleMatch(sourceLocation, argument, dataType, type, fields);
     }
 

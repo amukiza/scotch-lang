@@ -9,6 +9,7 @@ import scotch.compiler.steps.DependencyAccumulator;
 import scotch.compiler.steps.NameAccumulator;
 import scotch.compiler.steps.ScopedNameQualifier;
 import scotch.compiler.steps.TypeChecker;
+import scotch.compiler.syntax.value.Value;
 import scotch.symbol.Operator;
 import scotch.symbol.type.Type;
 import scotch.compiler.syntax.scope.Scope;
@@ -34,7 +35,7 @@ public abstract class PatternMatch {
         return Optional.empty();
     }
 
-    public abstract PatternMatch bind(String argument, Scope scope);
+    public abstract PatternMatch bind(Value argument, Scope scope);
 
     public abstract PatternMatch bindMethods(TypeChecker state);
 
@@ -63,6 +64,8 @@ public abstract class PatternMatch {
     }
 
     public abstract PatternMatch qualifyNames(ScopedNameQualifier state);
+
+    public abstract void reducePatterns(PatternReducer reducer);
 
     @Override
     public abstract String toString();

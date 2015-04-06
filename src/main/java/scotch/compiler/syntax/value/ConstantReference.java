@@ -19,6 +19,7 @@ import scotch.compiler.steps.PrecedenceParser;
 import scotch.compiler.steps.ScopedNameQualifier;
 import scotch.compiler.steps.TypeChecker;
 import scotch.compiler.syntax.builder.SyntaxBuilder;
+import scotch.compiler.syntax.pattern.PatternReducer;
 import scotch.compiler.text.SourceLocation;
 import scotch.symbol.FieldSignature;
 import scotch.symbol.Symbol;
@@ -89,6 +90,11 @@ public class ConstantReference extends Value {
     @Override
     public Value qualifyNames(ScopedNameQualifier state) {
         return this;
+    }
+
+    @Override
+    public Value reducePatterns(PatternReducer reducer) {
+        throw new UnsupportedOperationException(); // TODO
     }
 
     @Override

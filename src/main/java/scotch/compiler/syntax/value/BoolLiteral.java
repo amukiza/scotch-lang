@@ -2,13 +2,13 @@ package scotch.compiler.syntax.value;
 
 import static me.qmx.jitescript.util.CodegenUtils.ci;
 import static me.qmx.jitescript.util.CodegenUtils.p;
-import static scotch.symbol.type.Types.sum;
 
 import me.qmx.jitescript.CodeBlock;
 import scotch.compiler.intermediate.IntermediateGenerator;
 import scotch.compiler.intermediate.IntermediateValue;
-import scotch.symbol.type.Types;
+import scotch.compiler.syntax.pattern.PatternReducer;
 import scotch.compiler.text.SourceLocation;
+import scotch.symbol.type.Types;
 
 public class BoolLiteral extends LiteralValue<Boolean> {
 
@@ -18,6 +18,11 @@ public class BoolLiteral extends LiteralValue<Boolean> {
 
     @Override
     public IntermediateValue generateIntermediateCode(IntermediateGenerator state) {
+        throw new UnsupportedOperationException(); // TODO
+    }
+
+    @Override
+    public Value reducePatterns(PatternReducer reducer) {
         throw new UnsupportedOperationException(); // TODO
     }
 

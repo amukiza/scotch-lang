@@ -1,9 +1,9 @@
 package scotch.compiler.syntax.value;
 
-import static scotch.symbol.Operator.operator;
-import static scotch.symbol.Value.Fixity.LEFT_INFIX;
 import static scotch.compiler.syntax.builder.BuilderUtil.require;
 import static scotch.compiler.util.Pair.pair;
+import static scotch.symbol.Operator.operator;
+import static scotch.symbol.Value.Fixity.LEFT_INFIX;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -17,13 +17,14 @@ import scotch.compiler.steps.OperatorAccumulator;
 import scotch.compiler.steps.PrecedenceParser;
 import scotch.compiler.steps.ScopedNameQualifier;
 import scotch.compiler.steps.TypeChecker;
-import scotch.symbol.Operator;
-import scotch.symbol.Symbol;
-import scotch.symbol.type.Type;
 import scotch.compiler.syntax.builder.SyntaxBuilder;
+import scotch.compiler.syntax.pattern.PatternReducer;
 import scotch.compiler.syntax.scope.Scope;
 import scotch.compiler.text.SourceLocation;
 import scotch.compiler.util.Pair;
+import scotch.symbol.Operator;
+import scotch.symbol.Symbol;
+import scotch.symbol.type.Type;
 
 public class DefaultOperator extends Value {
 
@@ -142,6 +143,11 @@ public class DefaultOperator extends Value {
     @Override
     public Value qualifyNames(ScopedNameQualifier state) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Value reducePatterns(PatternReducer reducer) {
+        throw new UnsupportedOperationException(); // TODO
     }
 
     @Override

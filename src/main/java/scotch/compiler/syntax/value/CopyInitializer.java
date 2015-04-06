@@ -21,12 +21,13 @@ import scotch.compiler.steps.OperatorAccumulator;
 import scotch.compiler.steps.PrecedenceParser;
 import scotch.compiler.steps.ScopedNameQualifier;
 import scotch.compiler.steps.TypeChecker;
-import scotch.runtime.RuntimeSupport;
-import scotch.symbol.type.Type;
+import scotch.compiler.syntax.pattern.PatternReducer;
 import scotch.compiler.text.SourceLocation;
 import scotch.runtime.Callable;
 import scotch.runtime.Copyable;
+import scotch.runtime.RuntimeSupport;
 import scotch.runtime.SuppliedThunk;
+import scotch.symbol.type.Type;
 
 @EqualsAndHashCode(callSuper = false)
 @ToString
@@ -136,6 +137,11 @@ public class CopyInitializer extends Value {
     @Override
     public Value qualifyNames(ScopedNameQualifier state) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Value reducePatterns(PatternReducer reducer) {
+        throw new UnsupportedOperationException(); // TODO
     }
 
     @Override

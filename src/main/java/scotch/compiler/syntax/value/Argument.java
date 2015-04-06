@@ -1,6 +1,8 @@
 package scotch.compiler.syntax.value;
 
 import static lombok.AccessLevel.PACKAGE;
+import static scotch.compiler.error.SymbolNotFoundError.symbolNotFound;
+import static scotch.compiler.syntax.TypeError.typeError;
 import static scotch.compiler.syntax.builder.BuilderUtil.require;
 import static scotch.compiler.syntax.value.Values.arg;
 import static scotch.symbol.Symbol.unqualified;
@@ -20,6 +22,7 @@ import scotch.compiler.steps.PrecedenceParser;
 import scotch.compiler.steps.ScopedNameQualifier;
 import scotch.compiler.steps.TypeChecker;
 import scotch.compiler.syntax.builder.SyntaxBuilder;
+import scotch.compiler.syntax.pattern.PatternReducer;
 import scotch.compiler.text.SourceLocation;
 import scotch.symbol.Symbol;
 import scotch.symbol.type.Type;
@@ -66,7 +69,16 @@ public class Argument extends Value {
     @Override
     public Argument checkTypes(TypeChecker state) {
         state.capture(getSymbol());
-        return this;
+        return state.scope().getValue(getSymbol())
+            .map(actualType -> withType(actualType.unify(type, state.scope())
+                .orElseGet(unification -> {
+                    state.error(typeError(unification, sourceLocation));
+                    return type;
+                })))
+            .orElseGet(() -> {
+                state.error(symbolNotFound(getSymbol(), sourceLocation));
+                return this;
+            });
     }
 
     @Override
@@ -107,6 +119,11 @@ public class Argument extends Value {
     @Override
     public Argument qualifyNames(ScopedNameQualifier state) {
         return new Argument(sourceLocation, name, type.qualifyNames(state));
+    }
+
+    @Override
+    public Value reducePatterns(PatternReducer reducer) {
+        throw new UnsupportedOperationException(); // TODO
     }
 
     @Override

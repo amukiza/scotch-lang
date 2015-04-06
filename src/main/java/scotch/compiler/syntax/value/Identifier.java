@@ -28,6 +28,11 @@ import scotch.compiler.steps.PrecedenceParser;
 import scotch.compiler.steps.ScopedNameQualifier;
 import scotch.compiler.steps.TypeChecker;
 import scotch.compiler.steps.TypeQualifier;
+import scotch.compiler.syntax.builder.SyntaxBuilder;
+import scotch.compiler.syntax.pattern.PatternReducer;
+import scotch.compiler.syntax.scope.Scope;
+import scotch.compiler.text.SourceLocation;
+import scotch.compiler.util.Pair;
 import scotch.symbol.Operator;
 import scotch.symbol.Symbol;
 import scotch.symbol.Symbol.QualifiedSymbol;
@@ -35,10 +40,6 @@ import scotch.symbol.Symbol.SymbolVisitor;
 import scotch.symbol.Symbol.UnqualifiedSymbol;
 import scotch.symbol.descriptor.DataFieldDescriptor;
 import scotch.symbol.type.Type;
-import scotch.compiler.syntax.builder.SyntaxBuilder;
-import scotch.compiler.syntax.scope.Scope;
-import scotch.compiler.text.SourceLocation;
-import scotch.compiler.util.Pair;
 
 @EqualsAndHashCode(callSuper = false)
 @ToString(exclude = "sourceLocation")
@@ -210,6 +211,11 @@ public class Identifier extends Value {
                 state.symbolNotFound(symbol, sourceLocation);
                 return this;
             });
+    }
+
+    @Override
+    public Value reducePatterns(PatternReducer reducer) {
+        throw new UnsupportedOperationException(); // TODO
     }
 
     public Identifier withSourceLocation(SourceLocation sourceLocation) {

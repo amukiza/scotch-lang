@@ -13,6 +13,7 @@ import scotch.compiler.steps.DependencyAccumulator;
 import scotch.compiler.steps.NameAccumulator;
 import scotch.compiler.steps.ScopedNameQualifier;
 import scotch.compiler.steps.TypeChecker;
+import scotch.compiler.syntax.value.Value;
 import scotch.symbol.type.Type;
 import scotch.compiler.syntax.builder.SyntaxBuilder;
 import scotch.compiler.syntax.scope.Scope;
@@ -41,7 +42,7 @@ public class IgnorePattern extends PatternMatch {
     }
 
     @Override
-    public PatternMatch bind(String argument, Scope scope) {
+    public PatternMatch bind(Value argument, Scope scope) {
         return this;
     }
 
@@ -78,6 +79,11 @@ public class IgnorePattern extends PatternMatch {
     @Override
     public PatternMatch qualifyNames(ScopedNameQualifier state) {
         return this;
+    }
+
+    @Override
+    public void reducePatterns(PatternReducer reducer) {
+        throw new UnsupportedOperationException(); // TODO
     }
 
     @Override

@@ -38,14 +38,14 @@ public class SyntaxParseIntegrationTest extends IsolatedCompilerTest {
             "x == y = not (x /= y)"
         );
         shouldHaveValue("scotch.test.(==)", matcher("scotch.test.(==#0)", t(11), asList(arg("#0", t(9)), arg("#1", t(10))),
-            pattern("scotch.test.(==#0#0)", asList(capture("#0", "x", t(0)), capture("#1", "y", t(2))), apply(
+            pattern("scotch.test.(==#0#0)", asList(capture(arg("#0", t(12)), "x", t(0)), capture(arg("#1", t(13)), "y", t(2))), apply(
                 id("scotch.data.bool.not", t(3)),
                 apply(
-                    apply(id("scotch.test.(/=)", t(5)), id("x", t(4)), t(12)),
+                    apply(id("scotch.test.(/=)", t(5)), id("x", t(4)), t(14)),
                     id("y", t(6)),
-                    t(13)
+                    t(15)
                 ),
-                t(14)
+                t(16)
             ))
         ));
     }
@@ -60,40 +60,40 @@ public class SyntaxParseIntegrationTest extends IsolatedCompilerTest {
             "fib n = fib (n - 1) + fib (n - 2)"
         );
         shouldHaveValue("scotch.test.fib", matcher("scotch.test.(fib#0)", t(16), asList(arg("#0", t(15))),
-            pattern("scotch.test.(fib#0#0)", asList(equal("#0", literal(0), value -> apply(
-                apply(id("scotch.data.eq.(==)", t(17)), id("#0", t(18)), t(19)),
+            pattern("scotch.test.(fib#0#0)", asList(equal(arg("#0", t(17)), literal(0), value -> apply(
+                apply(id("scotch.data.eq.(==)", t(18)), arg("#0", t(17)), t(19)),
                 value,
                 t(20)
             ))), literal(0)),
-            pattern("scotch.test.(fib#0#1)", asList(equal("#0", literal(1), value -> apply(
-                apply(id("scotch.data.eq.(==)", t(21)), id("#0", t(22)), t(23)),
+            pattern("scotch.test.(fib#0#1)", asList(equal(arg("#0", t(21)), literal(1), value -> apply(
+                apply(id("scotch.data.eq.(==)", t(22)), arg("#0", t(21)), t(23)),
                 value,
                 t(24)
             ))), literal(1)),
-            pattern("scotch.test.(fib#0#2)", asList(capture("#0", "n", t(3))), apply(
+            pattern("scotch.test.(fib#0#2)", asList(capture(arg("#0", t(25)), "n", t(3))), apply(
                 apply(
                     id("scotch.test.(+)", t(9)),
                     apply(
                         id("scotch.test.fib", t(4)),
                         apply(
-                            apply(id("scotch.test.(-)", t(6)), id("n", t(5)), t(25)),
+                            apply(id("scotch.test.(-)", t(6)), id("n", t(5)), t(26)),
                             literal(1),
-                            t(26)
+                            t(27)
                         ),
-                        t(27)
+                        t(28)
                     ),
-                    t(31)
+                    t(32)
                 ),
                 apply(
                     id("scotch.test.fib", t(10)),
                     apply(
-                        apply(id("scotch.test.(-)", t(12)), id("n", t(11)), t(28)),
+                        apply(id("scotch.test.(-)", t(12)), id("n", t(11)), t(29)),
                         literal(2),
-                        t(29)
+                        t(30)
                     ),
-                    t(30)
+                    t(31)
                 ),
-                t(32)
+                t(33)
             ))
         ));
     }
@@ -111,18 +111,18 @@ public class SyntaxParseIntegrationTest extends IsolatedCompilerTest {
             "commutative? a b = fn a b"
         );
         shouldNotHaveErrors();
-        shouldHaveValue("scotch.test.(commutative?)", matcher("scotch.test.(commutative?#0)", t(27), asList(arg("#0", t(25)), arg("#1", t(26))),
+        shouldHaveValue("scotch.test.(commutative?)", matcher("scotch.test.(commutative?#0)", t(29), asList(arg("#0", t(27)), arg("#1", t(28))),
             pattern(
                 "scotch.test.(commutative?#0#0)",
-                asList(capture("#0", "a", t(11)), capture("#1", "b", t(12))),
+                asList(capture(arg("#0", t(30)), "a", t(11)), capture(arg("#1", t(31)), "b", t(12))),
                 apply(
                     apply(
                         id("scotch.test.fn", t(13)),
                         id("a", t(14)),
-                        t(28)
+                        t(32)
                     ),
                     id("b", t(15)),
-                    t(29)
+                    t(33)
                 )
             )
         ));

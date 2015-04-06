@@ -5,11 +5,11 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static me.qmx.jitescript.util.CodegenUtils.p;
 import static me.qmx.jitescript.util.CodegenUtils.sig;
-import static scotch.symbol.type.Types.fn;
 import static scotch.compiler.syntax.builder.BuilderUtil.require;
 import static scotch.compiler.syntax.definition.Definitions.scopeDef;
 import static scotch.compiler.syntax.reference.DefinitionReference.scopeRef;
 import static scotch.compiler.syntax.value.Values.fn;
+import static scotch.symbol.type.Types.fn;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -29,15 +29,16 @@ import scotch.compiler.steps.OperatorAccumulator;
 import scotch.compiler.steps.PrecedenceParser;
 import scotch.compiler.steps.ScopedNameQualifier;
 import scotch.compiler.steps.TypeChecker;
+import scotch.compiler.syntax.Scoped;
+import scotch.compiler.syntax.builder.SyntaxBuilder;
+import scotch.compiler.syntax.definition.Definition;
+import scotch.compiler.syntax.pattern.PatternReducer;
+import scotch.compiler.syntax.reference.ScopeReference;
+import scotch.compiler.text.SourceLocation;
 import scotch.runtime.Applicable;
 import scotch.runtime.Callable;
 import scotch.symbol.Symbol;
 import scotch.symbol.type.Type;
-import scotch.compiler.syntax.Scoped;
-import scotch.compiler.syntax.builder.SyntaxBuilder;
-import scotch.compiler.syntax.definition.Definition;
-import scotch.compiler.syntax.reference.ScopeReference;
-import scotch.compiler.text.SourceLocation;
 
 @EqualsAndHashCode(callSuper = false)
 public class FunctionValue extends Value implements Scoped {
@@ -177,6 +178,11 @@ public class FunctionValue extends Value implements Scoped {
             body.qualifyNames(state),
             type
         )));
+    }
+
+    @Override
+    public Value reducePatterns(PatternReducer reducer) {
+        throw new UnsupportedOperationException(); // TODO
     }
 
     @Override

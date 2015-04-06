@@ -51,8 +51,8 @@ public class ParsePrecedenceTest extends IsolatedCompilerTest {
         shouldNotHaveErrors();
         shouldHaveValue("scotch.test.($)", matcher("scotch.test.($#0)", t(7), asList(arg("#0", t(5)), arg("#1", t(6))), pattern(
             "scotch.test.($#0#0)",
-            asList(capture("#0", "x", t(0)), capture("#1", "y", t(2))),
-            apply(id("x", t(3)), id("y", t(4)), t(8))
+            asList(capture(arg("#0", t(8)), "x", t(0)), capture(arg("#1", t(9)), "y", t(2))),
+            apply(id("x", t(3)), id("y", t(4)), t(10))
         )));
     }
 
@@ -64,8 +64,8 @@ public class ParsePrecedenceTest extends IsolatedCompilerTest {
         );
         shouldHaveValue("scotch.test.fib", matcher("scotch.test.(fib#0)", t(2), arg("#0", t(1)), pattern(
             "scotch.test.fib#0#0",
-            asList(equal("#0", literal(0), value -> apply(
-                apply(id("scotch.data.eq.(==)", t(3)), id("#0", t(4)), t(5)), value, t(6)
+            asList(equal(arg("#0", t(3)), literal(0), value -> apply(
+                apply(id("scotch.data.eq.(==)", t(4)), arg("#0", t(3)), t(5)), value, t(6)
             ))),
             literal(0)
         )));

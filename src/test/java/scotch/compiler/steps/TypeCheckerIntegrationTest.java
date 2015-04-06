@@ -5,6 +5,7 @@ import static scotch.compiler.syntax.TypeError.typeError;
 import static scotch.compiler.text.SourceLocation.source;
 import static scotch.compiler.text.SourcePoint.point;
 import static scotch.compiler.text.TextUtil.repeat;
+import static scotch.compiler.util.TestUtil.access;
 import static scotch.compiler.util.TestUtil.arg;
 import static scotch.compiler.util.TestUtil.capture;
 import static scotch.compiler.util.TestUtil.field;
@@ -91,9 +92,9 @@ public class TypeCheckerIntegrationTest extends CompilerTest<ClassLoaderResolver
         shouldHaveValue("scotch.test.second", matcher(
             "scotch.test.(second#0)", fn(tuple, t(4)), arg("#0", tuple),
             pattern("scotch.test.(second#0#0)",
-                asList(tuple("#0", "scotch.data.tuple.(,)", tuple, asList(
-                    field("#0", "_0", t(2), ignore(t(2))),
-                    field("#0", "_1", t(4), capture("#0#_1", "b", t(4)))))),
+                asList(tuple(arg("#0", tuple), "scotch.data.tuple.(,)", tuple, asList(
+                    field("_0", t(2), ignore(t(2))),
+                    field("_1", t(4), capture(access(arg("#0", tuple), "_1", t(4)), "b", t(4)))))),
                 arg("b", t(4))
             )
         ));

@@ -46,6 +46,7 @@ import scotch.compiler.syntax.reference.OperatorReference;
 import scotch.compiler.syntax.reference.ScopeReference;
 import scotch.compiler.syntax.reference.SignatureReference;
 import scotch.compiler.syntax.reference.ValueReference;
+import scotch.compiler.syntax.value.Accessor;
 import scotch.compiler.syntax.value.Argument;
 import scotch.compiler.syntax.value.BoolLiteral;
 import scotch.compiler.syntax.value.CharLiteral;
@@ -77,6 +78,10 @@ import scotch.symbol.type.Type;
 
 public class TestUtil {
 
+    public static Accessor access(Value target, String field, Type type) {
+        return Values.access(NULL_SOURCE, target, field, type);
+    }
+
     public static Argument arg(String name, Type type) {
         return Values.arg(NULL_SOURCE, name, type);
     }
@@ -89,7 +94,7 @@ public class TestUtil {
         return Patterns.capture(NULL_SOURCE, Optional.empty(), symbol(name), type);
     }
 
-    public static CaptureMatch capture(String argument, String name, Type type) {
+    public static CaptureMatch capture(Value argument, String name, Type type) {
         return Patterns.capture(NULL_SOURCE, Optional.of(argument), symbol(name), type);
     }
 
@@ -165,7 +170,7 @@ public class TestUtil {
         return Patterns.equal(NULL_SOURCE, Optional.empty(), value, Optional.empty());
     }
 
-    public static EqualMatch equal(String argument, Value value, Function<Value, Value> matchTransform) {
+    public static EqualMatch equal(Value argument, Value value, Function<Value, Value> matchTransform) {
         return Patterns.equal(NULL_SOURCE, Optional.of(argument), value, Optional.of(matchTransform.apply(value)));
     }
 
@@ -218,6 +223,10 @@ public class TestUtil {
         return sum("scotch.data.int.Int");
     }
 
+    public static Value let(Type type, String name, Value value, Value scope) {
+        throw new UnsupportedOperationException(); // TODO
+    }
+
     public static BoolLiteral literal(boolean value) {
         return Values.literal(NULL_SOURCE, value);
     }
@@ -263,11 +272,11 @@ public class TestUtil {
     }
 
     public static TupleField field(Type type, PatternMatch patternMatch) {
-        return Patterns.field(NULL_SOURCE, Optional.empty(), Optional.empty(), type, patternMatch);
+        return Patterns.field(NULL_SOURCE, Optional.empty(), type, patternMatch);
     }
 
-    public static TupleField field(String argument, String field, Type type, PatternMatch patternMatch) {
-        return Patterns.field(NULL_SOURCE, Optional.of(argument), Optional.of(field), type, patternMatch);
+    public static TupleField field(String field, Type type, PatternMatch patternMatch) {
+        return Patterns.field(NULL_SOURCE, Optional.of(field), type, patternMatch);
     }
 
     public static PatternCase pattern(String name, List<PatternMatch> matches, Value body) {
@@ -290,7 +299,7 @@ public class TestUtil {
         return Patterns.tuple(NULL_SOURCE, Optional.empty(), symbol(dataType), type, fields);
     }
 
-    public static TupleMatch tuple(String argument, String dataType, Type type, List<TupleField> fields) {
+    public static TupleMatch tuple(Value argument, String dataType, Type type, List<TupleField> fields) {
         return Patterns.tuple(NULL_SOURCE, Optional.of(argument), symbol(dataType), type, fields);
     }
 

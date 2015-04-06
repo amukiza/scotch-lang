@@ -7,12 +7,12 @@ import static scotch.compiler.syntax.builder.BuilderUtil.require;
 import static scotch.compiler.syntax.value.Values.apply;
 import static scotch.compiler.syntax.value.Values.id;
 import static scotch.symbol.Symbol.symbol;
-import static scotch.util.StringUtil.stringify;
 
 import java.util.Optional;
 import java.util.function.Function;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import me.qmx.jitescript.CodeBlock;
 import scotch.compiler.steps.BytecodeGenerator;
 import scotch.compiler.steps.DependencyAccumulator;
@@ -29,16 +29,17 @@ import scotch.symbol.type.Type;
 
 @AllArgsConstructor(access = PACKAGE)
 @EqualsAndHashCode(callSuper = false)
+@ToString(exclude = "sourceLocation")
 public class EqualMatch extends PatternMatch {
 
     public static Builder builder() {
         return new Builder();
     }
 
-    private final SourceLocation   sourceLocation;
-    private final Optional<String> argument;
-    private final Value            value;
-    private final Optional<Value>  match;
+    private final SourceLocation  sourceLocation;
+    private final Optional<Value> argument;
+    private final Value           value;
+    private final Optional<Value> match;
 
     @Override
     public PatternMatch accumulateDependencies(DependencyAccumulator state) {
@@ -51,14 +52,14 @@ public class EqualMatch extends PatternMatch {
     }
 
     @Override
-    public PatternMatch bind(String argument, Scope scope) {
+    public PatternMatch bind(Value argument, Scope scope) {
         if (this.argument.isPresent()) {
             throw new IllegalStateException();
         } else {
             return new EqualMatch(sourceLocation, Optional.of(argument), value, Optional.of(apply(
                 apply(
                     id(sourceLocation, symbol("scotch.data.eq.(==)"), scope.reserveType()),
-                    id(sourceLocation, symbol(argument), scope.reserveType()),
+                    argument,
                     scope.reserveType()
                 ),
                 value,
@@ -113,8 +114,8 @@ public class EqualMatch extends PatternMatch {
     }
 
     @Override
-    public String toString() {
-        return stringify(this) + "(" + value + ")";
+    public void reducePatterns(PatternReducer reducer) {
+        throw new UnsupportedOperationException(); // TODO
     }
 
     public EqualMatch withSourceLocation(SourceLocation sourceLocation) {
@@ -129,7 +130,7 @@ public class EqualMatch extends PatternMatch {
     private PatternMatch map(Function<Value, Value> function) {
         return new EqualMatch(
             sourceLocation,
-            argument,
+            Optional.of(function.apply(argument.orElseThrow(IllegalStateException::new))),
             function.apply(value),
             match.map(function)
         );

@@ -15,9 +15,10 @@ import scotch.compiler.steps.OperatorAccumulator;
 import scotch.compiler.steps.PrecedenceParser;
 import scotch.compiler.steps.ScopedNameQualifier;
 import scotch.compiler.steps.TypeChecker;
-import scotch.symbol.type.Type;
+import scotch.compiler.syntax.pattern.PatternReducer;
 import scotch.compiler.syntax.reference.InstanceReference;
 import scotch.compiler.text.SourceLocation;
+import scotch.symbol.type.Type;
 
 @EqualsAndHashCode(callSuper = false)
 @ToString(exclude = "sourceLocation")
@@ -97,6 +98,11 @@ public class Instance extends Value {
     @Override
     public Value qualifyNames(ScopedNameQualifier state) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Value reducePatterns(PatternReducer reducer) {
+        throw new UnsupportedOperationException(); // TODO
     }
 
     @Override

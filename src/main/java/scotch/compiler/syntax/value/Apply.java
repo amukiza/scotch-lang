@@ -22,6 +22,7 @@ import scotch.compiler.steps.OperatorAccumulator;
 import scotch.compiler.steps.PrecedenceParser;
 import scotch.compiler.steps.ScopedNameQualifier;
 import scotch.compiler.steps.TypeChecker;
+import scotch.compiler.syntax.pattern.PatternReducer;
 import scotch.compiler.text.SourceLocation;
 import scotch.runtime.Applicable;
 import scotch.runtime.Callable;
@@ -140,6 +141,11 @@ public class Apply extends Value {
     @Override
     public Value qualifyNames(ScopedNameQualifier state) {
         return withFunction(function.qualifyNames(state)).withArgument(argument.qualifyNames(state));
+    }
+
+    @Override
+    public Value reducePatterns(PatternReducer reducer) {
+        throw new UnsupportedOperationException(); // TODO
     }
 
     public Apply withArgument(Value argument) {
