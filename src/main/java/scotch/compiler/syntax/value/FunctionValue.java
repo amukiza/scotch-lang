@@ -1,7 +1,6 @@
 package scotch.compiler.syntax.value;
 
 import static java.util.Collections.reverse;
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static me.qmx.jitescript.util.CodegenUtils.p;
 import static me.qmx.jitescript.util.CodegenUtils.sig;
@@ -18,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import me.qmx.jitescript.CodeBlock;
 import me.qmx.jitescript.LambdaBlock;
 import scotch.compiler.intermediate.IntermediateGenerator;
@@ -41,6 +41,7 @@ import scotch.symbol.Symbol;
 import scotch.symbol.type.Type;
 
 @EqualsAndHashCode(callSuper = false)
+@ToString(exclude = "sourceLocation")
 public class FunctionValue extends Value implements Scoped {
 
     public static Builder builder() {
@@ -183,11 +184,6 @@ public class FunctionValue extends Value implements Scoped {
     @Override
     public Value reducePatterns(PatternReducer reducer) {
         throw new UnsupportedOperationException(); // TODO
-    }
-
-    @Override
-    public String toString() {
-        return "(" + arguments.stream().map(arg -> arg.getSymbol().toString()).collect(joining(", ")) + " -> " + body + ")";
     }
 
     @Override

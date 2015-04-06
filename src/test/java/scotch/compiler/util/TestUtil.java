@@ -59,6 +59,7 @@ import scotch.compiler.syntax.value.Initializer;
 import scotch.compiler.syntax.value.InitializerField;
 import scotch.compiler.syntax.value.Instance;
 import scotch.compiler.syntax.value.IntLiteral;
+import scotch.compiler.syntax.value.Let;
 import scotch.compiler.syntax.value.PatternMatcher;
 import scotch.compiler.syntax.value.StringLiteral;
 import scotch.compiler.syntax.value.UnshuffledValue;
@@ -223,8 +224,8 @@ public class TestUtil {
         return sum("scotch.data.int.Int");
     }
 
-    public static Value let(Type type, String name, Value value, Value scope) {
-        throw new UnsupportedOperationException(); // TODO
+    public static Let let(Type type, String name, Value value, Value scope) {
+        return Values.let(NULL_SOURCE, type, name, value, scope);
     }
 
     public static BoolLiteral literal(boolean value) {

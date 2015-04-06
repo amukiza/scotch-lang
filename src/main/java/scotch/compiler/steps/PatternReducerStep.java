@@ -13,10 +13,11 @@ import java.util.function.Supplier;
 import scotch.compiler.syntax.definition.Definition;
 import scotch.compiler.syntax.definition.DefinitionEntry;
 import scotch.compiler.syntax.definition.DefinitionGraph;
+import scotch.compiler.syntax.pattern.CaptureMatch;
 import scotch.compiler.syntax.pattern.PatternReducer;
 import scotch.compiler.syntax.reference.DefinitionReference;
 import scotch.compiler.syntax.scope.Scope;
-import scotch.compiler.syntax.value.Argument;
+import scotch.compiler.syntax.value.PatternMatcher;
 import scotch.compiler.syntax.value.Value;
 
 public class PatternReducerStep implements PatternReducer {
@@ -32,7 +33,12 @@ public class PatternReducerStep implements PatternReducer {
     }
 
     @Override
-    public void beginPattern(List<Argument> arguments) {
+    public void addAssignment(CaptureMatch capture) {
+        throw new UnsupportedOperationException(); // TODO
+    }
+
+    @Override
+    public void beginPattern(PatternMatcher matcher) {
         throw new UnsupportedOperationException(); // TODO
     }
 

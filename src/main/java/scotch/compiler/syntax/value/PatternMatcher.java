@@ -158,6 +158,10 @@ public class PatternMatcher extends Value implements Scoped {
         return sourceLocation;
     }
 
+    public Symbol getSymbol() {
+        return symbol;
+    }
+
     @Override
     public Type getType() {
         return type;
@@ -185,7 +189,7 @@ public class PatternMatcher extends Value implements Scoped {
 
     @Override
     public Value reducePatterns(PatternReducer reducer) {
-        reducer.beginPattern(arguments);
+        reducer.beginPattern(this);
         try {
             patternCases.forEach(patternCase -> patternCase.reducePatterns(reducer));
             return reducer.reducePattern();

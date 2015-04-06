@@ -3,6 +3,7 @@ package scotch.compiler.syntax.pattern;
 import static lombok.AccessLevel.PACKAGE;
 import static scotch.compiler.syntax.TypeError.typeError;
 import static scotch.compiler.syntax.builder.BuilderUtil.require;
+import static scotch.compiler.syntax.value.Values.let;
 import static scotch.compiler.util.Either.right;
 import static scotch.compiler.util.Pair.pair;
 
@@ -26,6 +27,7 @@ import scotch.compiler.util.Pair;
 import scotch.symbol.Operator;
 import scotch.symbol.Symbol;
 import scotch.symbol.type.Type;
+import scotch.symbol.util.SymbolGenerator;
 
 @AllArgsConstructor(access = PACKAGE)
 @EqualsAndHashCode(callSuper = false, doNotUseGetters = true)
@@ -138,9 +140,13 @@ public class CaptureMatch extends PatternMatch {
         return this;
     }
 
+    public Value reducePattern(SymbolGenerator generator, Value result) {
+        return let(sourceLocation, generator.reserveType(), symbol.getCanonicalName(), getArgument(), result);
+    }
+
     @Override
     public void reducePatterns(PatternReducer reducer) {
-        throw new UnsupportedOperationException(); // TODO
+        reducer.addAssignment(this);
     }
 
     public CaptureMatch withSourceLocation(SourceLocation sourceLocation) {
