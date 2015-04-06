@@ -38,6 +38,11 @@ public class PatternReducerStep implements PatternReducer {
     }
 
     @Override
+    public void addCondition(Value condition) {
+        throw new UnsupportedOperationException(); // TODO
+    }
+
+    @Override
     public void beginPattern(PatternMatcher matcher) {
         throw new UnsupportedOperationException(); // TODO
     }

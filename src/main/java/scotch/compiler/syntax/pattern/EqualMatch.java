@@ -115,7 +115,7 @@ public class EqualMatch extends PatternMatch {
 
     @Override
     public void reducePatterns(PatternReducer reducer) {
-        throw new UnsupportedOperationException(); // TODO
+        reducer.addCondition(match.orElseThrow(IllegalStateException::new));
     }
 
     public EqualMatch withSourceLocation(SourceLocation sourceLocation) {

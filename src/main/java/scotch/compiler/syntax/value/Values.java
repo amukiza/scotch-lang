@@ -67,6 +67,10 @@ public class Values {
         return new Instance(sourceLocation, reference, type);
     }
 
+    public static Let let(SourceLocation sourceLocation, Type type, String name, Value value, Value scope) {
+        return new Let(sourceLocation, name, value, scope, type);
+    }
+
     public static BoolLiteral literal(SourceLocation sourceLocation, boolean value) {
         return new BoolLiteral(sourceLocation, value);
     }
@@ -105,9 +109,5 @@ public class Values {
 
     private Values() {
         // intentionally empty
-    }
-
-    public static Let let(SourceLocation sourceLocation, Type type, String name, Value value, Value scope) {
-        return new Let(sourceLocation, name, value, scope, type);
     }
 }

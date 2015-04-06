@@ -83,7 +83,7 @@ public class IgnorePattern extends PatternMatch {
 
     @Override
     public void reducePatterns(PatternReducer reducer) {
-        throw new UnsupportedOperationException(); // TODO
+        // intentionally empty
     }
 
     @Override
