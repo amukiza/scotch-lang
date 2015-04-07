@@ -1,6 +1,7 @@
 package scotch.compiler.syntax.value;
 
 import static lombok.AccessLevel.PACKAGE;
+import static scotch.compiler.intermediate.Intermediates.assign;
 import static scotch.compiler.syntax.TypeError.typeError;
 import static scotch.symbol.Symbol.symbol;
 
@@ -85,7 +86,11 @@ public class Let extends Value {
 
     @Override
     public IntermediateValue generateIntermediateCode(IntermediateGenerator state) {
-        throw new UnsupportedOperationException(); // TODO
+        IntermediateValue checkedScope = scope.generateIntermediateCode(state);
+        IntermediateValue checkedValue = value.generateIntermediateCode(state);
+        IntermediateValue result = assign(name, checkedValue, checkedScope);
+        state.addArgument(name);
+        return result;
     }
 
     @Override

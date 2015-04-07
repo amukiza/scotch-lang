@@ -5,9 +5,9 @@ import static scotch.compiler.syntax.reference.DefinitionReference.rootRef;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
+import com.google.common.collect.ImmutableList;
 import scotch.compiler.error.CompileException;
 import scotch.compiler.syntax.Scoped;
 import scotch.compiler.syntax.definition.DefinitionGraph;
@@ -20,11 +20,21 @@ public class IntermediateGenerator {
     private final DefinitionGraph              graph;
     private final List<IntermediateDefinition> definitions;
     private final Deque<Scope>                 scopes;
+    private final List<String>                 references;
 
     public IntermediateGenerator(DefinitionGraph graph) {
         this.graph = graph;
         this.definitions = new ArrayList<>();
         this.scopes = new ArrayDeque<>();
+        this.references = new ArrayList<>();
+    }
+
+    public void addArgument(String name) {
+        references.remove(name);
+    }
+
+    public List<String> capture() {
+        return ImmutableList.copyOf(references);
     }
 
     public void defineValue(DefinitionReference reference, Type type, IntermediateValue body) {
@@ -44,8 +54,10 @@ public class IntermediateGenerator {
         graph.getDefinition(reference).get().generateIntermediateCode(this);
     }
 
-    public List<String> getCaptures() {
-        return Collections.emptyList();
+    public void reference(String name) {
+        if (!references.contains(name)) {
+            references.add(name);
+        }
     }
 
     public <T extends Scoped> void scoped(T scoped, Runnable runnable) {

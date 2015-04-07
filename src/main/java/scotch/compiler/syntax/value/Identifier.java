@@ -70,11 +70,6 @@ public class Identifier extends Value {
     }
 
     @Override
-    public IntermediateValue generateIntermediateCode(IntermediateGenerator state) {
-        throw new UnsupportedOperationException(); // TODO
-    }
-
-    @Override
     public Optional<Value> asInitializer(Initializer initializer, TypeChecker state) {
         if (symbol.isConstructorName()) {
             return state.getDataConstructor(symbol)
@@ -98,21 +93,6 @@ public class Identifier extends Value {
         } else {
             return super.asInitializer(initializer, state);
         }
-    }
-
-    public boolean isConstructor() {
-        return symbol.isConstructorName();
-    }
-
-    private List<InitializerField> sort(List<InitializerField> initializerFields, List<DataFieldDescriptor> descriptorFields) {
-        List<InitializerField> sortedFields = new ArrayList<>();
-        List<String> initializerNames = initializerFields.stream().map(InitializerField::getName).collect(toList());
-        List<String> descriptorNames = descriptorFields.stream().map(DataFieldDescriptor::getName).collect(toList());
-        for (int i = 0; i < descriptorNames.size(); i++) {
-            int index = initializerNames.indexOf(descriptorNames.get(i));
-            sortedFields.add(i, initializerFields.get(index));
-        }
-        return sortedFields;
     }
 
     @Override
@@ -172,6 +152,11 @@ public class Identifier extends Value {
     }
 
     @Override
+    public IntermediateValue generateIntermediateCode(IntermediateGenerator state) {
+        throw new UnsupportedOperationException(); // TODO
+    }
+
+    @Override
     public SourceLocation getSourceLocation() {
         return sourceLocation;
     }
@@ -182,6 +167,10 @@ public class Identifier extends Value {
 
     public Type getType() {
         return type;
+    }
+
+    public boolean isConstructor() {
+        return symbol.isConstructorName();
     }
 
     @Override
@@ -252,6 +241,17 @@ public class Identifier extends Value {
                     return left;
                 }
             );
+    }
+
+    private List<InitializerField> sort(List<InitializerField> initializerFields, List<DataFieldDescriptor> descriptorFields) {
+        List<InitializerField> sortedFields = new ArrayList<>();
+        List<String> initializerNames = initializerFields.stream().map(InitializerField::getName).collect(toList());
+        List<String> descriptorNames = descriptorFields.stream().map(DataFieldDescriptor::getName).collect(toList());
+        for (int i = 0; i < descriptorNames.size(); i++) {
+            int index = initializerNames.indexOf(descriptorNames.get(i));
+            sortedFields.add(i, initializerFields.get(index));
+        }
+        return sortedFields;
     }
 
     public static class Builder implements SyntaxBuilder<Identifier> {

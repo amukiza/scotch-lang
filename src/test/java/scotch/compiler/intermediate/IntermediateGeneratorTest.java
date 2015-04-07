@@ -20,7 +20,6 @@ import static scotch.util.StringUtil.quote;
 
 import java.net.URI;
 import java.util.Optional;
-import org.junit.Ignore;
 import org.junit.Test;
 import scotch.compiler.ClassLoaderResolver;
 import scotch.symbol.type.Type;
@@ -87,7 +86,6 @@ public class IntermediateGeneratorTest {
         ));
     }
 
-    @Ignore("WIP")
     @Test
     public void shouldCreateIntermediatePattern() {
         compile(

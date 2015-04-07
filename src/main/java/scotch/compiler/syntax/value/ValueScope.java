@@ -90,7 +90,7 @@ public class ValueScope extends Value implements Scoped {
 
     @Override
     public IntermediateValue generateIntermediateCode(IntermediateGenerator state) {
-        throw new UnsupportedOperationException(); // TODO
+        return value.generateIntermediateCode(state);
     }
 
     @Override

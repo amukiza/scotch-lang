@@ -4,6 +4,7 @@ import static java.util.Collections.reverse;
 import static java.util.stream.Collectors.toList;
 import static me.qmx.jitescript.util.CodegenUtils.p;
 import static me.qmx.jitescript.util.CodegenUtils.sig;
+import static scotch.compiler.intermediate.Intermediates.function;
 import static scotch.compiler.syntax.builder.BuilderUtil.require;
 import static scotch.compiler.syntax.definition.Definitions.scopeDef;
 import static scotch.compiler.syntax.reference.DefinitionReference.scopeRef;
@@ -77,7 +78,15 @@ public class FunctionValue extends Value implements Scoped {
 
     @Override
     public IntermediateValue generateIntermediateCode(IntermediateGenerator state) {
-        throw new UnsupportedOperationException(); // TODO
+        IntermediateValue result = body.generateIntermediateCode(state);
+        for (int i = arguments.size() - 1; i >= 0; i--) {
+            if (i > 0) {
+                arguments.subList(0, i).stream().map(Argument::getName).forEach(state::reference);
+            }
+            state.addArgument(arguments.get(i).getName());
+            result = function(state.capture(), arguments.get(i).getName(), result);
+        }
+        return result;
     }
 
     @Override

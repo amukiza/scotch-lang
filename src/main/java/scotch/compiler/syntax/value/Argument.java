@@ -2,6 +2,7 @@ package scotch.compiler.syntax.value;
 
 import static lombok.AccessLevel.PACKAGE;
 import static scotch.compiler.error.SymbolNotFoundError.symbolNotFound;
+import static scotch.compiler.intermediate.Intermediates.variable;
 import static scotch.compiler.syntax.TypeError.typeError;
 import static scotch.compiler.syntax.builder.BuilderUtil.require;
 import static scotch.compiler.syntax.value.Values.arg;
@@ -53,7 +54,8 @@ public class Argument extends Value {
 
     @Override
     public IntermediateValue generateIntermediateCode(IntermediateGenerator state) {
-        throw new UnsupportedOperationException(); // TODO
+        state.reference(name);
+        return variable(name);
     }
 
     @Override

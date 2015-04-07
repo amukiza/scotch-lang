@@ -53,19 +53,14 @@ public class Apply extends Value {
     }
 
     @Override
-    public IntermediateValue generateIntermediateCode(IntermediateGenerator state) {
-        return apply(state.getCaptures(), function.generateIntermediateCode(state), argument.generateIntermediateCode(state));
+    public Value bindMethods(TypeChecker state) {
+        return withFunction(function.bindMethods(state))
+            .withArgument(argument.bindMethods(state));
     }
 
     @Override
     public Value bindTypes(TypeChecker state) {
         return new Apply(sourceLocation, function.bindTypes(state), argument.bindTypes(state), state.generate(type));
-    }
-
-    @Override
-    public Value bindMethods(TypeChecker state) {
-        return withFunction(function.bindMethods(state))
-            .withArgument(argument.bindMethods(state));
     }
 
     @Override
@@ -77,9 +72,9 @@ public class Apply extends Value {
         return new Apply(sourceLocation, checkedFunction, checkedArgument, unify
             .mapType(t -> ((FunctionType) t).getResult())
             .orElseGet(unification -> {
-                    state.error(typeError(unification.flip(), checkedArgument.getSourceLocation()));
-                    return type;
-                }));
+                state.error(typeError(unification.flip(), checkedArgument.getSourceLocation()));
+                return type;
+            }));
     }
 
     @Override
@@ -112,6 +107,13 @@ public class Apply extends Value {
             }});
             invokespecial(p(SuppliedThunk.class), "<init>", sig(void.class, Supplier.class));
         }};
+    }
+
+    @Override
+    public IntermediateValue generateIntermediateCode(IntermediateGenerator state) {
+        IntermediateValue intermediateFunction = function.generateIntermediateCode(state);
+        IntermediateValue intermediateArgument = argument.generateIntermediateCode(state);
+        return apply(state.capture(), intermediateFunction, intermediateArgument);
     }
 
     public Value getArgument() {
