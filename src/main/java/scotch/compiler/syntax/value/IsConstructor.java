@@ -28,11 +28,11 @@ public class IsConstructor extends Value {
 
     private final SourceLocation sourceLocation;
     private final Value          value;
-    private final Symbol constructor;
+    private final Symbol         constructor;
 
     @Override
     public Value accumulateDependencies(DependencyAccumulator state) {
-        throw new UnsupportedOperationException(); // TODO
+        return new IsConstructor(sourceLocation, value.accumulateDependencies(state), constructor);
     }
 
     @Override
@@ -42,17 +42,17 @@ public class IsConstructor extends Value {
 
     @Override
     public Value bindMethods(TypeChecker state) {
-        throw new UnsupportedOperationException(); // TODO
+        return new IsConstructor(sourceLocation, value.bindMethods(state), constructor);
     }
 
     @Override
     public Value bindTypes(TypeChecker state) {
-        throw new UnsupportedOperationException(); // TODO
+        return new IsConstructor(sourceLocation, value.bindTypes(state), constructor);
     }
 
     @Override
     public Value checkTypes(TypeChecker state) {
-        throw new UnsupportedOperationException(); // TODO
+        return new IsConstructor(sourceLocation, value.checkTypes(state), constructor);
     }
 
     @Override
@@ -62,7 +62,10 @@ public class IsConstructor extends Value {
 
     @Override
     public CodeBlock generateBytecode(BytecodeGenerator state) {
-        throw new UnsupportedOperationException(); // TODO
+        return new CodeBlock() {{
+            append(value.generateBytecode(state));
+            instance_of(state.getDataConstructorClass(constructor));
+        }};
     }
 
     @Override

@@ -22,11 +22,6 @@ public class CharLiteral extends LiteralValue<Character> {
     }
 
     @Override
-    public Value reducePatterns(PatternReducer reducer) {
-        throw new UnsupportedOperationException(); // TODO
-    }
-
-    @Override
     protected CodeBlock loadValue() {
         return new CodeBlock() {{
             ldc(getValue());

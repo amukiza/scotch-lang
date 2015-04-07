@@ -3,7 +3,6 @@ package scotch.compiler.syntax.value;
 import me.qmx.jitescript.CodeBlock;
 import scotch.compiler.intermediate.IntermediateGenerator;
 import scotch.compiler.intermediate.IntermediateValue;
-import scotch.compiler.syntax.pattern.PatternReducer;
 import scotch.compiler.text.SourceLocation;
 import scotch.symbol.type.Types;
 
@@ -15,11 +14,6 @@ public class StringLiteral extends LiteralValue<String> {
 
     @Override
     public IntermediateValue generateIntermediateCode(IntermediateGenerator state) {
-        throw new UnsupportedOperationException(); // TODO
-    }
-
-    @Override
-    public Value reducePatterns(PatternReducer reducer) {
         throw new UnsupportedOperationException(); // TODO
     }
 

@@ -35,7 +35,7 @@ public class Compiler {
     }
 
     public DefinitionGraph accumulateDependencies() {
-        return new DependencyAccumulator(qualifyNames()).accumulateDependencies();
+        return new DependencyAccumulator(reducePatterns()).accumulateDependencies();
     }
 
     public DefinitionGraph accumulateNames() {

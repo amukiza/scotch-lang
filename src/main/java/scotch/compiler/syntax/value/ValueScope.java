@@ -1,6 +1,8 @@
 package scotch.compiler.syntax.value;
 
 import static lombok.AccessLevel.PACKAGE;
+import static scotch.compiler.syntax.definition.Definitions.scopeDef;
+import static scotch.compiler.syntax.reference.DefinitionReference.scopeRef;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -15,7 +17,10 @@ import scotch.compiler.steps.OperatorAccumulator;
 import scotch.compiler.steps.PrecedenceParser;
 import scotch.compiler.steps.ScopedNameQualifier;
 import scotch.compiler.steps.TypeChecker;
+import scotch.compiler.syntax.Scoped;
+import scotch.compiler.syntax.definition.Definition;
 import scotch.compiler.syntax.pattern.PatternReducer;
+import scotch.compiler.syntax.reference.DefinitionReference;
 import scotch.compiler.text.SourceLocation;
 import scotch.symbol.Symbol;
 import scotch.symbol.type.Type;
@@ -23,7 +28,7 @@ import scotch.symbol.type.Type;
 @AllArgsConstructor(access = PACKAGE)
 @EqualsAndHashCode(callSuper = false)
 @ToString(exclude = "sourceLocation")
-public class ValueScope extends Value {
+public class ValueScope extends Value implements Scoped {
 
     private final SourceLocation sourceLocation;
     private final Symbol         symbol;
@@ -31,7 +36,21 @@ public class ValueScope extends Value {
 
     @Override
     public Value accumulateDependencies(DependencyAccumulator state) {
-        throw new UnsupportedOperationException(); // TODO
+        return state.keep(withValue(value.accumulateDependencies(state)));
+    }
+
+    @Override
+    public Definition getDefinition() {
+        return scopeDef(sourceLocation, symbol);
+    }
+
+    @Override
+    public DefinitionReference getReference() {
+        return scopeRef(symbol);
+    }
+
+    private ValueScope withValue(Value value) {
+        return new ValueScope(sourceLocation, symbol, value);
     }
 
     @Override
@@ -41,17 +60,17 @@ public class ValueScope extends Value {
 
     @Override
     public Value bindMethods(TypeChecker state) {
-        throw new UnsupportedOperationException(); // TODO
+        return state.scoped(this, () -> new ValueScope(sourceLocation, symbol, value.bindMethods(state)));
     }
 
     @Override
     public Value bindTypes(TypeChecker state) {
-        throw new UnsupportedOperationException(); // TODO
+        return new ValueScope(sourceLocation, symbol, value.bindTypes(state));
     }
 
     @Override
     public Value checkTypes(TypeChecker state) {
-        throw new UnsupportedOperationException(); // TODO
+        return state.scoped(this, () -> new ValueScope(sourceLocation, symbol, value.checkTypes(state)));
     }
 
     @Override
@@ -61,7 +80,12 @@ public class ValueScope extends Value {
 
     @Override
     public CodeBlock generateBytecode(BytecodeGenerator state) {
-        throw new UnsupportedOperationException(); // TODO
+        state.beginMatches();
+        try {
+            return value.generateBytecode(state);
+        } finally {
+            state.endMatches();
+        }
     }
 
     @Override

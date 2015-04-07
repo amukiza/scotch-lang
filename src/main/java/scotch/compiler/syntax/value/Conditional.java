@@ -5,7 +5,6 @@ import static me.qmx.jitescript.util.CodegenUtils.sig;
 import static scotch.compiler.intermediate.Intermediates.conditional;
 import static scotch.compiler.syntax.TypeError.typeError;
 import static scotch.compiler.syntax.builder.BuilderUtil.require;
-import static scotch.symbol.type.Types.sum;
 
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -26,6 +25,7 @@ import scotch.compiler.steps.TypeChecker;
 import scotch.compiler.syntax.builder.SyntaxBuilder;
 import scotch.compiler.syntax.pattern.PatternReducer;
 import scotch.compiler.text.SourceLocation;
+import scotch.data.bool.Bool;
 import scotch.runtime.Callable;
 import scotch.runtime.RuntimeSupport;
 import scotch.symbol.type.Type;
@@ -76,16 +76,16 @@ public class Conditional extends Value {
 
     @Override
     public Value checkTypes(TypeChecker state) {
-        Value c = condition.checkTypes(state);
-        Value t = whenTrue.checkTypes(state);
-        Value f = whenFalse.checkTypes(state);
-        Type resultType = sum("scotch.data.bool.Bool").unify(c.getType(), state)
-            .map(ct -> t.getType().unify(f.getType(), state))
+        Value checkedCondition = condition.checkTypes(state);
+        Value checkedWhenTrue = whenTrue.checkTypes(state);
+        Value checkedWhenFalse = whenFalse.checkTypes(state);
+        Type resultType = Bool.TYPE.unify(checkedCondition.getType(), state)
+            .map(ct -> checkedWhenTrue.getType().unify(checkedWhenFalse.getType(), state))
             .orElseGet(unification -> {
-                state.error(typeError(unification, sourceLocation));
+                state.error(typeError(unification, checkedWhenFalse.getSourceLocation()));
                 return type;
             });
-        return new Conditional(sourceLocation, c, t, f, resultType);
+        return new Conditional(sourceLocation, checkedCondition, checkedWhenTrue, checkedWhenFalse, resultType);
     }
 
     @Override
@@ -131,7 +131,13 @@ public class Conditional extends Value {
 
     @Override
     public Value reducePatterns(PatternReducer reducer) {
-        throw new UnsupportedOperationException(); // TODO
+        return new Conditional(
+            sourceLocation,
+            condition.reducePatterns(reducer),
+            whenTrue.reducePatterns(reducer),
+            whenFalse.reducePatterns(reducer),
+            type
+        );
     }
 
     @Override

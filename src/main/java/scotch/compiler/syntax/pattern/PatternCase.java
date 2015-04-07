@@ -14,7 +14,6 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import me.qmx.jitescript.CodeBlock;
 import scotch.compiler.steps.BytecodeGenerator;
-import scotch.compiler.steps.DependencyAccumulator;
 import scotch.compiler.steps.NameAccumulator;
 import scotch.compiler.steps.OperatorAccumulator;
 import scotch.compiler.steps.PrecedenceParser;
@@ -49,51 +48,12 @@ public class PatternCase implements Scoped {
         this.body = body;
     }
 
-    public PatternCase accumulateDependencies(DependencyAccumulator state) {
-        return state.keep(withMatches(patternMatches.stream().map(match -> match.accumulateDependencies(state)).collect(toList()))
-            .withBody(body.accumulateDependencies(state)));
-    }
-
     public PatternCase accumulateNames(NameAccumulator state) {
         return state.scoped(this, () ->
             withMatches(patternMatches.stream()
                 .map(match -> match.accumulateNames(state))
                 .collect(toList()))
                 .withBody(body.accumulateNames(state)));
-    }
-
-    public PatternCase bindMethods(TypeChecker state) {
-        return state.scoped(this, () ->
-            withMatches(patternMatches.stream()
-                .map(match -> match.bindMethods(state))
-                .collect(toList()))
-            .withBody(body.bindMethods(state)));
-    }
-
-    public PatternCase bindTypes(TypeChecker state) {
-        return state.scoped(this, () ->
-            withMatches(patternMatches.stream()
-                .map(match -> match.bindTypes(state))
-                .collect(toList()))
-            .withBody(body.bindTypes(state)));
-    }
-
-    public PatternCase checkTypes(TypeChecker state) {
-        return state.scoped(this, () -> {
-            patternMatches.stream()
-                .map(PatternMatch::getType)
-                .forEach(state::specialize);
-            try {
-                return withMatches(patternMatches.stream()
-                    .map(match -> match.checkTypes(state))
-                    .collect(toList()))
-                    .withBody(body.checkTypes(state));
-            } finally {
-                patternMatches.stream()
-                    .map(PatternMatch::getType)
-                    .forEach(state::generalize);
-            }
-        });
     }
 
     public PatternCase defineOperators(OperatorAccumulator state) {
@@ -164,7 +124,7 @@ public class PatternCase implements Scoped {
     }
 
     public void reducePatterns(PatternReducer reducer) {
-        reducer.beginPatternCase(this);
+        reducer.beginPatternCase(withBody(body.reducePatterns(reducer)));
         patternMatches.forEach(patternMatch -> patternMatch.reducePatterns(reducer));
         reducer.endPatternCase();
     }

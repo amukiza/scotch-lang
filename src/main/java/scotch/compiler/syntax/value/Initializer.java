@@ -143,7 +143,10 @@ public class Initializer extends Value {
 
     @Override
     public Value reducePatterns(PatternReducer reducer) {
-        throw new UnsupportedOperationException(); // TODO
+        return withValue(value.reducePatterns(reducer))
+            .withFields(fields.stream()
+                .map(field -> field.reducePatterns(reducer))
+                .collect(toList()));
     }
 
     @Override

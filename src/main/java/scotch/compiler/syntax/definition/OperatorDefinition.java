@@ -13,6 +13,7 @@ import scotch.compiler.steps.BytecodeGenerator;
 import scotch.compiler.steps.DependencyAccumulator;
 import scotch.compiler.steps.NameAccumulator;
 import scotch.compiler.steps.OperatorAccumulator;
+import scotch.compiler.steps.PatternReducerStep;
 import scotch.compiler.steps.PrecedenceParser;
 import scotch.compiler.steps.ScopedNameQualifier;
 import scotch.compiler.steps.TypeChecker;
@@ -118,6 +119,11 @@ public class OperatorDefinition extends Definition {
 
     @Override
     public Definition qualifyNames(ScopedNameQualifier state) {
+        return state.keep(this);
+    }
+
+    @Override
+    public Definition reducePatterns(PatternReducerStep state) {
         return state.keep(this);
     }
 

@@ -149,7 +149,7 @@ public class UnboundMethod extends Value {
                         .map(map -> instances.stream()
                             .map(instance -> instance.withBinding(map.get(instance.getBinding())))
                             .collect(toList()))
-                        .map(instanceTypes -> method(sourceLocation, valueRef, instances, state.generate(getMethodType(instanceTypes))))
+                        .map(instanceTypes -> method(sourceLocation, valueRef, instanceTypes, state.generate(getMethodType(instanceTypes))))
                         .orElseGet(() -> {
                             state.error(noBinding(getSymbol(), sourceLocation));
                             return this;

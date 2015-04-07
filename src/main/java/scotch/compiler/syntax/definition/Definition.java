@@ -69,9 +69,7 @@ public abstract class Definition implements Scoped {
 
     public abstract Definition qualifyNames(ScopedNameQualifier state);
 
-    public Definition reducePatterns(PatternReducerStep state) {
-        return this;
-    }
+    public abstract Definition reducePatterns(PatternReducerStep state);
 
     @Override
     public abstract String toString();

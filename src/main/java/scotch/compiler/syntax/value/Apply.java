@@ -145,7 +145,7 @@ public class Apply extends Value {
 
     @Override
     public Value reducePatterns(PatternReducer reducer) {
-        throw new UnsupportedOperationException(); // TODO
+        return new Apply(sourceLocation, function.reducePatterns(reducer), argument.reducePatterns(reducer), type);
     }
 
     public Apply withArgument(Value argument) {

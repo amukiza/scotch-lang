@@ -40,7 +40,7 @@ public class Accessor extends Value {
 
     @Override
     public Value accumulateDependencies(DependencyAccumulator state) {
-        throw new UnsupportedOperationException(); // TODO
+        return new Accessor(sourceLocation, target.accumulateDependencies(state), field, type);
     }
 
     @Override

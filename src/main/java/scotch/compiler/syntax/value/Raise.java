@@ -1,6 +1,8 @@
 package scotch.compiler.syntax.value;
 
 import static lombok.AccessLevel.PACKAGE;
+import static me.qmx.jitescript.util.CodegenUtils.p;
+import static me.qmx.jitescript.util.CodegenUtils.sig;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -33,7 +35,7 @@ public class Raise extends Value {
 
     @Override
     public Value accumulateDependencies(DependencyAccumulator state) {
-        throw new UnsupportedOperationException(); // TODO
+        return this;
     }
 
     @Override
@@ -43,17 +45,17 @@ public class Raise extends Value {
 
     @Override
     public Value bindMethods(TypeChecker state) {
-        throw new UnsupportedOperationException(); // TODO
+        return this;
     }
 
     @Override
     public Value bindTypes(TypeChecker state) {
-        throw new UnsupportedOperationException(); // TODO
+        return withType(state.generate(type));
     }
 
     @Override
     public Value checkTypes(TypeChecker state) {
-        throw new UnsupportedOperationException(); // TODO
+        return this;
     }
 
     @Override
@@ -63,7 +65,13 @@ public class Raise extends Value {
 
     @Override
     public CodeBlock generateBytecode(BytecodeGenerator state) {
-        throw new UnsupportedOperationException(); // TODO
+        return new CodeBlock() {{
+            newobj(p(RuntimeException.class)); // TODO should be specific exception type
+            dup();
+            ldc(message);
+            invokespecial(p(RuntimeException.class), "<init>", sig(void.class, String.class));
+            athrow();
+        }};
     }
 
     @Override
@@ -88,6 +96,6 @@ public class Raise extends Value {
 
     @Override
     public Value withType(Type type) {
-        throw new UnsupportedOperationException(); // TODO
+        return new Raise(sourceLocation, message, type);
     }
 }

@@ -4,20 +4,17 @@ import static java.util.Collections.reverse;
 import static java.util.stream.Collectors.toList;
 import static me.qmx.jitescript.util.CodegenUtils.p;
 import static me.qmx.jitescript.util.CodegenUtils.sig;
-import static scotch.compiler.syntax.TypeError.typeError;
 import static scotch.compiler.syntax.builder.BuilderUtil.require;
 import static scotch.compiler.syntax.definition.Definitions.scopeDef;
 import static scotch.compiler.syntax.reference.DefinitionReference.scopeRef;
 import static scotch.compiler.syntax.value.Values.matcher;
 import static scotch.symbol.type.Types.fn;
-import static scotch.symbol.type.Unification.unified;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import com.google.common.collect.ImmutableList;
@@ -72,10 +69,7 @@ public class PatternMatcher extends Value implements Scoped {
 
     @Override
     public Value accumulateDependencies(DependencyAccumulator state) {
-        return state.keep(map(
-            argument -> argument.accumulateDependencies(state),
-            patternCase -> patternCase.accumulateDependencies(state)
-        ));
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -88,42 +82,22 @@ public class PatternMatcher extends Value implements Scoped {
 
     @Override
     public IntermediateValue generateIntermediateCode(IntermediateGenerator state) {
-        throw new UnsupportedOperationException(); // TODO
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Value bindMethods(TypeChecker state) {
-        return withPatternCases(patternCases.stream()
-            .map(matcher -> matcher.bindMethods(state))
-            .collect(toList()));
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Value bindTypes(TypeChecker state) {
-        return map(argument -> argument.bindTypes(state), patternCase -> patternCase.bindTypes(state)).withType(state.generate(type));
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Value checkTypes(TypeChecker state) {
-        return encloseArguments(state, () -> {
-            AtomicReference<Type> resultType = new AtomicReference<>(state.reserveType());
-            List<PatternCase> patterns = patternCases.stream()
-                .map(matcher -> matcher.checkTypes(state))
-                .collect(toList());
-            patterns = patterns.stream()
-                .map(pattern -> pattern.withType(pattern.getType().unify(resultType.get(), state)
-                    .map(unifiedType -> {
-                        Type result = state.scope().generate(unifiedType);
-                        resultType.set(result);
-                        return unified(unifiedType);
-                    })
-                    .orElseGet(unification -> {
-                        state.error(typeError(unification.flip(), pattern.getSourceLocation()));
-                        return pattern.getType();
-                    })))
-                .collect(toList());
-            return withPatternCases(patterns).withType(calculateType(resultType.get()));
-        });
+        throw new UnsupportedOperationException();
     }
 
     @Override

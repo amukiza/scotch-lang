@@ -25,15 +25,16 @@ import static scotch.compiler.syntax.value.Values.apply;
 import static scotch.compiler.text.SourceLocation.source;
 import static scotch.compiler.text.SourcePoint.point;
 import static scotch.compiler.util.TestUtil.arg;
-import static scotch.compiler.util.TestUtil.capture;
-import static scotch.compiler.util.TestUtil.equal;
+import static scotch.compiler.util.TestUtil.conditional;
 import static scotch.compiler.util.TestUtil.fieldDef;
+import static scotch.compiler.util.TestUtil.fn;
 import static scotch.compiler.util.TestUtil.instance;
 import static scotch.compiler.util.TestUtil.instanceRef;
+import static scotch.compiler.util.TestUtil.let;
 import static scotch.compiler.util.TestUtil.literal;
-import static scotch.compiler.util.TestUtil.matcher;
 import static scotch.compiler.util.TestUtil.method;
-import static scotch.compiler.util.TestUtil.pattern;
+import static scotch.compiler.util.TestUtil.raise;
+import static scotch.compiler.util.TestUtil.scope;
 import static scotch.compiler.util.TestUtil.scopeRef;
 import static scotch.symbol.descriptor.TypeParameterDescriptor.typeParam;
 import static scotch.symbol.type.Types.fn;
@@ -98,7 +99,7 @@ public class TypeCheckerTest extends IsolatedCompilerTest {
             "test = id 5"
         );
         shouldNotHaveErrors();
-        shouldHaveValue("scotch.test.id", fn(t(1), t(1)));
+        shouldHaveValue("scotch.test.id", fn(t(5), t(5)));
         shouldHaveValue("scotch.test.test", intType);
     }
 
@@ -142,7 +143,7 @@ public class TypeCheckerTest extends IsolatedCompilerTest {
         );
         shouldHaveErrors(typeError(
             mismatch(intType, stringType),
-            source("test://mismatchedPatternCaseShouldReportTypeError", point(90, 6, 1), point(118, 6, 29))
+            source("test://mismatchedPatternCaseShouldReportTypeError", point(90, 6, 1), point(94, 6, 5))
         ));
     }
 
@@ -210,7 +211,7 @@ public class TypeCheckerTest extends IsolatedCompilerTest {
         );
         Type a = t(12, asList("scotch.data.num.Num"));
         shouldNotHaveErrors();
-        shouldHaveValue("scotch.test.add", fn(a, fn(a, a)));
+        shouldHaveValue("scotch.test.add", fn(instance("scotch.data.num.Num", a), fn(a, fn(a, a))));
     }
 
     @Test
@@ -219,7 +220,7 @@ public class TypeCheckerTest extends IsolatedCompilerTest {
             "module scotch.test",
             "apply = \\x y -> x y"
         );
-        shouldHaveValue("scotch.test.apply", fn(fn(t(2), t(9)), fn(t(2), t(9))));
+        shouldHaveValue("scotch.test.apply", fn(fn(t(4), t(9)), fn(t(4), t(9))));
     }
 
     @Test
@@ -258,48 +259,50 @@ public class TypeCheckerTest extends IsolatedCompilerTest {
         shouldNotHaveErrors();
         Type bool = sum("scotch.data.bool.Bool");
         Type t = t(18, asList("scotch.data.num.Num", "scotch.data.eq.Eq"));
-        InstanceType numType = instance("scotch.data.num.Num", t(16));
-        InstanceType eqType = instance("scotch.data.eq.Eq", t(16));
+        InstanceType numType = instance("scotch.data.num.Num", t(18));
+        InstanceType eqType = instance("scotch.data.eq.Eq", t(18));
         shouldNotHaveErrors();
-        shouldHaveValue("scotch.test.fn", matcher("scotch.test.(fn#0)", fn(t, fn(t, bool)),
-            asList(arg("#0i", eqType), arg("#1i", numType), arg("#0", t), arg("#1", t)),
-            pattern("scotch.test.(fn#0#0)", asList(capture(arg("#0", t), "a", t), capture(arg("#1", t), "b", t)), apply(
-                apply(
-                    apply(
-                        method("scotch.data.eq.(==)", asList(eqType), fn(eqType, fn(t, fn(t, bool)))),
-                        arg("#0i", eqType),
-                        fn(t, fn(t, bool))
-                    ),
-                    apply(
+        shouldHaveValue("scotch.test.fn", fn("scotch.test.(fn#0)", asList(arg("#0i", eqType), arg("#1i", numType), arg("#0", t), arg("#1", t)),
+            scope("scotch.test.(fn#0#0)",
+                let(bool, "a", arg("#0", t),
+                    let(bool, "b", arg("#1", t), apply(
                         apply(
                             apply(
-                                method("scotch.data.num.(+)", asList(numType), fn(numType, fn(t, fn(t, t)))),
-                                arg("#1i", numType),
-                                fn(t, fn(t, t))
+                                method("scotch.data.eq.(==)", asList(eqType), fn(eqType, fn(t, fn(t, bool)))),
+                                arg("#0i", eqType),
+                                fn(t, fn(t, bool))
+                            ),
+                            apply(
+                                apply(
+                                    apply(
+                                        method("scotch.data.num.(+)", asList(numType), fn(numType, fn(t, fn(t, t)))),
+                                        arg("#1i", numType),
+                                        fn(t, fn(t, t))
+                                    ),
+                                    arg("a", t),
+                                    fn(t, t)
+                                ),
+                                arg("b", t),
+                                t
+                            ),
+                            fn(t, bool)
+                        ),
+                        apply(
+                            apply(
+                                apply(
+                                    method("scotch.data.num.(+)", asList(numType), fn(numType, fn(t, fn(t, t)))),
+                                    arg("#1i", numType),
+                                    fn(t, fn(t, t))
+                                ),
+                                arg("b", t),
+                                fn(t, t)
                             ),
                             arg("a", t),
-                            fn(t, t)
+                            t
                         ),
-                        arg("b", t),
-                        t
-                    ),
-                    fn(t, bool)
-                ),
-                apply(
-                    apply(
-                        apply(
-                            method("scotch.data.num.(+)", asList(numType), fn(numType, fn(t, fn(t, t)))),
-                            arg("#1i", numType),
-                            fn(t, fn(t, t))
-                        ),
-                        arg("b", t),
-                        fn(t, t)
-                    ),
-                    arg("a", t),
-                    t
-                ),
-                bool
-            ))
+                        bool
+                    ))
+                ))
         ));
     }
 
@@ -312,30 +315,33 @@ public class TypeCheckerTest extends IsolatedCompilerTest {
             "fn a b = a + b == b + a",
             "commutative? a b = fn a b"
         );
-        Type t = t(12, asList("scotch.data.eq.Eq", "scotch.data.num.Num"));
+        Type t = t(28, asList("scotch.data.eq.Eq", "scotch.data.num.Num"));
         Type bool = sum("scotch.data.bool.Bool");
-        InstanceType numType = instance("scotch.data.num.Num", t(12));
-        InstanceType eqType = instance("scotch.data.eq.Eq", t(12));
+        InstanceType numType = instance("scotch.data.num.Num", t(28));
+        InstanceType eqType = instance("scotch.data.eq.Eq", t(28));
         shouldNotHaveErrors();
-        shouldHaveValue("scotch.test.(commutative?)", matcher(
-            "scotch.test.(commutative?#0)", fn(t, fn(t, bool)), asList(arg("#0i", eqType), arg("#1i", numType), arg("#0", t), arg("#1", t)),
-            pattern("scotch.test.(commutative?#0#0)", asList(capture(arg("#0", t), "a", t), capture(arg("#1", t), "b", t)), apply(
-                apply(
-                    apply(
+        shouldHaveValue("scotch.test.(commutative?)", fn(
+            "scotch.test.(commutative?#0)", asList(arg("#0i", eqType), arg("#1i", numType), arg("#0", t), arg("#1", t)),
+            scope("scotch.test.(commutative?#0#0)",
+                let(bool, "a", arg("#0", t),
+                    let(bool, "b", arg("#1", t),
                         apply(
-                            method("scotch.test.fn", asList(eqType, numType), fn(eqType, fn(numType, fn(t, fn(t, bool))))),
-                            arg("#0i", eqType),
-                            fn(numType, fn(t, fn(t, bool)))
-                        ),
-                        arg("#1i", numType),
-                        fn(t, fn(t, bool))
-                    ),
-                    arg("a", t),
-                    fn(t, bool)
-                ),
-                arg("b", t),
-                bool
-            ))
+                            apply(
+                                apply(
+                                    apply(
+                                        method("scotch.test.fn", asList(eqType, numType), fn(eqType, fn(numType, fn(t, fn(t, bool))))),
+                                        arg("#0i", eqType),
+                                        fn(numType, fn(t, fn(t, bool)))
+                                    ),
+                                    arg("#1i", numType),
+                                    fn(t, fn(t, bool))
+                                ),
+                                arg("a", t),
+                                fn(t, bool)
+                            ),
+                            arg("b", t),
+                            bool
+                        ))))
         ));
     }
 
@@ -378,23 +384,25 @@ public class TypeCheckerTest extends IsolatedCompilerTest {
         );
         String num = "scotch.data.num.Num";
         Type t = t(12, asList(num));
-        InstanceType instance = instance(num, t(10));
+        InstanceType instance = instance(num, t(12));
         shouldNotHaveErrors();
-        shouldHaveValue("scotch.test.fn", matcher("scotch.test.(fn#0)", fn(t, fn(t, t)),
-            asList(arg("#0i", instance), arg("#0", t), arg("#1", t)),
-            pattern("scotch.test.(fn#0#0)", asList(capture(arg("#0", t), "a", t), capture(arg("#1", t), "b", t)), apply(
-                apply(
-                    apply(
-                        method("scotch.data.num.(+)", asList(instance), fn(instance, fn(t, fn(t, t)))),
-                        arg("#0i", instance),
-                        fn(t, fn(t, t))
-                    ),
-                    arg("a", t),
-                    fn(t, t)
-                ),
-                arg("b", t),
-                t
-            ))
+        shouldHaveValue("scotch.test.fn", fn("scotch.test.(fn#0)", asList(arg("#0i", instance), arg("#0", t), arg("#1", t)),
+            scope("scotch.test.(fn#0#0)",
+                let(t, "a", arg("#0", t),
+                    let(t, "b", arg("#1", t),
+                        apply(
+                            apply(
+                                apply(
+                                    method("scotch.data.num.(+)", asList(instance), fn(instance, fn(t, fn(t, t)))),
+                                    arg("#0i", instance),
+                                    fn(t, fn(t, t))
+                                ),
+                                arg("a", t),
+                                fn(t, t)
+                            ),
+                            arg("b", t),
+                            t
+                        ))))
         ));
     }
 
@@ -409,23 +417,25 @@ public class TypeCheckerTest extends IsolatedCompilerTest {
         Type t = t(11, asList(num));
         InstanceType instance = instance(num, t(11));
         shouldNotHaveErrors();
-        shouldHaveValue("scotch.test.fn", matcher(
+        shouldHaveValue("scotch.test.fn", fn(
             "scotch.test.(fn#0)",
-            fn(t, fn(t, t)),
             asList(arg("#0i", instance), arg("#0", t), arg("#1", t)),
-            pattern(
-                "scotch.test.(fn#0#1)", asList(capture(arg("#0", t), "x", t), capture(arg("#1", t), "y", t)), apply(
-                    apply(
+            scope("scotch.test.(fn#0#1)",
+                let(t, "x", arg("#0", t),
+                    let(t, "y", arg("#1", t),
                         apply(
-                            method("scotch.data.num.(+)", asList(instance(num, var("a"))), fn(instance, fn(t, fn(t, t)))),
-                            arg("#0i", instance),
-                            fn(t, fn(t, t))
-                        ),
-                        arg("x", t),
-                        fn(t, t)
-                    ),
-                    arg("y", t),
-                    t
+                            apply(
+                                apply(
+                                    method("scotch.data.num.(+)", asList(instance(num, var("a"))), fn(instance, fn(t, fn(t, t)))),
+                                    arg("#0i", instance),
+                                    fn(t, fn(t, t))
+                                ),
+                                arg("x", t),
+                                fn(t, t)
+                            ),
+                            arg("y", t),
+                            t
+                        ))
                 ))
         ));
     }
@@ -488,23 +498,25 @@ public class TypeCheckerTest extends IsolatedCompilerTest {
         );
         InstanceType instance = instance("scotch.data.eq.Eq", intType);
         shouldNotHaveErrors();
-        shouldHaveValue("scotch.test.fib", matcher("scotch.test.(fib#0)", fn(intType, intType), arg("#0", intType), pattern(
-            "scotch.test.(fib#0#0)",
-            asList(equal(arg("#0", intType), literal(0), value -> apply(
+        shouldHaveValue("scotch.test.fib", fn("scotch.test.(fib#0)", arg("#0", intType),
+            conditional(
                 apply(
                     apply(
-                        method("scotch.data.eq.(==)", asList(instance), fn(instance, fn(intType, fn(intType, boolType)))),
-                        instance(instanceRef("scotch.data.eq", "scotch.data.eq.Eq", asList(typeParam(intType))), instance),
-                        fn(intType, fn(intType, boolType))
+                        apply(
+                            method("scotch.data.eq.(==)", asList(instance), fn(instance, fn(intType, fn(intType, boolType)))),
+                            instance(instanceRef("scotch.data.eq", "scotch.data.eq.Eq", asList(typeParam(intType))), instance),
+                            fn(intType, fn(intType, boolType))
+                        ),
+                        arg("#0", intType),
+                        fn(intType, boolType)
                     ),
-                    arg("#0", intType),
-                    fn(intType, boolType)
+                    literal(0),
+                    boolType
                 ),
-                value,
-                boolType
-            ))),
-            literal(0)
-        )));
+                scope("scotch.test.(fib#0#0)", literal(0)),
+                raise("Incomplete match", intType),
+                intType
+            )));
     }
 
     @Test
@@ -538,7 +550,7 @@ public class TypeCheckerTest extends IsolatedCompilerTest {
             "run = Right 1 >>= \\i -> Left \"Oops\""
         );
         shouldNotHaveErrors();
-        shouldHaveValue("scotch.test.run", sum("scotch.data.either.Either", stringType, t(18)));
+        shouldHaveValue("scotch.test.run", sum("scotch.data.either.Either", stringType, t(19)));
     }
 
     @Test

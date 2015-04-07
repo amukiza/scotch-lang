@@ -89,7 +89,7 @@ public abstract class LiteralValue<A> extends Value {
 
     @Override
     public Value reducePatterns(PatternReducer reducer) {
-        throw new UnsupportedOperationException(); // TODO
+        return this;
     }
 
     @Override

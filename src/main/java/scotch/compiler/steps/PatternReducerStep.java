@@ -19,6 +19,7 @@ import scotch.compiler.syntax.pattern.PatternCase;
 import scotch.compiler.syntax.pattern.PatternReducer;
 import scotch.compiler.syntax.reference.DefinitionReference;
 import scotch.compiler.syntax.scope.Scope;
+import scotch.compiler.syntax.value.FunctionValue;
 import scotch.compiler.syntax.value.PatternMatcher;
 import scotch.compiler.syntax.value.Value;
 import scotch.symbol.Symbol;
@@ -50,12 +51,19 @@ public class PatternReducerStep implements PatternReducer {
     }
 
     @Override
+    public void markFunction(FunctionValue function) {
+        entries.add(entry(graph.getScope(function.getReference()), function.getDefinition()));
+    }
+
+    @Override
     public void beginPattern(PatternMatcher matcher) {
+        entries.add(entry(graph.getScope(matcher.getReference()), matcher.getDefinition()));
         patternReducer.beginPattern(matcher);
     }
 
     @Override
     public void beginPatternCase(PatternCase patternCase) {
+        entries.add(entry(graph.getScope(patternCase.getReference()), patternCase.getDefinition()));
         patternReducer.beginPatternCase(patternCase);
     }
 
@@ -67,6 +75,11 @@ public class PatternReducerStep implements PatternReducer {
     @Override
     public void endPatternCase() {
         patternReducer.endPatternCase();
+    }
+
+    public Definition keep(Definition definition) {
+        entries.add(entry(graph.getScope(definition.getReference()), definition));
+        return definition;
     }
 
     @Override

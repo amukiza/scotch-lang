@@ -12,6 +12,7 @@ import scotch.compiler.steps.OperatorAccumulator;
 import scotch.compiler.steps.PrecedenceParser;
 import scotch.compiler.steps.ScopedNameQualifier;
 import scotch.compiler.steps.TypeChecker;
+import scotch.compiler.syntax.pattern.PatternReducer;
 import scotch.symbol.type.Type;
 import scotch.compiler.syntax.builder.SyntaxBuilder;
 import scotch.compiler.text.SourceLocation;
@@ -85,6 +86,10 @@ public class InitializerField {
 
     public InitializerField qualifyNames(ScopedNameQualifier state) {
         return withValue(value.qualifyNames(state));
+    }
+
+    public InitializerField reducePatterns(PatternReducer reducer) {
+        return withValue(value.reducePatterns(reducer));
     }
 
     @Override

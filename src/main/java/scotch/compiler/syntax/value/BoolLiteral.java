@@ -22,11 +22,6 @@ public class BoolLiteral extends LiteralValue<Boolean> {
     }
 
     @Override
-    public Value reducePatterns(PatternReducer reducer) {
-        throw new UnsupportedOperationException(); // TODO
-    }
-
-    @Override
     protected CodeBlock loadValue() {
         return new CodeBlock().getstatic(p(Boolean.class), getValue() ? "TRUE" : "FALSE", ci(Boolean.class));
     }

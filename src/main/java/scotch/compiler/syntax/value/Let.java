@@ -1,6 +1,8 @@
 package scotch.compiler.syntax.value;
 
 import static lombok.AccessLevel.PACKAGE;
+import static scotch.compiler.syntax.TypeError.typeError;
+import static scotch.symbol.Symbol.symbol;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -35,7 +37,7 @@ public class Let extends Value {
 
     @Override
     public Value accumulateDependencies(DependencyAccumulator state) {
-        throw new UnsupportedOperationException(); // TODO
+        return new Let(sourceLocation, name, value.accumulateDependencies(state), scope.accumulateDependencies(state), type);
     }
 
     @Override
@@ -45,17 +47,25 @@ public class Let extends Value {
 
     @Override
     public Value bindMethods(TypeChecker state) {
-        throw new UnsupportedOperationException(); // TODO
+        return new Let(sourceLocation, name, value.bindMethods(state), scope.bindMethods(state), type);
     }
 
     @Override
     public Value bindTypes(TypeChecker state) {
-        throw new UnsupportedOperationException(); // TODO
+        return new Let(sourceLocation, name, value.bindTypes(state), scope.bindTypes(state), state.generate(type));
     }
 
     @Override
     public Value checkTypes(TypeChecker state) {
-        throw new UnsupportedOperationException(); // TODO
+        state.addLocal(symbol(name));
+        Value checkedValue = value.checkTypes(state);
+        state.scope().redefineValue(symbol(name), checkedValue.getType());
+        Value checkedScope = scope.checkTypes(state);
+        return new Let(sourceLocation, name, checkedValue, checkedScope,
+            checkedScope.getType().unify(type, state).orElseGet(unification -> {
+                state.error(typeError(unification, scope.getSourceLocation()));
+                return type;
+            }));
     }
 
     @Override
@@ -65,7 +75,12 @@ public class Let extends Value {
 
     @Override
     public CodeBlock generateBytecode(BytecodeGenerator state) {
-        throw new UnsupportedOperationException(); // TODO
+        return new CodeBlock() {{
+            state.addMatch(name);
+            append(value.generateBytecode(state));
+            astore(state.getVariable(name));
+            append(scope.generateBytecode(state));
+        }};
     }
 
     @Override

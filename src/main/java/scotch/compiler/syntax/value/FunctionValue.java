@@ -183,7 +183,8 @@ public class FunctionValue extends Value implements Scoped {
 
     @Override
     public Value reducePatterns(PatternReducer reducer) {
-        throw new UnsupportedOperationException(); // TODO
+        reducer.markFunction(this);
+        return withBody(body.reducePatterns(reducer));
     }
 
     @Override

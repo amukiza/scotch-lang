@@ -215,7 +215,7 @@ public class Identifier extends Value {
 
     @Override
     public Value reducePatterns(PatternReducer reducer) {
-        throw new UnsupportedOperationException(); // TODO
+        return this;
     }
 
     public Identifier withSourceLocation(SourceLocation sourceLocation) {

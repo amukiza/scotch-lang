@@ -14,6 +14,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
+import scotch.compiler.syntax.value.FunctionValue;
 import scotch.compiler.syntax.value.PatternMatcher;
 import scotch.compiler.syntax.value.Value;
 import scotch.compiler.text.SourceLocation;
@@ -38,6 +39,11 @@ public class DefaultPatternReducer implements PatternReducer {
     @Override
     public void addCondition(Value condition) {
         patterns.peek().addCondition(condition);
+    }
+
+    @Override
+    public void markFunction(FunctionValue function) {
+        // intentionally empty
     }
 
     @Override

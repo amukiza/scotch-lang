@@ -124,7 +124,7 @@ public class DataConstructor extends Value {
 
     @Override
     public Value reducePatterns(PatternReducer reducer) {
-        throw new UnsupportedOperationException(); // TODO
+        return withArguments(arguments.stream().map(argument -> argument.reducePatterns(reducer)).collect(toList()));
     }
 
     @Override
