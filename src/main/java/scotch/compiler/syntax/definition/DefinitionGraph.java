@@ -18,6 +18,7 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import scotch.compiler.error.SyntaxError;
+import scotch.symbol.util.DefaultSymbolGenerator;
 import scotch.symbol.util.SymbolGenerator;
 import scotch.symbol.type.Type;
 import scotch.compiler.syntax.reference.DefinitionReference;
@@ -202,7 +203,7 @@ public class DefinitionGraph {
         }
 
         public DefinitionGraph build() {
-            return new DefinitionGraph(definitions, optionalSequence.orElseGet(SymbolGenerator::new), optionalErrors.orElse(ImmutableList.of()));
+            return new DefinitionGraph(definitions, optionalSequence.orElseGet(DefaultSymbolGenerator::new), optionalErrors.orElse(ImmutableList.of()));
         }
 
         public DefinitionGraphBuilder withErrors(List<SyntaxError> errors) {

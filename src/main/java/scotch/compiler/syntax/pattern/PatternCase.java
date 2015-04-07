@@ -164,7 +164,7 @@ public class PatternCase implements Scoped {
     }
 
     public void reducePatterns(PatternReducer reducer) {
-        reducer.beginPatternCase(body);
+        reducer.beginPatternCase(this);
         patternMatches.forEach(patternMatch -> patternMatch.reducePatterns(reducer));
         reducer.endPatternCase();
     }

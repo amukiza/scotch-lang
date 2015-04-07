@@ -16,7 +16,7 @@ import static scotch.symbol.type.Unification.unified;
 import java.util.List;
 import org.junit.Before;
 import scotch.symbol.Symbol;
-import scotch.symbol.util.SymbolGenerator;
+import scotch.symbol.util.DefaultSymbolGenerator;
 import scotch.symbol.SymbolResolver;
 import scotch.compiler.syntax.scope.DefaultTypeScope;
 
@@ -31,7 +31,7 @@ public class UnificationTest {
     }
 
     protected TypeScope createTypeScope() {
-        return new DefaultTypeScope(new SymbolGenerator(), mock(SymbolResolver.class));
+        return new DefaultTypeScope(new DefaultSymbolGenerator(), mock(SymbolResolver.class));
     }
 
     protected void setUp() {

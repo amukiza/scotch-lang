@@ -23,6 +23,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import scotch.symbol.SymbolResolver;
+import scotch.symbol.util.DefaultSymbolGenerator;
 import scotch.symbol.util.SymbolGenerator;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -38,7 +39,7 @@ public class ChildScopeTest {
     public void setUp() {
         when(parentScope.reserveType()).thenReturn(t(20));
         SymbolResolver symbolResolver = mock(SymbolResolver.class);
-        SymbolGenerator symbolGenerator = new SymbolGenerator();
+        SymbolGenerator symbolGenerator = new DefaultSymbolGenerator();
         childScope = scope(parentScope, new DefaultTypeScope(symbolGenerator, symbolResolver), symbolResolver, symbolGenerator, "scotch.test");
     }
 

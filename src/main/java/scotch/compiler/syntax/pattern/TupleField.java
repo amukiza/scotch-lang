@@ -61,6 +61,10 @@ public class TupleField {
         return type;
     }
 
+    public void reducePatterns(PatternReducer reducer) {
+        patternMatch.reducePatterns(reducer);
+    }
+
     private TupleField withPatternMatch(PatternMatch patternMatch) {
         return new TupleField(sourceLocation, field, type, patternMatch);
     }

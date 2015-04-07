@@ -118,6 +118,7 @@ import scotch.symbol.SymbolResolver;
 import scotch.symbol.Value.Fixity;
 import scotch.symbol.type.SumType;
 import scotch.symbol.type.Type;
+import scotch.symbol.util.DefaultSymbolGenerator;
 import scotch.symbol.util.SymbolGenerator;
 import scotch.util.StringUtil;
 
@@ -136,7 +137,7 @@ public class InputParser {
         this.scanner = new LookAheadScanner(scanner);
         this.definitions = new ArrayList<>();
         this.positions = new ArrayDeque<>();
-        this.symbolGenerator = new SymbolGenerator();
+        this.symbolGenerator = new DefaultSymbolGenerator();
         this.scopes = new ArrayDeque<>(asList(Scope.scope(symbolGenerator, resolver)));
         this.memberNames = new ArrayDeque<>(asList(ImmutableList.of()));
     }

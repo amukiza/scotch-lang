@@ -6,6 +6,8 @@ import static scotch.compiler.syntax.value.Values.apply;
 import static scotch.compiler.syntax.value.Values.conditional;
 import static scotch.compiler.syntax.value.Values.fn;
 import static scotch.compiler.syntax.value.Values.id;
+import static scotch.compiler.syntax.value.Values.raise;
+import static scotch.compiler.syntax.value.Values.scope;
 import static scotch.symbol.Symbol.symbol;
 
 import java.util.ArrayDeque;
@@ -44,8 +46,8 @@ public class DefaultPatternReducer implements PatternReducer {
     }
 
     @Override
-    public void beginPatternCase(Value body) {
-        patterns.peek().beginPatternCase(body);
+    public void beginPatternCase(PatternCase patternCase) {
+        patterns.peek().beginPatternCase(patternCase);
     }
 
     @Override
@@ -63,13 +65,18 @@ public class DefaultPatternReducer implements PatternReducer {
         return patterns.peek().reducePattern();
     }
 
+    private VariableType reserveType() {
+        return generator.reserveType();
+    }
+
     private final class CaseState {
 
+        private final PatternCase        patternCase;
         private final List<Value>        conditions;
         private final List<CaptureMatch> assignments;
-        private       Value              body;
 
-        public CaseState() {
+        public CaseState(PatternCase patternCase) {
+            this.patternCase = patternCase;
             this.conditions = new ArrayList<>();
             this.assignments = new ArrayList<>();
         }
@@ -82,8 +89,12 @@ public class DefaultPatternReducer implements PatternReducer {
             conditions.add(condition);
         }
 
-        public void beginPatternCase(Value body) {
-            this.body = body;
+        public SourceLocation getSourceLocation() {
+            return SourceLocation.extent(new ArrayList<SourceLocation>() {{
+                addAll(conditions.stream().map(Value::getSourceLocation).collect(toList()));
+                addAll(assignments.stream().map(CaptureMatch::getSourceLocation).collect(toList()));
+                add(patternCase.getBody().getSourceLocation());
+            }});
         }
 
         public boolean isDefaultCase() {
@@ -119,18 +130,14 @@ public class DefaultPatternReducer implements PatternReducer {
         }
 
         private Value reduceBody() {
-            Value result = body;
+            Value result = patternCase.getBody();
             List<CaptureMatch> reverseAssignments = new ArrayList<>(assignments);
             reverse(reverseAssignments);
             for (CaptureMatch match : reverseAssignments) {
                 result = match.reducePattern(generator, result);
             }
-            return result;
+            return scope(patternCase.getSourceLocation(), patternCase.getSymbol(), result);
         }
-    }
-
-    private VariableType reserveType() {
-        return generator.reserveType();
     }
 
     private final class PatternState {
@@ -152,9 +159,8 @@ public class DefaultPatternReducer implements PatternReducer {
             currentCase.addCondition(condition);
         }
 
-        public void beginPatternCase(Value body) {
-            currentCase = new CaseState();
-            currentCase.beginPatternCase(body);
+        public void beginPatternCase(PatternCase patternCase) {
+            currentCase = new CaseState(patternCase);
         }
 
         public void endPatternCase() {
@@ -164,10 +170,13 @@ public class DefaultPatternReducer implements PatternReducer {
 
         public Value reducePattern() {
             Value result = calculateDefaultCase();
-            if (cases.size() > 1) {
-                List<CaseState> reverseCases = new ArrayList<>(cases);
-                reverse(reverseCases);
-                for (CaseState patternCase : reverseCases) {
+            List<CaseState> reverseCases = new ArrayList<>(cases);
+            int count = 0;
+            reverse(reverseCases);
+            for (CaseState patternCase : reverseCases) {
+                if (count++ > 0 && patternCase.isDefaultCase()) {
+                    throw new PatternReductionException("Non-terminal default pattern case", patternCase.getSourceLocation()); // TODO message
+                } else {
                     result = patternCase.reducePattern(result);
                 }
             }
@@ -184,7 +193,7 @@ public class DefaultPatternReducer implements PatternReducer {
             if (lastCase.isDefaultCase()) {
                 return lastCase.reducePattern();
             } else {
-                throw new UnsupportedOperationException(); // TODO
+                return raise(lastCase.getSourceLocation().getEndPoint(), "Incomplete match", generator.reserveType());
             }
         }
     }

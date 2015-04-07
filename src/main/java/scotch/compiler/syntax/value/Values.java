@@ -67,6 +67,10 @@ public class Values {
         return new Instance(sourceLocation, reference, type);
     }
 
+    public static IsConstructor isConstructor(SourceLocation sourceLocation, Value value, Symbol constructor) {
+        return new IsConstructor(sourceLocation, value, constructor);
+    }
+
     public static Let let(SourceLocation sourceLocation, Type type, String name, Value value, Value scope) {
         return new Let(sourceLocation, name, value, scope, type);
     }
@@ -99,6 +103,10 @@ public class Values {
         return new Method(sourceLocation, valueRef, instances, type);
     }
 
+    public static ValueScope scope(SourceLocation sourceLocation, Symbol symbol, Value value) {
+        return new ValueScope(sourceLocation, symbol, value);
+    }
+
     public static UnboundMethod unboundMethod(SourceLocation sourceLocation, ValueReference valueRef, Type type) {
         return new UnboundMethod(sourceLocation, valueRef, type);
     }
@@ -109,5 +117,9 @@ public class Values {
 
     private Values() {
         // intentionally empty
+    }
+
+    public static Raise raise(SourceLocation sourceLocation, String message, Type type) {
+        return new Raise(sourceLocation, message, type);
     }
 }

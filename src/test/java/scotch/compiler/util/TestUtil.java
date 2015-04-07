@@ -59,11 +59,14 @@ import scotch.compiler.syntax.value.Initializer;
 import scotch.compiler.syntax.value.InitializerField;
 import scotch.compiler.syntax.value.Instance;
 import scotch.compiler.syntax.value.IntLiteral;
+import scotch.compiler.syntax.value.IsConstructor;
 import scotch.compiler.syntax.value.Let;
 import scotch.compiler.syntax.value.PatternMatcher;
+import scotch.compiler.syntax.value.Raise;
 import scotch.compiler.syntax.value.StringLiteral;
 import scotch.compiler.syntax.value.UnshuffledValue;
 import scotch.compiler.syntax.value.Value;
+import scotch.compiler.syntax.value.ValueScope;
 import scotch.compiler.syntax.value.Values;
 import scotch.symbol.FieldSignature;
 import scotch.symbol.MethodSignature;
@@ -179,6 +182,14 @@ public class TestUtil {
         return InitializerField.field(NULL_SOURCE, name, value);
     }
 
+    public static TupleField field(Type type, PatternMatch patternMatch) {
+        return Patterns.field(NULL_SOURCE, Optional.empty(), type, patternMatch);
+    }
+
+    public static TupleField field(String field, Type type, PatternMatch patternMatch) {
+        return Patterns.field(NULL_SOURCE, Optional.of(field), type, patternMatch);
+    }
+
     public static DataFieldDefinition fieldDef(int ordinal, String name, Type type) {
         return DataFieldDefinition.builder()
             .withSourceLocation(NULL_SOURCE)
@@ -222,6 +233,10 @@ public class TestUtil {
 
     public static Type intType() {
         return sum("scotch.data.int.Int");
+    }
+
+    public static IsConstructor isConstructor(Value value, String constructor) {
+        return Values.isConstructor(NULL_SOURCE, value, symbol(constructor));
     }
 
     public static Let let(Type type, String name, Value value, Value scope) {
@@ -272,20 +287,20 @@ public class TestUtil {
         return DefinitionReference.operatorRef(symbol(name));
     }
 
-    public static TupleField field(Type type, PatternMatch patternMatch) {
-        return Patterns.field(NULL_SOURCE, Optional.empty(), type, patternMatch);
-    }
-
-    public static TupleField field(String field, Type type, PatternMatch patternMatch) {
-        return Patterns.field(NULL_SOURCE, Optional.of(field), type, patternMatch);
-    }
-
     public static PatternCase pattern(String name, List<PatternMatch> matches, Value body) {
         return Patterns.pattern(NULL_SOURCE, symbol(name), matches, body);
     }
 
+    public static Raise raise(String message, Type type) {
+        return Values.raise(NULL_SOURCE, message, type);
+    }
+
     public static RootDefinition root(List<DefinitionReference> definitions) {
         return Definitions.root(NULL_SOURCE, definitions);
+    }
+
+    public static ValueScope scope(String symbol, Value value) {
+        return Values.scope(NULL_SOURCE, symbol(symbol), value);
     }
 
     public static ScopeReference scopeRef(String name) {
@@ -294,14 +309,6 @@ public class TestUtil {
 
     public static SignatureReference signatureRef(String name) {
         return DefinitionReference.signatureRef(symbol(name));
-    }
-
-    public static TupleMatch tuple(String dataType, Type type, List<TupleField> fields) {
-        return Patterns.tuple(NULL_SOURCE, Optional.empty(), symbol(dataType), type, fields);
-    }
-
-    public static TupleMatch tuple(Value argument, String dataType, Type type, List<TupleField> fields) {
-        return Patterns.tuple(NULL_SOURCE, Optional.of(argument), symbol(dataType), type, fields);
     }
 
     public static Token token(TokenKind kind, Object value) {
@@ -314,6 +321,14 @@ public class TestUtil {
             token = scanner.nextToken();
         }
         return token;
+    }
+
+    public static TupleMatch tuple(String dataType, Type type, List<TupleField> fields) {
+        return Patterns.tuple(NULL_SOURCE, Optional.empty(), symbol(dataType), type, fields);
+    }
+
+    public static TupleMatch tuple(Value argument, String dataType, Type type, List<TupleField> fields) {
+        return Patterns.tuple(NULL_SOURCE, Optional.of(argument), symbol(dataType), type, fields);
     }
 
     public static TypeClassDescriptor typeClass(String name, List<Type> parameters, List<String> members) {

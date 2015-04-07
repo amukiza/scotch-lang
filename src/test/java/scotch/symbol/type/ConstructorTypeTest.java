@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
-import scotch.symbol.util.SymbolGenerator;
+import scotch.symbol.util.DefaultSymbolGenerator;
 import scotch.symbol.SymbolResolver;
 import scotch.compiler.syntax.scope.DefaultTypeScope;
 
@@ -27,7 +27,7 @@ public class ConstructorTypeTest {
 
     @Before
     public void setUp() {
-        scope = new DefaultTypeScope(new SymbolGenerator(), mock(SymbolResolver.class));
+        scope = new DefaultTypeScope(new DefaultSymbolGenerator(), mock(SymbolResolver.class));
     }
 
     @Test

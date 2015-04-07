@@ -4,6 +4,7 @@ import static java.util.stream.Collectors.toList;
 import static me.qmx.jitescript.util.CodegenUtils.p;
 import static me.qmx.jitescript.util.CodegenUtils.sig;
 import static scotch.compiler.syntax.builder.BuilderUtil.require;
+import static scotch.compiler.syntax.value.Values.isConstructor;
 import static scotch.compiler.text.TextUtil.repeat;
 import static scotch.symbol.type.Types.sum;
 
@@ -107,7 +108,8 @@ public class TupleMatch extends PatternMatch {
 
     @Override
     public void reducePatterns(PatternReducer reducer) {
-        throw new UnsupportedOperationException(); // TODO
+        reducer.addCondition(isConstructor(sourceLocation, argument.orElseThrow(IllegalStateException::new), constructor));
+        fields.forEach(field -> field.reducePatterns(reducer));
     }
 
     @Override

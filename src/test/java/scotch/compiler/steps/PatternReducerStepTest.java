@@ -7,11 +7,11 @@ import static scotch.compiler.util.TestUtil.conditional;
 import static scotch.compiler.util.TestUtil.fn;
 import static scotch.compiler.util.TestUtil.id;
 import static scotch.compiler.util.TestUtil.let;
+import static scotch.compiler.util.TestUtil.scope;
 import static scotch.symbol.type.Types.t;
 
 import java.util.Optional;
 import java.util.function.Function;
-import org.junit.Ignore;
 import org.junit.Test;
 import scotch.compiler.ClassLoaderResolver;
 import scotch.compiler.Compiler;
@@ -20,7 +20,6 @@ import scotch.compiler.syntax.definition.DefinitionGraph;
 
 public class PatternReducerStepTest extends CompilerTest<ClassLoaderResolver> {
 
-    @Ignore("WIP")
     @Test
     public void shouldReduceCapturesToLets() {
         compile(
@@ -33,19 +32,19 @@ public class PatternReducerStepTest extends CompilerTest<ClassLoaderResolver> {
             "            then a",
             "            else b"
         );
-        shouldHaveValue("scotch.test.max", fn("scotch.test.(max#0)", asList(arg("#0", t(0)), arg("#1", t(1))),
-            let(t(0), "a", id("#0", t(0)),
-                let(t(0), "b", id("#1", t(0)),
+        shouldHaveValue("scotch.test.max", fn("scotch.test.(max#0)", asList(arg("#0", t(9)), arg("#1", t(10))),
+            scope("scotch.test.(max#0#0)", let(t(19), "a", arg("#0", t(12)),
+                let(t(18), "b", arg("#1", t(13)),
                     conditional(
                         apply(
-                            apply(id("scotch.data.ord.(>=)", t(0)), id("a", t(0)), t(0)),
-                            id("b", t(0)),
-                            t(0)
+                            apply(id("scotch.data.ord.(>=)", t(4)), id("a", t(3)), t(14)),
+                            id("b", t(5)),
+                            t(15)
                         ),
-                        id("a", t(0)),
-                        id("b", t(0)),
-                        t(0)
-                    )))
+                        id("a", t(6)),
+                        id("b", t(7)),
+                        t(8)
+                    ))))
         ));
     }
 

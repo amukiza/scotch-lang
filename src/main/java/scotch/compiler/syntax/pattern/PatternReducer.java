@@ -11,7 +11,7 @@ public interface PatternReducer {
 
     void beginPattern(PatternMatcher matcher);
 
-    void beginPatternCase(Value body);
+    void beginPatternCase(PatternCase patternCase);
 
     void endPattern();
 

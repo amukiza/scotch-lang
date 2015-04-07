@@ -4,25 +4,37 @@ import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static scotch.compiler.syntax.value.Values.apply;
+import static scotch.compiler.text.SourceLocation.NULL_SOURCE;
+import static scotch.compiler.util.TestUtil.access;
 import static scotch.compiler.util.TestUtil.arg;
 import static scotch.compiler.util.TestUtil.capture;
 import static scotch.compiler.util.TestUtil.conditional;
 import static scotch.compiler.util.TestUtil.equal;
+import static scotch.compiler.util.TestUtil.field;
 import static scotch.compiler.util.TestUtil.fn;
 import static scotch.compiler.util.TestUtil.id;
 import static scotch.compiler.util.TestUtil.ignore;
+import static scotch.compiler.util.TestUtil.isConstructor;
 import static scotch.compiler.util.TestUtil.let;
 import static scotch.compiler.util.TestUtil.literal;
 import static scotch.compiler.util.TestUtil.matcher;
 import static scotch.compiler.util.TestUtil.pattern;
+import static scotch.compiler.util.TestUtil.raise;
+import static scotch.compiler.util.TestUtil.scope;
+import static scotch.compiler.util.TestUtil.tuple;
 import static scotch.symbol.type.Types.t;
 
-import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import scotch.compiler.syntax.value.Value;
+import scotch.symbol.util.DefaultSymbolGenerator;
 import scotch.symbol.util.SymbolGenerator;
 
 public class DefaultPatternReducerTest {
+
+    @Rule
+    public final ExpectedException exception = ExpectedException.none();
 
     @Test
     public void shouldReduceCapturesToLets() {
@@ -37,18 +49,18 @@ public class DefaultPatternReducerTest {
                 )
             )
         );
-        SymbolGenerator generator = new SymbolGenerator() {{
+        SymbolGenerator generator = new DefaultSymbolGenerator() {{
             startTypesAt(9);
         }};
         assertThat(pattern.reducePatterns(new DefaultPatternReducer(generator)),
             is(fn("scotch.test.max", asList(arg("#0", t(2)), arg("#1", t(3))),
-                let(t(10), "a", arg("#0", t(10)),
-                    let(t(9), "b", arg("#1", t(12)),
+                scope("scotch.test.(max#0)", let(t(12), "a", arg("#0", t(10)),
+                    let(t(11), "b", arg("#1", t(12)),
                         apply(
                             id("a", t(6)),
                             id("b", t(7)),
                             t(8)
-                        )))
+                        ))))
             )));
     }
 
@@ -64,7 +76,7 @@ public class DefaultPatternReducerTest {
                 literal(true)),
             pattern("scotch.test.(empty?#1)", asList(ignore(t(9))), literal(false))
         );
-        SymbolGenerator generator = new SymbolGenerator() {{
+        SymbolGenerator generator = new DefaultSymbolGenerator() {{
             startTypesAt(10);
         }};
         assertThat(pattern.reducePatterns(new DefaultPatternReducer(generator)),
@@ -74,15 +86,16 @@ public class DefaultPatternReducerTest {
                     id("[]", t(7)),
                     t(8)
                 ),
-                literal(true),
-                literal(false),
+                scope("scotch.test.(empty?#0)", literal(true)),
+                scope("scotch.test.(empty?#1)", literal(false)),
                 t(10)
             ))));
     }
 
-    @Ignore("WIP")
-    @Test(expected = PatternReductionException.class)
-    public void shouldRaiseErrorWhenPatternHasTwoCapturingCasesInARow() {
+    @Test
+    public void shouldRaiseErrorWhenPatternHasNonTerminalDefaultCase() {
+        exception.expect(PatternReductionException.class);
+        exception.expect(is(new PatternReductionException("Non-terminal default pattern case", NULL_SOURCE)));
         Value pattern = matcher("scotch.test.max", t(1), asList(arg("#0", t(2)), arg("#1", t(3))),
             pattern(
                 "scotch.test.(max#0)",
@@ -90,12 +103,104 @@ public class DefaultPatternReducerTest {
                 id("a", t(6))
             ),
             pattern(
-                "scotch.test.(max#0)",
+                "scotch.test.(max#1)",
                 asList(capture(arg("#0", t(10)), "a", t(4)), capture(arg("#1", t(12)), "b", t(5))),
                 id("b", t(7))
             )
         );
-        SymbolGenerator generator = new SymbolGenerator();
+        SymbolGenerator generator = new DefaultSymbolGenerator();
         pattern.reducePatterns(new DefaultPatternReducer(generator));
+    }
+
+    @Test
+    public void patternShouldAddDefaultCase() {
+        Value pattern = matcher("scotch.test.oneOrZero", t(1), arg("#0", t(2)),
+            pattern("scotch.test.(oneOrZero#0)", asList(equal(arg("#0", t(3)), literal(1), value -> apply(
+                apply(id("scotch.data.eq.(==)", t(4)), literal(1), t(5)),
+                value,
+                t(9)
+            ))), literal(true)),
+            pattern("scotch.test.(oneOrZero#1)", asList(equal(arg("#0", t(10)), literal(0), value -> apply(
+                apply(id("scotch.data.eq.(==)", t(11)), literal(0), t(12)),
+                value,
+                t(13)
+            ))), literal(true))
+        );
+        SymbolGenerator generator = new DefaultSymbolGenerator() {{
+            startTypesAt(14);
+        }};
+        assertThat(pattern.reducePatterns(new DefaultPatternReducer(generator)),
+            is(fn("scotch.test.oneOrZero", arg("#0", t(2)), conditional(
+                apply(
+                    apply(id("scotch.data.eq.(==)", t(4)), literal(1), t(5)),
+                    literal(1),
+                    t(9)
+                ),
+                scope("scotch.test.(oneOrZero#0)", literal(true)),
+                conditional(
+                    apply(
+                        apply(id("scotch.data.eq.(==)", t(11)), literal(0), t(12)),
+                        literal(0),
+                        t(13)
+                    ),
+                    scope("scotch.test.(oneOrZero#1)", literal(true)),
+                    raise("Incomplete match", t(14)),
+                    t(15)
+                ),
+                t(16)
+            ))));
+    }
+
+    @Test
+    public void shouldAddAssignmentsWithinCondition() {
+        Value pattern = matcher("scotch.test.oneAndVar", t(1), asList(arg("#0", t(2)), arg("#1", t(3))),
+            pattern("scotch.test.(oneAndVar#0)",
+                asList(
+                    equal(arg("#0", t(4)), literal(1), value -> apply(
+                        apply(id("scotch.data.eq.(==)", t(5)), literal(1), t(6)),
+                        value,
+                        t(7)
+                    )),
+                    capture(arg("#0", t(8)), "n", t(9))
+                ),
+                id("n", t(10)))
+        );
+        SymbolGenerator generator = new DefaultSymbolGenerator() {{
+            startTypesAt(11);
+        }};
+        assertThat(pattern.reducePatterns(new DefaultPatternReducer(generator)),
+            is(fn("scotch.test.oneAndVar", asList(arg("#0", t(2)), arg("#1", t(3))), conditional(
+                apply(
+                    apply(id("scotch.data.eq.(==)", t(5)), literal(1), t(6)),
+                    literal(1),
+                    t(7)
+                ),
+                scope("scotch.test.(oneAndVar#0)", let(t(12), "n", arg("#0", t(8)), id("n", t(10)))),
+                raise("Incomplete match", t(11)),
+                t(13)
+            ))));
+    }
+
+    @Test
+    public void shouldDestructureTuple() {
+        Value pattern = matcher("scotch.test.second", t(1), arg("#0", t(2)),
+            pattern("scotch.test.(second#0)",
+                asList(tuple(arg("#0", t(3)), "scotch.data.tuple.(,)", t(4), asList(
+                    field("_0", t(5), ignore(t(6))),
+                    field("_1", t(7), capture(access(arg("#0", t(8)), "_1", t(9)), "b", t(10)))
+                ))),
+                id("b", t(11))
+            )
+        );
+        SymbolGenerator generator = new DefaultSymbolGenerator() {{
+            startTypesAt(12);
+        }};
+        assertThat(pattern.reducePatterns(new DefaultPatternReducer(generator)),
+            is(fn("scotch.test.second", arg("#0", t(2)), conditional(
+                isConstructor(arg("#0", t(3)), "scotch.data.tuple.(,)"),
+                scope("scotch.test.(second#0)", let(t(13), "b", access(arg("#0", t(8)), "_1", t(9)), id("b", t(11)))),
+                raise("Incomplete match", t(12)),
+                t(14)
+            ))));
     }
 }
