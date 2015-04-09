@@ -1,28 +1,27 @@
 package scotch.compiler.syntax.definition;
 
-import static scotch.symbol.Operator.operator;
 import static scotch.compiler.syntax.builder.BuilderUtil.require;
 import static scotch.compiler.syntax.reference.DefinitionReference.operatorRef;
+import static scotch.symbol.Operator.operator;
 import static scotch.util.StringUtil.stringify;
 
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
+import scotch.compiler.analyzer.DependencyAccumulator;
+import scotch.compiler.analyzer.NameAccumulator;
+import scotch.compiler.analyzer.OperatorAccumulator;
+import scotch.compiler.analyzer.PatternAnalyzer;
+import scotch.compiler.analyzer.PrecedenceParser;
+import scotch.compiler.analyzer.ScopedNameQualifier;
+import scotch.compiler.analyzer.TypeChecker;
 import scotch.compiler.intermediate.IntermediateGenerator;
-import scotch.compiler.steps.BytecodeGenerator;
-import scotch.compiler.steps.DependencyAccumulator;
-import scotch.compiler.steps.NameAccumulator;
-import scotch.compiler.steps.OperatorAccumulator;
-import scotch.compiler.steps.PatternReducerStep;
-import scotch.compiler.steps.PrecedenceParser;
-import scotch.compiler.steps.ScopedNameQualifier;
-import scotch.compiler.steps.TypeChecker;
-import scotch.symbol.Operator;
-import scotch.symbol.Symbol;
-import scotch.symbol.Value.Fixity;
 import scotch.compiler.syntax.builder.SyntaxBuilder;
 import scotch.compiler.syntax.reference.DefinitionReference;
 import scotch.compiler.text.SourceLocation;
+import scotch.symbol.Operator;
+import scotch.symbol.Symbol;
+import scotch.symbol.Value.Fixity;
 
 public class OperatorDefinition extends Definition {
 
@@ -80,13 +79,8 @@ public class OperatorDefinition extends Definition {
     }
 
     @Override
-    public void generateBytecode(BytecodeGenerator state) {
-        // intentionally empty
-    }
-
-    @Override
-    public void generateIntermediateCode(IntermediateGenerator state) {
-        throw new UnsupportedOperationException(); // TODO
+    public Optional<DefinitionReference> generateIntermediateCode(IntermediateGenerator generator) {
+        return Optional.empty();
     }
 
     public Operator getOperator() {
@@ -123,7 +117,7 @@ public class OperatorDefinition extends Definition {
     }
 
     @Override
-    public Definition reducePatterns(PatternReducerStep state) {
+    public Definition reducePatterns(PatternAnalyzer state) {
         return state.keep(this);
     }
 

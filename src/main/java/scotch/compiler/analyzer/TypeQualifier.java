@@ -1,4 +1,4 @@
-package scotch.compiler.steps;
+package scotch.compiler.analyzer;
 
 import java.util.Optional;
 import scotch.compiler.error.SymbolNotFoundError;

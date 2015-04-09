@@ -7,10 +7,8 @@ import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import me.qmx.jitescript.CodeBlock;
-import scotch.compiler.steps.BytecodeGenerator;
-import scotch.compiler.steps.NameAccumulator;
-import scotch.compiler.steps.TypeChecker;
+import scotch.compiler.analyzer.NameAccumulator;
+import scotch.compiler.analyzer.TypeChecker;
 import scotch.compiler.syntax.scope.Scope;
 import scotch.compiler.syntax.value.Value;
 import scotch.compiler.text.SourceLocation;
@@ -51,10 +49,6 @@ public class TupleField {
     public TupleField checkTypes(TypeChecker state) {
         PatternMatch checkedMatch = patternMatch.checkTypes(state);
         return new TupleField(sourceLocation, field, checkedMatch.getType(), checkedMatch);
-    }
-
-    public CodeBlock generateBytecode(BytecodeGenerator state) {
-        return patternMatch.generateBytecode(state);
     }
 
     public Type getType() {

@@ -148,7 +148,7 @@ public class ModuleScanner {
         Optional.ofNullable(clazz.getAnnotation(DataConstructor.class)).ifPresent(annotation -> {
             Symbol constructor = qualify(annotation.memberName());
             Symbol dataType = qualify(annotation.dataType());
-            DataConstructorDescriptor.Builder builder = getBuilder(constructor).dataConstructor(annotation.ordinal(), dataType);
+            DataConstructorDescriptor.Builder builder = getBuilder(constructor).dataConstructor(annotation.ordinal(), dataType, clazz.getName().replace('.', '/'));
 
             Map<String, Type> fieldTypes = stream(clazz.getDeclaredMethods())
                 .filter(method -> method.isAnnotationPresent(DataFieldType.class))
@@ -190,6 +190,19 @@ public class ModuleScanner {
         });
     }
 
+    private void processModules(Class<?> clazz) {
+        if (!reExports.isEmpty()) {
+            throw new SymbolResolutionError(
+                "Multiple classes in module " + quote(moduleName) + " found with annotation @Module:"
+                    + " duplicate class is " + quote(clazz.getName())
+            );
+        } else if (clazz.isAnnotationPresent(Module.class)) {
+            for (ReExportModule module : clazz.getAnnotation(Module.class).reExports()) {
+                stream(module.members()).forEach(member -> reExports.put(member.memberName(), module.moduleName()));
+            }
+        }
+    }
+
     private void processTypeClasses(Class<?> clazz) {
         Optional.ofNullable(clazz.getAnnotation(TypeClass.class)).ifPresent(typeClass -> {
             ImmutableEntryBuilder builder = getBuilder(typeClass.memberName());
@@ -212,19 +225,6 @@ public class ModuleScanner {
                 MethodSignature.fromMethod(instanceGetter)
             ));
         });
-    }
-
-    private void processModules(Class<?> clazz) {
-        if (!reExports.isEmpty()) {
-            throw new SymbolResolutionError(
-                "Multiple classes in module " + quote(moduleName) + " found with annotation @Module:"
-                    + " duplicate class is " + quote(clazz.getName())
-            );
-        } else if (clazz.isAnnotationPresent(Module.class)) {
-            for (ReExportModule module : clazz.getAnnotation(Module.class).reExports()) {
-                stream(module.members()).forEach(member -> reExports.put(member.memberName(), module.moduleName()));
-            }
-        }
     }
 
     private void processValues(Class<?> clazz) {

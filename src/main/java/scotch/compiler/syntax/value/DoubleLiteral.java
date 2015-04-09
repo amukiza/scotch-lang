@@ -17,11 +17,6 @@ public class DoubleLiteral extends LiteralValue<Double> {
     }
 
     @Override
-    public IntermediateValue generateIntermediateCode(IntermediateGenerator state) {
-        throw new UnsupportedOperationException(); // TODO
-    }
-
-    @Override
     protected CodeBlock loadValue() {
         return new CodeBlock() {{
             ldc(getValue());

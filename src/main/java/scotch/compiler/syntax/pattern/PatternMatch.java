@@ -3,19 +3,17 @@ package scotch.compiler.syntax.pattern;
 import static scotch.compiler.util.Either.left;
 
 import java.util.Optional;
-import me.qmx.jitescript.CodeBlock;
-import scotch.compiler.steps.BytecodeGenerator;
-import scotch.compiler.steps.DependencyAccumulator;
-import scotch.compiler.steps.NameAccumulator;
-import scotch.compiler.steps.ScopedNameQualifier;
-import scotch.compiler.steps.TypeChecker;
-import scotch.compiler.syntax.value.Value;
-import scotch.symbol.Operator;
-import scotch.symbol.type.Type;
+import scotch.compiler.analyzer.DependencyAccumulator;
+import scotch.compiler.analyzer.NameAccumulator;
+import scotch.compiler.analyzer.ScopedNameQualifier;
+import scotch.compiler.analyzer.TypeChecker;
 import scotch.compiler.syntax.scope.Scope;
+import scotch.compiler.syntax.value.Value;
 import scotch.compiler.text.SourceLocation;
 import scotch.compiler.util.Either;
 import scotch.compiler.util.Pair;
+import scotch.symbol.Operator;
+import scotch.symbol.type.Type;
 
 public abstract class PatternMatch {
 
@@ -45,8 +43,6 @@ public abstract class PatternMatch {
 
     @Override
     public abstract boolean equals(Object o);
-
-    public abstract CodeBlock generateBytecode(BytecodeGenerator state);
 
     public abstract SourceLocation getSourceLocation();
 

@@ -1,32 +1,23 @@
 package scotch.compiler.syntax.value;
 
 import static lombok.AccessLevel.PACKAGE;
-import static me.qmx.jitescript.util.CodegenUtils.p;
-import static me.qmx.jitescript.util.CodegenUtils.sig;
 import static scotch.compiler.intermediate.Intermediates.apply;
 import static scotch.compiler.syntax.TypeError.typeError;
 import static scotch.symbol.type.Types.fn;
 
-import java.util.function.Supplier;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import me.qmx.jitescript.CodeBlock;
-import me.qmx.jitescript.LambdaBlock;
+import scotch.compiler.analyzer.DependencyAccumulator;
+import scotch.compiler.analyzer.NameAccumulator;
+import scotch.compiler.analyzer.OperatorAccumulator;
+import scotch.compiler.analyzer.PrecedenceParser;
+import scotch.compiler.analyzer.ScopedNameQualifier;
+import scotch.compiler.analyzer.TypeChecker;
 import scotch.compiler.intermediate.IntermediateGenerator;
 import scotch.compiler.intermediate.IntermediateValue;
-import scotch.compiler.steps.BytecodeGenerator;
-import scotch.compiler.steps.DependencyAccumulator;
-import scotch.compiler.steps.NameAccumulator;
-import scotch.compiler.steps.OperatorAccumulator;
-import scotch.compiler.steps.PrecedenceParser;
-import scotch.compiler.steps.ScopedNameQualifier;
-import scotch.compiler.steps.TypeChecker;
 import scotch.compiler.syntax.pattern.PatternReducer;
 import scotch.compiler.text.SourceLocation;
-import scotch.runtime.Applicable;
-import scotch.runtime.Callable;
-import scotch.runtime.SuppliedThunk;
 import scotch.symbol.type.FunctionType;
 import scotch.symbol.type.Type;
 import scotch.symbol.type.Unification;
@@ -80,33 +71,6 @@ public class Apply extends Value {
     @Override
     public Value defineOperators(OperatorAccumulator state) {
         throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public CodeBlock generateBytecode(BytecodeGenerator state) {
-        return new CodeBlock() {{
-            newobj(p(SuppliedThunk.class));
-            dup();
-            append(state.captureApply());
-            lambda(state.currentClass(), new LambdaBlock(state.reserveApply()) {{
-                function(p(Supplier.class), "get", sig(Object.class));
-                specialize(sig(Callable.class));
-                capture(state.getCaptureAllTypes());
-                Class<?> returnType = state.typeOf(type);
-                delegateTo(ACC_STATIC, sig(returnType, state.getCaptureAllTypes()), new CodeBlock() {{
-                    append(function.generateBytecode(state));
-                    invokeinterface(p(Callable.class), "call", sig(Object.class));
-                    checkcast(p(Applicable.class));
-                    append(argument.generateBytecode(state));
-                    invokeinterface(p(Applicable.class), "apply", sig(Callable.class, Callable.class));
-                    if (returnType != Callable.class) {
-                        checkcast(p(returnType));
-                    }
-                    areturn();
-                }});
-            }});
-            invokespecial(p(SuppliedThunk.class), "<init>", sig(void.class, Supplier.class));
-        }};
     }
 
     @Override

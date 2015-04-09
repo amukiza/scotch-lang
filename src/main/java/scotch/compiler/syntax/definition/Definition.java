@@ -4,19 +4,19 @@ import static scotch.compiler.util.Either.left;
 
 import java.util.Optional;
 import me.qmx.jitescript.CodeBlock;
+import scotch.compiler.analyzer.DependencyAccumulator;
+import scotch.compiler.analyzer.NameAccumulator;
+import scotch.compiler.analyzer.OperatorAccumulator;
+import scotch.compiler.analyzer.PatternAnalyzer;
+import scotch.compiler.analyzer.PrecedenceParser;
+import scotch.compiler.analyzer.ScopedNameQualifier;
+import scotch.compiler.analyzer.TypeChecker;
 import scotch.compiler.intermediate.IntermediateGenerator;
-import scotch.compiler.steps.BytecodeGenerator;
-import scotch.compiler.steps.DependencyAccumulator;
-import scotch.compiler.steps.NameAccumulator;
-import scotch.compiler.steps.OperatorAccumulator;
-import scotch.compiler.steps.PatternReducerStep;
-import scotch.compiler.steps.PrecedenceParser;
-import scotch.compiler.steps.ScopedNameQualifier;
-import scotch.compiler.steps.TypeChecker;
-import scotch.symbol.Symbol;
 import scotch.compiler.syntax.Scoped;
+import scotch.compiler.syntax.reference.DefinitionReference;
 import scotch.compiler.text.SourceLocation;
 import scotch.compiler.util.Either;
+import scotch.symbol.Symbol;
 
 public abstract class Definition implements Scoped {
 
@@ -47,9 +47,7 @@ public abstract class Definition implements Scoped {
     @Override
     public abstract boolean equals(Object o);
 
-    public abstract void generateBytecode(BytecodeGenerator state);
-
-    public abstract void generateIntermediateCode(IntermediateGenerator state);
+    public abstract Optional<DefinitionReference> generateIntermediateCode(IntermediateGenerator generator);
 
     @Override
     public Definition getDefinition() {
@@ -69,7 +67,7 @@ public abstract class Definition implements Scoped {
 
     public abstract Definition qualifyNames(ScopedNameQualifier state);
 
-    public abstract Definition reducePatterns(PatternReducerStep state);
+    public abstract Definition reducePatterns(PatternAnalyzer state);
 
     @Override
     public abstract String toString();

@@ -1,20 +1,16 @@
 package scotch.compiler.syntax.value;
 
-import static java.util.stream.Collectors.toList;
-
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import me.qmx.jitescript.CodeBlock;
+import scotch.compiler.analyzer.DependencyAccumulator;
+import scotch.compiler.analyzer.NameAccumulator;
+import scotch.compiler.analyzer.OperatorAccumulator;
+import scotch.compiler.analyzer.PrecedenceParser;
+import scotch.compiler.analyzer.ScopedNameQualifier;
+import scotch.compiler.analyzer.TypeChecker;
 import scotch.compiler.intermediate.IntermediateGenerator;
 import scotch.compiler.intermediate.IntermediateValue;
 import scotch.compiler.intermediate.Intermediates;
-import scotch.compiler.steps.BytecodeGenerator;
-import scotch.compiler.steps.DependencyAccumulator;
-import scotch.compiler.steps.NameAccumulator;
-import scotch.compiler.steps.OperatorAccumulator;
-import scotch.compiler.steps.PrecedenceParser;
-import scotch.compiler.steps.ScopedNameQualifier;
-import scotch.compiler.steps.TypeChecker;
 import scotch.compiler.syntax.pattern.PatternReducer;
 import scotch.compiler.syntax.reference.InstanceReference;
 import scotch.compiler.text.SourceLocation;
@@ -46,7 +42,7 @@ public class Instance extends Value {
 
     @Override
     public IntermediateValue generateIntermediateCode(IntermediateGenerator state) {
-        return Intermediates.instanceRef(reference);
+        return Intermediates.instanceRef(reference, state.instanceGetter(reference));
     }
 
     @Override
@@ -72,17 +68,6 @@ public class Instance extends Value {
     @Override
     public Value parsePrecedence(PrecedenceParser state) {
         throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public CodeBlock generateBytecode(BytecodeGenerator state) {
-        return state.getTypeInstance(
-            reference.getClassReference(),
-            reference.getModuleReference(),
-            reference.getParameters().stream()
-                .map(parameter -> parameter.copy(state.scope()::reserveType))
-                .collect(toList())
-        ).reference();
     }
 
     @Override

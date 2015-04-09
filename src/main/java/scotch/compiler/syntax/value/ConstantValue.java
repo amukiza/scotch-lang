@@ -1,20 +1,20 @@
 package scotch.compiler.syntax.value;
 
 import static scotch.compiler.syntax.builder.BuilderUtil.require;
+import static scotch.compiler.syntax.reference.DefinitionReference.valueRef;
 
 import java.util.Optional;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import me.qmx.jitescript.CodeBlock;
+import scotch.compiler.analyzer.DependencyAccumulator;
+import scotch.compiler.analyzer.NameAccumulator;
+import scotch.compiler.analyzer.OperatorAccumulator;
+import scotch.compiler.analyzer.PrecedenceParser;
+import scotch.compiler.analyzer.ScopedNameQualifier;
+import scotch.compiler.analyzer.TypeChecker;
 import scotch.compiler.intermediate.IntermediateGenerator;
 import scotch.compiler.intermediate.IntermediateValue;
-import scotch.compiler.steps.BytecodeGenerator;
-import scotch.compiler.steps.DependencyAccumulator;
-import scotch.compiler.steps.NameAccumulator;
-import scotch.compiler.steps.OperatorAccumulator;
-import scotch.compiler.steps.PrecedenceParser;
-import scotch.compiler.steps.ScopedNameQualifier;
-import scotch.compiler.steps.TypeChecker;
+import scotch.compiler.intermediate.Intermediates;
 import scotch.compiler.syntax.builder.SyntaxBuilder;
 import scotch.compiler.syntax.pattern.PatternReducer;
 import scotch.compiler.text.SourceLocation;
@@ -53,7 +53,7 @@ public class ConstantValue extends Value {
 
     @Override
     public IntermediateValue generateIntermediateCode(IntermediateGenerator state) {
-        throw new UnsupportedOperationException(); // TODO
+        return Intermediates.valueRef(valueRef(symbol), state.valueSignature(valueRef(symbol)));
     }
 
     @Override
@@ -74,11 +74,6 @@ public class ConstantValue extends Value {
     @Override
     public Value defineOperators(OperatorAccumulator state) {
         return this;
-    }
-
-    @Override
-    public CodeBlock generateBytecode(BytecodeGenerator state) {
-        return state.getValueSignature(symbol).reference();
     }
 
     @Override

@@ -1,4 +1,4 @@
-package scotch.compiler.steps;
+package scotch.compiler.analyzer;
 
 import static java.util.Collections.reverse;
 import static scotch.compiler.error.ParseError.parseError;

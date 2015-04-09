@@ -1,8 +1,5 @@
 package scotch.compiler.syntax.definition;
 
-import static me.qmx.jitescript.util.CodegenUtils.ci;
-import static org.objectweb.asm.Opcodes.ACC_FINAL;
-import static org.objectweb.asm.Opcodes.ACC_PRIVATE;
 import static scotch.compiler.syntax.builder.BuilderUtil.require;
 import static scotch.symbol.Symbol.symbol;
 import static scotch.symbol.descriptor.DataFieldDescriptor.field;
@@ -10,7 +7,9 @@ import static scotch.symbol.descriptor.DataFieldDescriptor.field;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
-import scotch.compiler.steps.BytecodeGenerator;
+import scotch.compiler.intermediate.IntermediateField;
+import scotch.compiler.intermediate.IntermediateGenerator;
+import scotch.compiler.intermediate.Intermediates;
 import scotch.compiler.syntax.builder.SyntaxBuilder;
 import scotch.compiler.syntax.value.Argument;
 import scotch.compiler.syntax.value.Identifier;
@@ -40,8 +39,8 @@ public class DataFieldDefinition implements Comparable<DataFieldDefinition> {
         return ordinal - o.ordinal;
     }
 
-    public void generateBytecode(BytecodeGenerator state) {
-        state.field(Symbol.toJavaName(name), ACC_PRIVATE | ACC_FINAL, ci(getJavaType()));
+    public IntermediateField generateIntermediateCode(IntermediateGenerator state) {
+        return Intermediates.field(name, type);
     }
 
     public DataFieldDescriptor getDescriptor() {

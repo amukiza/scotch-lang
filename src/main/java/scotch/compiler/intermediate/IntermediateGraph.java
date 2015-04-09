@@ -15,7 +15,7 @@ public class IntermediateGraph {
         definitions.forEach(definition -> this.definitions.put(definition.getReference(), definition));
     }
 
-    public Optional<IntermediateDefinition> getValue(DefinitionReference reference) {
+    public Optional<IntermediateDefinition> getDefinition(DefinitionReference reference) {
         return Optional.ofNullable(definitions.get(reference));
     }
 }

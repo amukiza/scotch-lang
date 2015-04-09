@@ -1,7 +1,5 @@
 package scotch.compiler.syntax.value;
 
-import static me.qmx.jitescript.util.CodegenUtils.p;
-import static me.qmx.jitescript.util.CodegenUtils.sig;
 import static scotch.compiler.intermediate.Intermediates.conditional;
 import static scotch.compiler.syntax.TypeError.typeError;
 import static scotch.compiler.syntax.builder.BuilderUtil.require;
@@ -11,23 +9,18 @@ import java.util.function.BiFunction;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
-import me.qmx.jitescript.CodeBlock;
-import org.objectweb.asm.tree.LabelNode;
+import scotch.compiler.analyzer.DependencyAccumulator;
+import scotch.compiler.analyzer.NameAccumulator;
+import scotch.compiler.analyzer.OperatorAccumulator;
+import scotch.compiler.analyzer.PrecedenceParser;
+import scotch.compiler.analyzer.ScopedNameQualifier;
+import scotch.compiler.analyzer.TypeChecker;
 import scotch.compiler.intermediate.IntermediateGenerator;
 import scotch.compiler.intermediate.IntermediateValue;
-import scotch.compiler.steps.BytecodeGenerator;
-import scotch.compiler.steps.DependencyAccumulator;
-import scotch.compiler.steps.NameAccumulator;
-import scotch.compiler.steps.OperatorAccumulator;
-import scotch.compiler.steps.PrecedenceParser;
-import scotch.compiler.steps.ScopedNameQualifier;
-import scotch.compiler.steps.TypeChecker;
 import scotch.compiler.syntax.builder.SyntaxBuilder;
 import scotch.compiler.syntax.pattern.PatternReducer;
 import scotch.compiler.text.SourceLocation;
 import scotch.data.bool.Bool;
-import scotch.runtime.Callable;
-import scotch.runtime.RuntimeSupport;
 import scotch.symbol.type.Type;
 
 @EqualsAndHashCode(callSuper = false)
@@ -91,22 +84,6 @@ public class Conditional extends Value {
     @Override
     public Value defineOperators(OperatorAccumulator state) {
         return parse(state, Value::defineOperators);
-    }
-
-    @Override
-    public CodeBlock generateBytecode(BytecodeGenerator state) {
-        return new CodeBlock() {{
-            LabelNode falseBranch = new LabelNode();
-            LabelNode end = new LabelNode();
-            append(condition.generateBytecode(state));
-            invokestatic(p(RuntimeSupport.class), "unboxBool", sig(boolean.class, Callable.class));
-            iffalse(falseBranch);
-            append(whenTrue.generateBytecode(state));
-            go_to(end);
-            label(falseBranch);
-            append(whenFalse.generateBytecode(state));
-            label(end);
-        }};
     }
 
     @Override

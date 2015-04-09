@@ -39,7 +39,7 @@ public class TypeInstanceDescriptor {
     @Getter private final String                        moduleName;
     @Getter private final Symbol                        typeClass;
     @Getter private final List<TypeParameterDescriptor> parameters;
-    private final         MethodSignature               instanceGetter;
+    @Getter private final MethodSignature               instanceGetter;
 
     private TypeInstanceDescriptor(String moduleName, Symbol typeClass, List<TypeParameterDescriptor> parameters, MethodSignature instanceGetter) {
         this.moduleName = moduleName;

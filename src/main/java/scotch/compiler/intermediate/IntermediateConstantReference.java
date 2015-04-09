@@ -6,20 +6,21 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import me.qmx.jitescript.CodeBlock;
-import scotch.compiler.syntax.reference.DefinitionReference;
 import scotch.compiler.target.BytecodeGenerator;
-import scotch.symbol.MethodSignature;
+import scotch.symbol.FieldSignature;
+import scotch.symbol.Symbol;
 
 @AllArgsConstructor(access = PACKAGE)
 @EqualsAndHashCode(callSuper = false)
 @ToString
-public class IntermediateReference extends IntermediateValue {
+public class IntermediateConstantReference extends IntermediateValue {
 
-    private final DefinitionReference reference;
-    private final MethodSignature methodSignature;
+    private final Symbol symbol;
+    private final Symbol dataType;
+    private final FieldSignature constantField;
 
     @Override
     public CodeBlock generateBytecode(BytecodeGenerator generator) {
-        return methodSignature.reference();
+        return constantField.getValue();
     }
 }

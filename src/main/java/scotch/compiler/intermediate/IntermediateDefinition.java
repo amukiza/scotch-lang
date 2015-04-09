@@ -1,19 +1,20 @@
 package scotch.compiler.intermediate;
 
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
 import scotch.compiler.syntax.reference.DefinitionReference;
-import scotch.symbol.type.Type;
+import scotch.compiler.target.BytecodeGenerator;
 
-@Getter
-@AllArgsConstructor
-@EqualsAndHashCode(callSuper = false)
-@ToString
-public class IntermediateDefinition {
+public abstract class IntermediateDefinition {
 
-    private final DefinitionReference reference;
-    private final Type type;
-    private final IntermediateValue   value;
+    @Override
+    public abstract boolean equals(Object o);
+
+    public abstract void generateBytecode(BytecodeGenerator generator);
+
+    public abstract DefinitionReference getReference();
+
+    @Override
+    public abstract int hashCode();
+
+    @Override
+    public abstract String toString();
 }

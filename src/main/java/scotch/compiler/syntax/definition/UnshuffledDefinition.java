@@ -10,22 +10,21 @@ import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import scotch.compiler.analyzer.DependencyAccumulator;
+import scotch.compiler.analyzer.NameAccumulator;
+import scotch.compiler.analyzer.OperatorAccumulator;
+import scotch.compiler.analyzer.PatternAnalyzer;
+import scotch.compiler.analyzer.PrecedenceParser;
+import scotch.compiler.analyzer.ScopedNameQualifier;
+import scotch.compiler.analyzer.TypeChecker;
 import scotch.compiler.intermediate.IntermediateGenerator;
-import scotch.compiler.steps.BytecodeGenerator;
-import scotch.compiler.steps.DependencyAccumulator;
-import scotch.compiler.steps.NameAccumulator;
-import scotch.compiler.steps.OperatorAccumulator;
-import scotch.compiler.steps.PatternReducerStep;
-import scotch.compiler.steps.PrecedenceParser;
-import scotch.compiler.steps.ScopedNameQualifier;
-import scotch.compiler.steps.TypeChecker;
-import scotch.symbol.Symbol;
 import scotch.compiler.syntax.builder.SyntaxBuilder;
-import scotch.compiler.syntax.pattern.PatternMatch;
 import scotch.compiler.syntax.pattern.PatternCase;
+import scotch.compiler.syntax.pattern.PatternMatch;
 import scotch.compiler.syntax.reference.DefinitionReference;
 import scotch.compiler.syntax.value.Value;
 import scotch.compiler.text.SourceLocation;
+import scotch.symbol.Symbol;
 
 @EqualsAndHashCode(callSuper = false)
 @ToString(exclude = "sourceLocation")
@@ -75,12 +74,7 @@ public class UnshuffledDefinition extends Definition {
     }
 
     @Override
-    public void generateBytecode(BytecodeGenerator state) {
-        throw new IllegalStateException("Can't generate bytecode from unshuffled definition");
-    }
-
-    @Override
-    public void generateIntermediateCode(IntermediateGenerator state) {
+    public Optional<DefinitionReference> generateIntermediateCode(IntermediateGenerator generator) {
         throw new UnsupportedOperationException(); // TODO
     }
 
@@ -117,7 +111,7 @@ public class UnshuffledDefinition extends Definition {
     }
 
     @Override
-    public Definition reducePatterns(PatternReducerStep state) {
+    public Definition reducePatterns(PatternAnalyzer state) {
         throw new UnsupportedOperationException(); // TODO
     }
 

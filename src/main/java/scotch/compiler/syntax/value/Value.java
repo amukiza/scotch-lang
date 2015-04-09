@@ -6,16 +6,14 @@ import static scotch.compiler.util.Either.left;
 
 import java.util.List;
 import java.util.Optional;
-import me.qmx.jitescript.CodeBlock;
+import scotch.compiler.analyzer.DependencyAccumulator;
+import scotch.compiler.analyzer.NameAccumulator;
+import scotch.compiler.analyzer.OperatorAccumulator;
+import scotch.compiler.analyzer.PrecedenceParser;
+import scotch.compiler.analyzer.ScopedNameQualifier;
+import scotch.compiler.analyzer.TypeChecker;
 import scotch.compiler.intermediate.IntermediateGenerator;
 import scotch.compiler.intermediate.IntermediateValue;
-import scotch.compiler.steps.BytecodeGenerator;
-import scotch.compiler.steps.DependencyAccumulator;
-import scotch.compiler.steps.NameAccumulator;
-import scotch.compiler.steps.OperatorAccumulator;
-import scotch.compiler.steps.PrecedenceParser;
-import scotch.compiler.steps.ScopedNameQualifier;
-import scotch.compiler.steps.TypeChecker;
 import scotch.compiler.syntax.pattern.PatternReducer;
 import scotch.compiler.syntax.scope.Scope;
 import scotch.compiler.text.SourceLocation;
@@ -71,8 +69,6 @@ public abstract class Value {
 
     @Override
     public abstract boolean equals(Object o);
-
-    public abstract CodeBlock generateBytecode(BytecodeGenerator state);
 
     public abstract IntermediateValue generateIntermediateCode(IntermediateGenerator state);
 

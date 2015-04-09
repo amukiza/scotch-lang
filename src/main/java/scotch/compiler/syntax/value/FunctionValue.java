@@ -2,8 +2,6 @@ package scotch.compiler.syntax.value;
 
 import static java.util.Collections.reverse;
 import static java.util.stream.Collectors.toList;
-import static me.qmx.jitescript.util.CodegenUtils.p;
-import static me.qmx.jitescript.util.CodegenUtils.sig;
 import static scotch.compiler.intermediate.Intermediates.function;
 import static scotch.compiler.syntax.builder.BuilderUtil.require;
 import static scotch.compiler.syntax.definition.Definitions.scopeDef;
@@ -11,33 +9,26 @@ import static scotch.compiler.syntax.reference.DefinitionReference.scopeRef;
 import static scotch.compiler.syntax.value.Values.fn;
 import static scotch.symbol.type.Types.fn;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Deque;
 import java.util.List;
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import me.qmx.jitescript.CodeBlock;
-import me.qmx.jitescript.LambdaBlock;
+import scotch.compiler.analyzer.DependencyAccumulator;
+import scotch.compiler.analyzer.NameAccumulator;
+import scotch.compiler.analyzer.OperatorAccumulator;
+import scotch.compiler.analyzer.PrecedenceParser;
+import scotch.compiler.analyzer.ScopedNameQualifier;
+import scotch.compiler.analyzer.TypeChecker;
 import scotch.compiler.intermediate.IntermediateGenerator;
 import scotch.compiler.intermediate.IntermediateValue;
-import scotch.compiler.steps.BytecodeGenerator;
-import scotch.compiler.steps.DependencyAccumulator;
-import scotch.compiler.steps.NameAccumulator;
-import scotch.compiler.steps.OperatorAccumulator;
-import scotch.compiler.steps.PrecedenceParser;
-import scotch.compiler.steps.ScopedNameQualifier;
-import scotch.compiler.steps.TypeChecker;
 import scotch.compiler.syntax.Scoped;
 import scotch.compiler.syntax.builder.SyntaxBuilder;
 import scotch.compiler.syntax.definition.Definition;
 import scotch.compiler.syntax.pattern.PatternReducer;
 import scotch.compiler.syntax.reference.ScopeReference;
 import scotch.compiler.text.SourceLocation;
-import scotch.runtime.Applicable;
-import scotch.runtime.Callable;
 import scotch.symbol.Symbol;
 import scotch.symbol.type.Type;
 
@@ -120,18 +111,9 @@ public class FunctionValue extends Value implements Scoped {
         });
     }
 
-    public CurriedFunction curry() {
-        return curry_(new ArrayDeque<>(arguments));
-    }
-
     @Override
     public Value defineOperators(OperatorAccumulator state) {
         return state.scoped(this, () -> withBody(body.defineOperators(state)));
-    }
-
-    @Override
-    public CodeBlock generateBytecode(BytecodeGenerator state) {
-        return state.enclose(this, () -> curry().generateBytecode(state));
     }
 
     public List<Argument> getArguments() {
@@ -214,23 +196,8 @@ public class FunctionValue extends Value implements Scoped {
         return new FunctionValue(sourceLocation, symbol, arguments, body, Optional.of(type));
     }
 
-    private CurriedFunction curry_(Deque<Argument> args) {
-        if (args.isEmpty()) {
-            return new CurriedBody(body);
-        } else {
-            return new CurriedLambda(args.pop(), curry_(args));
-        }
-    }
-
     private FunctionValue withSymbol(Symbol symbol) {
         return fn(sourceLocation, symbol, arguments, body);
-    }
-
-    private interface CurriedFunction {
-
-        CodeBlock generateBytecode(BytecodeGenerator state);
-
-        Type getType();
     }
 
     public static class Builder implements SyntaxBuilder<FunctionValue> {
@@ -276,57 +243,6 @@ public class FunctionValue extends Value implements Scoped {
         public Builder withSymbol(Symbol symbol) {
             this.symbol = Optional.of(symbol);
             return this;
-        }
-    }
-
-    private static class CurriedBody implements CurriedFunction {
-
-        private final Value body;
-
-        public CurriedBody(Value body) {
-            this.body = body;
-        }
-
-        @Override
-        public CodeBlock generateBytecode(BytecodeGenerator state) {
-            return body.generateBytecode(state);
-        }
-
-        @Override
-        public Type getType() {
-            return body.getType();
-        }
-    }
-
-    private static class CurriedLambda implements CurriedFunction {
-
-        private final Argument        argument;
-        private final CurriedFunction body;
-
-        CurriedLambda(Argument argument, CurriedFunction body) {
-            this.argument = argument;
-            this.body = body;
-        }
-
-        @Override
-        public CodeBlock generateBytecode(BytecodeGenerator state) {
-            return new CodeBlock() {{
-                append(state.captureLambda(argument.getName()));
-                lambda(state.currentClass(), new LambdaBlock(state.reserveLambda()) {{
-                    function(p(Applicable.class), "apply", sig(Callable.class, Callable.class));
-                    capture(state.getLambdaCaptureTypes());
-                    delegateTo(ACC_STATIC, sig(state.typeOf(body.getType()), state.getLambdaType()), new CodeBlock() {{
-                        append(body.generateBytecode(state));
-                        areturn();
-                    }});
-                }});
-                state.releaseLambda(argument.getName());
-            }};
-        }
-
-        @Override
-        public Type getType() {
-            return fn(argument.getType(), body.getType());
         }
     }
 }

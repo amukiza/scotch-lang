@@ -2,31 +2,38 @@ package scotch.symbol.descriptor;
 
 import static java.util.Collections.sort;
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
+import static me.qmx.jitescript.util.CodegenUtils.sig;
 
 import java.util.ArrayList;
 import java.util.List;
 import com.google.common.collect.ImmutableList;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import scotch.runtime.Callable;
+import scotch.symbol.MethodSignature;
 import scotch.symbol.Symbol;
 
 @EqualsAndHashCode(callSuper = false)
 public class DataConstructorDescriptor implements Comparable<DataConstructorDescriptor> {
 
-    public static Builder builder(int ordinal, Symbol dataType, Symbol symbol) {
-        return new Builder(ordinal, dataType, symbol);
+    public static Builder builder(int ordinal, Symbol dataType, Symbol symbol, String className) {
+        return new Builder(ordinal, dataType, symbol, className);
     }
 
-    private final int                       ordinal;
-    private final Symbol                    dataType;
-    private final Symbol                    symbol;
-    private final List<DataFieldDescriptor> fields;
+    @Getter private final int                       ordinal;
+    @Getter private final Symbol                    dataType;
+    @Getter private final Symbol                    symbol;
+    @Getter private final String                    className;
+    @Getter private final List<DataFieldDescriptor> fields;
 
-    private DataConstructorDescriptor(int ordinal, Symbol dataType, Symbol symbol, List<DataFieldDescriptor> fields) {
+    private DataConstructorDescriptor(int ordinal, Symbol dataType, Symbol symbol, String className, List<DataFieldDescriptor> fields) {
         List<DataFieldDescriptor> sortedFields = new ArrayList<>(fields);
         sort(sortedFields);
         this.ordinal = ordinal;
         this.dataType = dataType;
         this.symbol = symbol;
+        this.className = className;
         this.fields = ImmutableList.copyOf(sortedFields);
     }
 
@@ -35,16 +42,9 @@ public class DataConstructorDescriptor implements Comparable<DataConstructorDesc
         return ordinal - o.ordinal;
     }
 
-    public Symbol getDataType() {
-        return dataType;
-    }
-
-    public List<DataFieldDescriptor> getFields() {
-        return fields;
-    }
-
-    public Symbol getSymbol() {
-        return symbol;
+    public MethodSignature getConstructorSignature() {
+        return MethodSignature.constructor(className + ":<init>:"
+            + sig(void.class, fields.stream().map(field -> Callable.class).collect(toList()).toArray(new Class<?>[fields.size()])));
     }
 
     @Override
@@ -58,12 +58,14 @@ public class DataConstructorDescriptor implements Comparable<DataConstructorDesc
         private final int                       ordinal;
         private final Symbol                    dataType;
         private final Symbol                    symbol;
+        private final String                    className;
         private       List<DataFieldDescriptor> fields;
 
-        private Builder(int ordinal, Symbol dataType, Symbol symbol) {
+        private Builder(int ordinal, Symbol dataType, Symbol symbol, String className) {
             this.ordinal = ordinal;
             this.dataType = dataType;
             this.symbol = symbol;
+            this.className = className;
             this.fields = new ArrayList<>();
         }
 
@@ -78,6 +80,7 @@ public class DataConstructorDescriptor implements Comparable<DataConstructorDesc
                 ordinal,
                 dataType,
                 symbol,
+                className,
                 fields
             );
         }

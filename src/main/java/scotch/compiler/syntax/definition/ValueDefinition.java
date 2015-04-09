@@ -1,9 +1,6 @@
 package scotch.compiler.syntax.definition;
 
 import static lombok.AccessLevel.PACKAGE;
-import static me.qmx.jitescript.util.CodegenUtils.sig;
-import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
-import static org.objectweb.asm.Opcodes.ACC_STATIC;
 import static scotch.compiler.syntax.TypeError.typeError;
 import static scotch.compiler.syntax.builder.BuilderUtil.require;
 import static scotch.compiler.syntax.reference.DefinitionReference.valueRef;
@@ -13,23 +10,22 @@ import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import me.qmx.jitescript.CodeBlock;
+import scotch.compiler.analyzer.DependencyAccumulator;
+import scotch.compiler.analyzer.NameAccumulator;
+import scotch.compiler.analyzer.OperatorAccumulator;
+import scotch.compiler.analyzer.PatternAnalyzer;
+import scotch.compiler.analyzer.PrecedenceParser;
+import scotch.compiler.analyzer.ScopedNameQualifier;
+import scotch.compiler.analyzer.TypeChecker;
 import scotch.compiler.intermediate.IntermediateGenerator;
-import scotch.compiler.steps.BytecodeGenerator;
-import scotch.compiler.steps.DependencyAccumulator;
-import scotch.compiler.steps.NameAccumulator;
-import scotch.compiler.steps.OperatorAccumulator;
-import scotch.compiler.steps.PatternReducerStep;
-import scotch.compiler.steps.PrecedenceParser;
-import scotch.compiler.steps.ScopedNameQualifier;
-import scotch.compiler.steps.TypeChecker;
-import scotch.symbol.Symbol;
-import scotch.symbol.type.Type;
 import scotch.compiler.syntax.builder.SyntaxBuilder;
+import scotch.compiler.syntax.reference.DefinitionReference;
 import scotch.compiler.syntax.reference.ValueReference;
 import scotch.compiler.syntax.value.Value;
 import scotch.compiler.text.SourceLocation;
 import scotch.compiler.util.Either;
+import scotch.symbol.Symbol;
+import scotch.symbol.type.Type;
 
 @AllArgsConstructor(access = PACKAGE)
 @EqualsAndHashCode(callSuper = false)
@@ -96,18 +92,8 @@ public class ValueDefinition extends Definition {
     }
 
     @Override
-    public void generateBytecode(BytecodeGenerator state) {
-        state.generate(this, () -> state.method(getMethodName(), ACC_STATIC | ACC_PUBLIC, sig(state.typeOf(getType())), new CodeBlock() {{
-            annotate(scotch.symbol.Value.class).value("memberName", symbol.getSimpleName());
-            markLine(this);
-            append(body.generateBytecode(state));
-            areturn();
-        }}));
-    }
-
-    @Override
-    public void generateIntermediateCode(IntermediateGenerator state) {
-        state.scoped(this, () -> state.defineValue(getReference(), body.getType(), body.generateIntermediateCode(state)));
+    public Optional<DefinitionReference> generateIntermediateCode(IntermediateGenerator generator) {
+        return generator.scoped(this, () -> generator.defineValue(symbol, body.getType(), body.generateIntermediateCode(generator)));
     }
 
     public Value getBody() {
@@ -158,7 +144,7 @@ public class ValueDefinition extends Definition {
     }
 
     @Override
-    public Definition reducePatterns(PatternReducerStep state) {
+    public Definition reducePatterns(PatternAnalyzer state) {
         return state.scoped(this, () -> withBody(body.reducePatterns(state)));
     }
 

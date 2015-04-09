@@ -229,9 +229,9 @@ public abstract class SymbolEntry {
             return new ImmutableEntry(this);
         }
 
-        public DataConstructorDescriptor.Builder dataConstructor(int ordinal, Symbol dataType) {
+        public DataConstructorDescriptor.Builder dataConstructor(int ordinal, Symbol dataType, String className) {
             if (!dataConstructorBuilder.isPresent()) {
-                dataConstructorBuilder = Optional.of(DataConstructorDescriptor.builder(ordinal, dataType, symbol));
+                dataConstructorBuilder = Optional.of(DataConstructorDescriptor.builder(ordinal, dataType, symbol, className));
             }
             return dataConstructorBuilder.get();
         }

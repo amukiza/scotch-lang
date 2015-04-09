@@ -1,4 +1,4 @@
-package scotch.compiler.steps;
+package scotch.compiler.analyzer;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;

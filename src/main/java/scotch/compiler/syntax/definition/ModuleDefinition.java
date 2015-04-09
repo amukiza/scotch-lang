@@ -1,7 +1,6 @@
 package scotch.compiler.syntax.definition;
 
-import static org.objectweb.asm.Opcodes.ACC_PRIVATE;
-import static scotch.compiler.output.GeneratedClass.ClassType.MODULE;
+import static java.util.stream.Collectors.toList;
 import static scotch.compiler.syntax.builder.BuilderUtil.require;
 import static scotch.compiler.syntax.reference.DefinitionReference.moduleRef;
 import static scotch.util.StringUtil.stringify;
@@ -11,16 +10,14 @@ import java.util.List;
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import lombok.EqualsAndHashCode;
+import scotch.compiler.analyzer.DependencyAccumulator;
+import scotch.compiler.analyzer.NameAccumulator;
+import scotch.compiler.analyzer.OperatorAccumulator;
+import scotch.compiler.analyzer.PatternAnalyzer;
+import scotch.compiler.analyzer.PrecedenceParser;
+import scotch.compiler.analyzer.ScopedNameQualifier;
+import scotch.compiler.analyzer.TypeChecker;
 import scotch.compiler.intermediate.IntermediateGenerator;
-import scotch.compiler.steps.BytecodeGenerator;
-import scotch.compiler.steps.DependencyAccumulator;
-import scotch.compiler.steps.NameAccumulator;
-import scotch.compiler.steps.OperatorAccumulator;
-import scotch.compiler.steps.PatternReducerStep;
-import scotch.compiler.steps.PrecedenceParser;
-import scotch.compiler.steps.ScopedNameQualifier;
-import scotch.compiler.steps.TypeChecker;
-import scotch.symbol.Symbol;
 import scotch.compiler.syntax.builder.SyntaxBuilder;
 import scotch.compiler.syntax.reference.DefinitionReference;
 import scotch.compiler.text.SourceLocation;
@@ -65,19 +62,12 @@ public class ModuleDefinition extends Definition {
     }
 
     @Override
-    public void generateBytecode(BytecodeGenerator state) {
-        state.scoped(this, () -> {
-            state.beginClass(MODULE, Symbol.moduleClass(symbol), sourceLocation);
-            state.defineDefaultConstructor(ACC_PRIVATE);
-            state.generateBytecode(definitions);
-            state.endClass();
-            return null;
-        });
-    }
-
-    @Override
-    public void generateIntermediateCode(IntermediateGenerator state) {
-        definitions.forEach(state::generateIntermediateCode);
+    public Optional<DefinitionReference> generateIntermediateCode(IntermediateGenerator generator) {
+        return generator.scoped(this, () -> generator.defineModule(symbol, definitions.stream()
+            .map(generator::generateIntermediateCode)
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .collect(toList())));
     }
 
     public List<Import> getImports() {
@@ -108,7 +98,7 @@ public class ModuleDefinition extends Definition {
     }
 
     @Override
-    public Definition reducePatterns(PatternReducerStep state) {
+    public Definition reducePatterns(PatternAnalyzer state) {
         return state.scoped(this, () -> withDefinitions(state.reducePatterns(definitions)));
     }
 

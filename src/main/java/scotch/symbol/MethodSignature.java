@@ -44,10 +44,11 @@ public class MethodSignature {
         return new MethodSignature(MethodType.STATIC, className, methodName, signature);
     }
 
-    private static MethodSignature fromString(MethodType methodType, String descriptor) {
+    public static MethodSignature fromString(MethodType methodType, String descriptor) {
         String[] parts = descriptor.split(":");
         return new MethodSignature(methodType, parts[0], parts[1], parts[2]);
     }
+
     private final MethodType methodType;
     private final String     className;
     private final String     methodName;
@@ -93,7 +94,7 @@ public class MethodSignature {
         return className + ":" + methodName + ":" + signature;
     }
 
-    private enum MethodType {
+    public enum MethodType {
         STATIC {
             @Override
             public CodeBlock generate(MethodSignature signature) {

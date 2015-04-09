@@ -1,4 +1,4 @@
-package scotch.compiler.steps;
+package scotch.compiler.analyzer;
 
 import static scotch.compiler.syntax.reference.DefinitionReference.moduleRef;
 import static scotch.compiler.util.TestUtil.scopeRef;

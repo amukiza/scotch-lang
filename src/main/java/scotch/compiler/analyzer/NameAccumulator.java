@@ -1,4 +1,4 @@
-package scotch.compiler.steps;
+package scotch.compiler.analyzer;
 
 import static java.util.stream.Collectors.toList;
 import static scotch.compiler.syntax.definition.DefinitionEntry.entry;
@@ -13,7 +13,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
+import scotch.compiler.error.CompileException;
 import scotch.compiler.error.SyntaxError;
+import scotch.symbol.descriptor.DataConstructorDescriptor;
+import scotch.symbol.descriptor.DataTypeDescriptor;
 import scotch.symbol.Operator;
 import scotch.symbol.Symbol;
 import scotch.symbol.type.Type;
@@ -24,9 +27,8 @@ import scotch.compiler.syntax.definition.DefinitionGraph;
 import scotch.compiler.syntax.reference.DefinitionReference;
 import scotch.compiler.syntax.scope.Scope;
 import scotch.compiler.syntax.pattern.PatternCase;
-import scotch.compiler.syntax.value.Value;
 
-public class OperatorAccumulator {
+public class NameAccumulator {
 
     private final DefinitionGraph                           graph;
     private final Deque<Scope>                              scopes;
@@ -34,12 +36,35 @@ public class OperatorAccumulator {
     private final Map<DefinitionReference, DefinitionEntry> entries;
     private final List<SyntaxError>                         errors;
 
-    public OperatorAccumulator(DefinitionGraph graph) {
+    public NameAccumulator(DefinitionGraph graph) {
         this.graph = graph;
         this.scopes = new ArrayDeque<>();
         this.functionScopes = new HashMap<>();
         this.entries = new HashMap<>();
         this.errors = new ArrayList<>();
+    }
+
+    public DefinitionGraph accumulateNames() {
+        if (graph.hasErrors()) {
+            throw new CompileException(graph.getErrors());
+        } else {
+            Definition root = getDefinition(rootRef()).orElseThrow(() -> new IllegalStateException("No root found!"));
+            scoped(root, () -> root.accumulateNames(this));
+            return graph
+                .copyWith(entries.values())
+                .appendErrors(errors)
+                .build();
+        }
+    }
+
+    public List<DefinitionReference> accumulateNames(List<DefinitionReference> references) {
+        return references.stream()
+            .map(this::getDefinition)
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .map(definition -> definition.accumulateNames(this))
+            .map(Definition::getReference)
+            .collect(toList());
     }
 
     public Definition collect(Definition definition) {
@@ -49,15 +74,6 @@ public class OperatorAccumulator {
 
     public Definition collect(PatternCase pattern) {
         return collect(scopeDef(pattern));
-    }
-
-    public DefinitionGraph accumulateOperators() {
-        Definition root = getDefinition(rootRef()).orElseThrow(() -> new IllegalStateException("No root found!"));
-        scoped(root, () -> root.defineOperators(this));
-        return graph
-            .copyWith(entries.values())
-            .appendErrors(errors)
-            .build();
     }
 
     public void enterScope(Definition definition) {
@@ -115,8 +131,20 @@ public class OperatorAccumulator {
         return graph.tryGetScope(reference).orElseGet(() -> functionScopes.get(reference));
     }
 
+    public void defineDataConstructor(Symbol symbol, DataConstructorDescriptor descriptor) {
+        scope().defineDataConstructor(symbol, descriptor);
+    }
+
+    public void defineDataType(Symbol symbol, DataTypeDescriptor descriptor) {
+        scope().defineDataType(symbol, descriptor);
+    }
+
     public void defineOperator(Symbol symbol, Operator operator) {
         scope().defineOperator(symbol, operator);
+    }
+
+    public void defineSignature(Symbol symbol, Type type) {
+        scope().defineSignature(symbol, type);
     }
 
     public void defineValue(Symbol symbol, Type type) {
@@ -127,19 +155,7 @@ public class OperatorAccumulator {
         return scope().isOperator(symbol);
     }
 
-    public List<DefinitionReference> defineDefinitionOperators(List<DefinitionReference> references) {
-        return references.stream()
-            .map(this::getDefinition)
-            .filter(Optional::isPresent)
-            .map(Optional::get)
-            .map(definition -> definition.defineOperators(this))
-            .map(Definition::getReference)
-            .collect(toList());
-    }
-
-    public List<Value> defineValueOperators(List<Value> values) {
-        return values.stream()
-            .map(value -> value.defineOperators(this))
-            .collect(toList());
+    public void specialize(Type type) {
+        scope().specialize(type);
     }
 }

@@ -4,14 +4,10 @@ import static java.util.Collections.sort;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static me.qmx.jitescript.util.CodegenUtils.ci;
-import static me.qmx.jitescript.util.CodegenUtils.p;
-import static me.qmx.jitescript.util.CodegenUtils.sig;
-import static org.apache.commons.lang.StringUtils.capitalize;
 import static org.objectweb.asm.Opcodes.ACC_FINAL;
-import static org.objectweb.asm.Opcodes.ACC_PRIVATE;
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 import static org.objectweb.asm.Opcodes.ACC_STATIC;
-import static org.objectweb.asm.Opcodes.ACC_SYNTHETIC;
+import static scotch.compiler.intermediate.Intermediates.constructor;
 import static scotch.compiler.syntax.builder.BuilderUtil.require;
 import static scotch.symbol.FieldSignature.fieldSignature;
 
@@ -19,23 +15,15 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Supplier;
 import lombok.EqualsAndHashCode;
-import me.qmx.jitescript.CodeBlock;
-import me.qmx.jitescript.JiteClass;
-import me.qmx.jitescript.LambdaBlock;
-import org.objectweb.asm.tree.LabelNode;
-import scotch.compiler.steps.BytecodeGenerator;
-import scotch.compiler.steps.NameAccumulator;
-import scotch.compiler.steps.ScopedNameQualifier;
+import scotch.compiler.analyzer.NameAccumulator;
+import scotch.compiler.analyzer.ScopedNameQualifier;
+import scotch.compiler.intermediate.IntermediateConstructorDefinition;
+import scotch.compiler.intermediate.IntermediateGenerator;
 import scotch.compiler.syntax.builder.SyntaxBuilder;
 import scotch.compiler.text.SourceLocation;
 import scotch.runtime.Callable;
-import scotch.runtime.Copyable;
-import scotch.runtime.RuntimeSupport;
 import scotch.symbol.FieldSignature;
 import scotch.symbol.Symbol;
 import scotch.symbol.descriptor.DataConstructorDescriptor;
@@ -80,30 +68,14 @@ public class DataConstructorDefinition implements Comparable<DataConstructorDefi
         return ordinal - o.ordinal;
     }
 
-    public FieldSignature getConstantField() {
-        return constantField.orElseThrow(() -> new IllegalStateException("Data constructor " + symbol + " is not niladic"));
+    public IntermediateConstructorDefinition generateIntermediateCode(IntermediateGenerator state) {
+        return constructor(symbol, dataType, fields.values().stream()
+            .map(field -> field.generateIntermediateCode(state))
+            .collect(toList()));
     }
 
-    public void generateBytecode(BytecodeGenerator state) {
-        JiteClass parentClass = state.currentClass();
-        if (isNiladic()) {
-            state.beginConstant(state.getDataConstructorClass(symbol), sourceLocation);
-            parentClass.addChildClass(state.currentClass());
-            generateInstanceField(state);
-            generateToString(state);
-            state.endClass();
-        } else {
-            state.beginConstructor(state.getDataConstructorClass(symbol), sourceLocation);
-            parentClass.addChildClass(state.currentClass());
-            generateFields(state);
-            generateConstructor(state, parentClass);
-            generateEquals(state);
-            generateGetters(state);
-            generateHashCode(state);
-            generateToString(state);
-            generateCopyConstructor(state);
-            state.endClass();
-        }
+    public FieldSignature getConstantField() {
+        return constantField.orElseThrow(() -> new IllegalStateException("Data constructor " + symbol + " is not niladic"));
     }
 
     public Symbol getDataType() {
@@ -111,7 +83,7 @@ public class DataConstructorDefinition implements Comparable<DataConstructorDefi
     }
 
     public DataConstructorDescriptor getDescriptor() {
-        return DataConstructorDescriptor.builder(ordinal, dataType, symbol)
+        return DataConstructorDescriptor.builder(ordinal, dataType, symbol, symbol.getClassNameAsChildOf(dataType))
             .withFields(fields.values().stream()
                 .map(DataFieldDefinition::getDescriptor)
                 .collect(toList()))
@@ -146,190 +118,6 @@ public class DataConstructorDefinition implements Comparable<DataConstructorDefi
     public String toString() {
         return symbol.getSimpleName()
             + (fields.isEmpty() ? "" : " { " + fields.values().stream().map(Object::toString).collect(joining(", ")) + " }");
-    }
-
-    private void generateConstructor(final BytecodeGenerator state, final JiteClass parentClass) {
-        Class<?>[] parameters = getParameters();
-        state.method("<init>", ACC_PUBLIC, sig(void.class, parameters), new CodeBlock() {{
-            aload(0);
-            invokespecial(parentClass.getClassName(), "<init>", sig(void.class));
-            AtomicInteger counter = new AtomicInteger(1);
-            fields.values().forEach(field -> {
-                int offset = counter.get();
-                aload(0);
-                aload(offset);
-                putfield(state.currentClass().getClassName(), field.getJavaName(), ci(field.getJavaType()));
-                counter.getAndIncrement();
-            });
-            voidreturn();
-        }});
-    }
-
-    private void generateCopyConstructor(BytecodeGenerator state) {
-        state.method("copy", ACC_PUBLIC, sig(Copyable.class, Map.class), new CodeBlock() {{
-            newobj(state.currentClass().getClassName());
-            dup();
-            for (DataFieldDefinition field : fields.values()) {
-                LabelNode fromField = new LabelNode();
-                LabelNode endField = new LabelNode();
-                aload(1);
-                ldc(field.getJavaName());
-                invokeinterface(p(Map.class), "containsKey", sig(boolean.class, Object.class));
-                iffalse(fromField);
-                aload(1);
-                ldc(field.getJavaName());
-                invokeinterface(p(Map.class), "get", sig(Object.class, Object.class));
-                checkcast(p(field.getJavaType()));
-                go_to(endField);
-                label(fromField);
-                aload(0);
-                getfield(state.currentClass().getClassName(), field.getJavaName(), ci(field.getJavaType()));
-                label(endField);
-            }
-            invokespecial(state.currentClass().getClassName(), "<init>", sig(void.class, getParameters()));
-            areturn();
-        }});
-    }
-
-    private void generateEquals(BytecodeGenerator state) {
-        state.method("equals", ACC_PUBLIC, sig(boolean.class, Object.class), new CodeBlock() {{
-            String className = state.currentClass().getClassName();
-            LabelNode equal = new LabelNode();
-            LabelNode valueCompare = new LabelNode();
-            LabelNode notEqual = new LabelNode();
-
-            // o == this
-            aload(0);
-            aload(1);
-            if_acmpne(valueCompare);
-            go_to(equal);
-
-            // o instanceof {class} && values equal
-            label(valueCompare);
-            aload(1);
-            instance_of(className);
-            ifeq(notEqual);
-            if (!fields.isEmpty()) {
-                aload(1);
-                checkcast(className);
-                astore(2);
-                fields.values().forEach(field -> {
-                    aload(0);
-                    getfield(className, field.getJavaName(), ci(field.getJavaType()));
-                    invokeinterface(p(Callable.class), "call", sig(Object.class));
-                    aload(2);
-                    checkcast(className);
-                    getfield(className, field.getJavaName(), ci(field.getJavaType()));
-                    invokeinterface(p(Callable.class), "call", sig(Object.class));
-                    invokestatic(p(Objects.class), "equals", sig(boolean.class, Object.class, Object.class));
-                    ifeq(notEqual);
-                });
-            }
-
-            label(equal);
-            iconst_1();
-            ireturn();
-
-            // not this && not {class}
-            label(notEqual);
-            iconst_0();
-            ireturn();
-        }});
-    }
-
-    private void generateFields(BytecodeGenerator state) {
-        fields.values().forEach(field -> field.generateBytecode(state));
-    }
-
-    private void generateGetters(final BytecodeGenerator state) {
-        Class<?>[] parameters = getParameters();
-        AtomicInteger counter = new AtomicInteger(0);
-        fields.values().forEach(field -> {
-            Class<?> type = parameters[counter.getAndIncrement()];
-            state.method("get" + capitalize(field.getJavaName()), ACC_PUBLIC, sig(type), new CodeBlock() {{
-                aload(0);
-                getfield(state.currentClass().getClassName(), field.getJavaName(), ci(type));
-                areturn();
-            }});
-        });
-    }
-
-    private void generateHashCode(BytecodeGenerator state) {
-        state.method("hashCode", ACC_PUBLIC, sig(int.class), new CodeBlock() {{
-            if (fields.size() == 1) {
-                aload(0);
-                DataFieldDefinition field = fields.values().iterator().next();
-                getfield(state.currentClass().getClassName(), field.getJavaName(), ci(field.getJavaType()));
-                invokeinterface(p(Callable.class), "call", sig(Object.class));
-                invokestatic(p(Objects.class), "hashCode", sig(int.class, Object.class));
-            } else {
-                ldc(fields.size());
-                anewarray(p(Object.class));
-                AtomicInteger counter = new AtomicInteger();
-                fields.values().forEach(field -> {
-                    dup();
-                    ldc(counter.getAndIncrement());
-                    aload(0);
-                    getfield(state.currentClass().getClassName(), field.getJavaName(), ci(field.getJavaType()));
-                    invokeinterface(p(Callable.class), "call", sig(Object.class));
-                    aastore();
-                });
-                invokestatic(p(Objects.class), "hash", sig(int.class, Object[].class));
-            }
-            ireturn();
-        }});
-    }
-
-    private void generateInstanceField(BytecodeGenerator state) {
-        JiteClass jiteClass = state.currentClass();
-        String className = jiteClass.getClassName();
-        getConstantField().defineOn(jiteClass);
-        jiteClass.defineMethod("<clinit>", ACC_STATIC | ACC_SYNTHETIC | ACC_PRIVATE, sig(void.class), new CodeBlock() {{
-            lambda(jiteClass, new LambdaBlock(state.reserveLambda()) {{
-                function(p(Supplier.class), "get", sig(Object.class));
-                delegateTo(ACC_STATIC, sig(Object.class), new CodeBlock() {{
-                    newobj(className);
-                    dup();
-                    invokespecial(className, "<init>", sig(void.class));
-                    areturn();
-                }});
-            }});
-            invokestatic(p(RuntimeSupport.class), "callable", sig(Callable.class, Supplier.class));
-            append(getConstantField().putValue());
-            voidreturn();
-        }});
-    }
-
-    private void generateToString(BytecodeGenerator state) {
-        state.method("toString", ACC_PUBLIC, sig(String.class), new CodeBlock() {{
-            newobj(p(StringBuilder.class));
-            dup();
-            ldc(symbol.getMemberName());
-            invokespecial(p(StringBuilder.class), "<init>", sig(void.class, String.class));
-            int count = 0;
-            if (!fields.isEmpty()) {
-                ldc(" {");
-                invokevirtual(p(StringBuilder.class), "append", sig(StringBuilder.class, String.class));
-                for (DataFieldDefinition field : fields.values()) {
-                    if (count != 0) {
-                        ldc(",");
-                        invokevirtual(p(StringBuilder.class), "append", sig(StringBuilder.class, String.class));
-                    }
-                    ldc(" " + field.getName() + " = ");
-                    invokevirtual(p(StringBuilder.class), "append", sig(StringBuilder.class, String.class));
-                    aload(0);
-                    getfield(state.currentClass().getClassName(), field.getJavaName(), ci(field.getJavaType()));
-                    invokeinterface(p(Callable.class), "call", sig(Object.class));
-                    invokevirtual(p(Object.class), "toString", sig(String.class));
-                    invokevirtual(p(StringBuilder.class), "append", sig(StringBuilder.class, String.class));
-                    count++;
-                }
-                ldc(" }");
-                invokevirtual(p(StringBuilder.class), "append", sig(StringBuilder.class, String.class));
-            }
-            invokevirtual(p(Object.class), "toString", sig(String.class));
-            areturn();
-        }});
     }
 
     private Class<?>[] getParameters() {

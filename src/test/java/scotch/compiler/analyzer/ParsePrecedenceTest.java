@@ -1,4 +1,4 @@
-package scotch.compiler.steps;
+package scotch.compiler.analyzer;
 
 import static java.util.Arrays.asList;
 import static scotch.compiler.syntax.value.Values.apply;
@@ -17,7 +17,7 @@ import static scotch.symbol.type.Types.t;
 import java.util.function.Function;
 import org.junit.Test;
 import scotch.compiler.IsolatedCompilerTest;
-import scotch.compiler.steps.PrecedenceParser.ArityMismatch;
+import scotch.compiler.analyzer.PrecedenceParser.ArityMismatch;
 import scotch.compiler.syntax.definition.DefinitionGraph;
 
 public class ParsePrecedenceTest extends IsolatedCompilerTest {

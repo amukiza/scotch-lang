@@ -9,20 +9,19 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
+import scotch.compiler.analyzer.DependencyAccumulator;
+import scotch.compiler.analyzer.NameAccumulator;
+import scotch.compiler.analyzer.OperatorAccumulator;
+import scotch.compiler.analyzer.PatternAnalyzer;
+import scotch.compiler.analyzer.PrecedenceParser;
+import scotch.compiler.analyzer.ScopedNameQualifier;
+import scotch.compiler.analyzer.TypeChecker;
 import scotch.compiler.intermediate.IntermediateGenerator;
-import scotch.compiler.steps.BytecodeGenerator;
-import scotch.compiler.steps.DependencyAccumulator;
-import scotch.compiler.steps.NameAccumulator;
-import scotch.compiler.steps.OperatorAccumulator;
-import scotch.compiler.steps.PatternReducerStep;
-import scotch.compiler.steps.PrecedenceParser;
-import scotch.compiler.steps.ScopedNameQualifier;
-import scotch.compiler.steps.TypeChecker;
-import scotch.symbol.Symbol;
-import scotch.symbol.type.Type;
 import scotch.compiler.syntax.builder.SyntaxBuilder;
 import scotch.compiler.syntax.reference.DefinitionReference;
 import scotch.compiler.text.SourceLocation;
+import scotch.symbol.Symbol;
+import scotch.symbol.type.Type;
 
 public class ClassDefinition extends Definition {
 
@@ -78,12 +77,7 @@ public class ClassDefinition extends Definition {
     }
 
     @Override
-    public void generateBytecode(BytecodeGenerator state) {
-        throw new UnsupportedOperationException(); // TODO
-    }
-
-    @Override
-    public void generateIntermediateCode(IntermediateGenerator state) {
+    public Optional<DefinitionReference> generateIntermediateCode(IntermediateGenerator generator) {
         throw new UnsupportedOperationException(); // TODO
     }
 
@@ -117,7 +111,7 @@ public class ClassDefinition extends Definition {
     }
 
     @Override
-    public Definition reducePatterns(PatternReducerStep state) {
+    public Definition reducePatterns(PatternAnalyzer state) {
         throw new UnsupportedOperationException(); // TODO
     }
 

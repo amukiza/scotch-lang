@@ -1,32 +1,20 @@
 package scotch.compiler.syntax.value;
 
 import static java.util.stream.Collectors.toList;
-import static me.qmx.jitescript.util.CodegenUtils.p;
-import static me.qmx.jitescript.util.CodegenUtils.sig;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Supplier;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import me.qmx.jitescript.CodeBlock;
-import me.qmx.jitescript.LambdaBlock;
+import scotch.compiler.analyzer.DependencyAccumulator;
+import scotch.compiler.analyzer.NameAccumulator;
+import scotch.compiler.analyzer.OperatorAccumulator;
+import scotch.compiler.analyzer.PrecedenceParser;
+import scotch.compiler.analyzer.ScopedNameQualifier;
+import scotch.compiler.analyzer.TypeChecker;
 import scotch.compiler.intermediate.IntermediateGenerator;
 import scotch.compiler.intermediate.IntermediateValue;
-import scotch.compiler.steps.BytecodeGenerator;
-import scotch.compiler.steps.DependencyAccumulator;
-import scotch.compiler.steps.NameAccumulator;
-import scotch.compiler.steps.OperatorAccumulator;
-import scotch.compiler.steps.PrecedenceParser;
-import scotch.compiler.steps.ScopedNameQualifier;
-import scotch.compiler.steps.TypeChecker;
 import scotch.compiler.syntax.pattern.PatternReducer;
 import scotch.compiler.text.SourceLocation;
-import scotch.runtime.Callable;
-import scotch.runtime.Copyable;
-import scotch.runtime.RuntimeSupport;
-import scotch.runtime.SuppliedThunk;
 import scotch.symbol.type.Type;
 
 @EqualsAndHashCode(callSuper = false)
@@ -80,43 +68,6 @@ public class CopyInitializer extends Value {
     @Override
     public Value defineOperators(OperatorAccumulator state) {
         throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public CodeBlock generateBytecode(BytecodeGenerator state) {
-        return new CodeBlock() {{
-            newobj(p(SuppliedThunk.class));
-            dup();
-            append(state.captureApply());
-            lambda(state.currentClass(), new LambdaBlock(state.reserveApply()) {{
-                function(p(Supplier.class), "get", sig(Object.class));
-                specialize(sig(Callable.class));
-                capture(state.getCaptureAllTypes());
-                Class<?> returnType = state.typeOf(value.getType());
-                delegateTo(ACC_STATIC, sig(returnType, state.getCaptureAllTypes()), new CodeBlock() {{
-                    if (returnType != Callable.class) {
-                        checkcast(p(returnType));
-                    }
-                    append(value.generateBytecode(state));
-                    invokeinterface(p(Callable.class), "call", sig(Object.class));
-                    checkcast(p(Copyable.class));
-                    newobj(p(HashMap.class));
-                    dup();
-                    invokespecial(p(HashMap.class), "<init>", sig(void.class));
-                    fields.forEach(field -> {
-                        dup();
-                        ldc(field.getName());
-                        append(field.getValue().generateBytecode(state));
-                        invokeinterface(p(Map.class), "put", sig(Object.class, Object.class, Object.class));
-                        pop();
-                    });
-                    invokeinterface(p(Copyable.class), "copy", sig(Copyable.class, Map.class));
-                    invokestatic(p(RuntimeSupport.class), "box", sig(Callable.class, Object.class));
-                    areturn();
-                }});
-            }});
-            invokespecial(p(SuppliedThunk.class), "<init>", sig(void.class, Supplier.class));
-        }};
     }
 
     @Override

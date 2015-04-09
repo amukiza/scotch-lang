@@ -92,11 +92,13 @@ public class ClassLoaderResolverTest {
             asList(
                 constructor(
                     0, "scotch.data.maybe.Maybe",
-                    "scotch.data.maybe.Nothing"
+                    "scotch.data.maybe.Nothing",
+                    "scotch/data/maybe/Maybe$Nothing"
                 ),
                 constructor(
                     1, "scotch.data.maybe.Maybe",
                     "scotch.data.maybe.Just",
+                    "scotch/data/maybe/Maybe$Just",
                     asList(field(0, "value", var("a")))
                 )
             )

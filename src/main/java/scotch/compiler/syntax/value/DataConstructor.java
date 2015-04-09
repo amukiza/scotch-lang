@@ -2,7 +2,6 @@ package scotch.compiler.syntax.value;
 
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
-import static me.qmx.jitescript.util.CodegenUtils.sig;
 import static scotch.compiler.syntax.builder.BuilderUtil.require;
 
 import java.util.ArrayList;
@@ -10,16 +9,14 @@ import java.util.List;
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import lombok.EqualsAndHashCode;
-import me.qmx.jitescript.CodeBlock;
+import scotch.compiler.analyzer.DependencyAccumulator;
+import scotch.compiler.analyzer.NameAccumulator;
+import scotch.compiler.analyzer.OperatorAccumulator;
+import scotch.compiler.analyzer.PrecedenceParser;
+import scotch.compiler.analyzer.ScopedNameQualifier;
+import scotch.compiler.analyzer.TypeChecker;
 import scotch.compiler.intermediate.IntermediateGenerator;
 import scotch.compiler.intermediate.IntermediateValue;
-import scotch.compiler.steps.BytecodeGenerator;
-import scotch.compiler.steps.DependencyAccumulator;
-import scotch.compiler.steps.NameAccumulator;
-import scotch.compiler.steps.OperatorAccumulator;
-import scotch.compiler.steps.PrecedenceParser;
-import scotch.compiler.steps.ScopedNameQualifier;
-import scotch.compiler.steps.TypeChecker;
 import scotch.compiler.syntax.builder.SyntaxBuilder;
 import scotch.compiler.syntax.pattern.PatternReducer;
 import scotch.compiler.text.SourceLocation;
@@ -57,7 +54,13 @@ public class DataConstructor extends Value {
 
     @Override
     public IntermediateValue generateIntermediateCode(IntermediateGenerator state) {
-        throw new UnsupportedOperationException(); // TODO
+        return state.createConstructor(
+            symbol,
+            state.getDataConstructor(symbol).getClassName(),
+            state.getDataConstructor(symbol).getConstructorSignature(),
+            arguments.stream()
+                .map(argument -> argument.generateIntermediateCode(state))
+                .collect(toList()));
     }
 
     @Override
@@ -83,20 +86,6 @@ public class DataConstructor extends Value {
 
     private DataConstructor withArguments(List<Value> arguments) {
         return new DataConstructor(sourceLocation, symbol, type, arguments);
-    }
-
-    @Override
-    public CodeBlock generateBytecode(BytecodeGenerator state) {
-        return new CodeBlock() {{
-            newobj(state.getDataConstructorClass(symbol));
-            dup();
-            arguments.forEach(argument -> append(argument.generateBytecode(state)));
-            List<Class<?>> parameters = arguments.stream()
-                .map(Value::getType)
-                .map(Type::getJavaType)
-                .collect(toList());
-            invokespecial(state.getDataConstructorClass(symbol), "<init>", sig(void.class, parameters.toArray(new Class<?>[parameters.size()])));
-        }};
     }
 
     @Override

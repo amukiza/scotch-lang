@@ -2,19 +2,19 @@ package scotch.compiler;
 
 import java.net.URI;
 import java.util.List;
+import scotch.compiler.target.BytecodeGenerator;
 import scotch.compiler.intermediate.IntermediateGenerator;
 import scotch.compiler.intermediate.IntermediateGraph;
 import scotch.compiler.output.GeneratedClass;
 import scotch.compiler.parser.InputParser;
 import scotch.compiler.scanner.Scanner;
-import scotch.compiler.steps.BytecodeGenerator;
-import scotch.compiler.steps.DependencyAccumulator;
-import scotch.compiler.steps.NameAccumulator;
-import scotch.compiler.steps.OperatorAccumulator;
-import scotch.compiler.steps.PatternReducerStep;
-import scotch.compiler.steps.PrecedenceParser;
-import scotch.compiler.steps.ScopedNameQualifier;
-import scotch.compiler.steps.TypeChecker;
+import scotch.compiler.analyzer.DependencyAccumulator;
+import scotch.compiler.analyzer.NameAccumulator;
+import scotch.compiler.analyzer.OperatorAccumulator;
+import scotch.compiler.analyzer.PatternAnalyzer;
+import scotch.compiler.analyzer.PrecedenceParser;
+import scotch.compiler.analyzer.ScopedNameQualifier;
+import scotch.compiler.analyzer.TypeChecker;
 import scotch.compiler.syntax.definition.DefinitionGraph;
 import scotch.symbol.SymbolResolver;
 
@@ -51,7 +51,7 @@ public class Compiler {
     }
 
     public List<GeneratedClass> generateBytecode() {
-        return new BytecodeGenerator(checkTypes()).generateBytecode();
+        return new BytecodeGenerator(generateIntermediateCode()).generateBytecode();
     }
 
     public IntermediateGraph generateIntermediateCode() {
@@ -71,6 +71,6 @@ public class Compiler {
     }
 
     public DefinitionGraph reducePatterns() {
-        return new PatternReducerStep(qualifyNames()).reducePatterns();
+        return new PatternAnalyzer(qualifyNames()).reducePatterns();
     }
 }

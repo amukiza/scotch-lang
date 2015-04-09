@@ -1,8 +1,6 @@
 package scotch.compiler.syntax.pattern;
 
 import static java.util.stream.Collectors.toList;
-import static me.qmx.jitescript.util.CodegenUtils.p;
-import static me.qmx.jitescript.util.CodegenUtils.sig;
 import static scotch.compiler.syntax.builder.BuilderUtil.require;
 import static scotch.compiler.syntax.value.Values.isConstructor;
 import static scotch.compiler.text.TextUtil.repeat;
@@ -17,17 +15,14 @@ import com.google.common.collect.ImmutableList;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
-import me.qmx.jitescript.CodeBlock;
-import scotch.compiler.steps.BytecodeGenerator;
-import scotch.compiler.steps.DependencyAccumulator;
-import scotch.compiler.steps.NameAccumulator;
-import scotch.compiler.steps.ScopedNameQualifier;
-import scotch.compiler.steps.TypeChecker;
+import scotch.compiler.analyzer.DependencyAccumulator;
+import scotch.compiler.analyzer.NameAccumulator;
+import scotch.compiler.analyzer.ScopedNameQualifier;
+import scotch.compiler.analyzer.TypeChecker;
 import scotch.compiler.syntax.builder.SyntaxBuilder;
 import scotch.compiler.syntax.scope.Scope;
 import scotch.compiler.syntax.value.Value;
 import scotch.compiler.text.SourceLocation;
-import scotch.runtime.Callable;
 import scotch.symbol.Symbol;
 import scotch.symbol.type.Type;
 
@@ -85,20 +80,6 @@ public class TupleMatch extends PatternMatch {
     @Override
     public PatternMatch checkTypes(TypeChecker state) {
         return map((field, ordinal) -> field.checkTypes(state)).bindType(state);
-    }
-
-    @Override
-    public CodeBlock generateBytecode(BytecodeGenerator state) {
-        return new CodeBlock() {{
-            append(argument.orElseThrow(IllegalStateException::new).generateBytecode(state));
-            invokeinterface(p(Callable.class), "call", sig(Object.class));
-            String className = "scotch/data/tuple/Tuple" + fields.size();
-            checkcast(className);
-            for (TupleField field : fields) {
-                dup();
-                append(field.generateBytecode(state));
-            }
-        }};
     }
 
     @Override

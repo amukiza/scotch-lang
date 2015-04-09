@@ -2,37 +2,29 @@ package scotch.compiler.syntax.value;
 
 import static java.util.Collections.reverse;
 import static java.util.stream.Collectors.toList;
-import static me.qmx.jitescript.util.CodegenUtils.p;
-import static me.qmx.jitescript.util.CodegenUtils.sig;
 import static scotch.compiler.syntax.builder.BuilderUtil.require;
 import static scotch.compiler.syntax.definition.Definitions.scopeDef;
 import static scotch.compiler.syntax.reference.DefinitionReference.scopeRef;
 import static scotch.compiler.syntax.value.Values.matcher;
 import static scotch.symbol.type.Types.fn;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Deque;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import com.google.common.collect.ImmutableList;
-import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import me.qmx.jitescript.CodeBlock;
-import me.qmx.jitescript.LambdaBlock;
+import scotch.compiler.analyzer.DependencyAccumulator;
+import scotch.compiler.analyzer.NameAccumulator;
+import scotch.compiler.analyzer.OperatorAccumulator;
+import scotch.compiler.analyzer.PrecedenceParser;
+import scotch.compiler.analyzer.PrecedenceParser.ArityMismatch;
+import scotch.compiler.analyzer.ScopedNameQualifier;
+import scotch.compiler.analyzer.TypeChecker;
 import scotch.compiler.intermediate.IntermediateGenerator;
 import scotch.compiler.intermediate.IntermediateValue;
-import scotch.compiler.steps.BytecodeGenerator;
-import scotch.compiler.steps.DependencyAccumulator;
-import scotch.compiler.steps.NameAccumulator;
-import scotch.compiler.steps.OperatorAccumulator;
-import scotch.compiler.steps.PrecedenceParser;
-import scotch.compiler.steps.PrecedenceParser.ArityMismatch;
-import scotch.compiler.steps.ScopedNameQualifier;
-import scotch.compiler.steps.TypeChecker;
 import scotch.compiler.syntax.Scoped;
 import scotch.compiler.syntax.builder.SyntaxBuilder;
 import scotch.compiler.syntax.definition.Definition;
@@ -40,8 +32,6 @@ import scotch.compiler.syntax.pattern.PatternCase;
 import scotch.compiler.syntax.pattern.PatternReducer;
 import scotch.compiler.syntax.reference.DefinitionReference;
 import scotch.compiler.text.SourceLocation;
-import scotch.runtime.Applicable;
-import scotch.runtime.Callable;
 import scotch.symbol.Symbol;
 import scotch.symbol.type.Type;
 
@@ -106,11 +96,6 @@ public class PatternMatcher extends Value implements Scoped {
             argument -> argument,
             patternCase -> patternCase.defineOperators(state)
         ));
-    }
-
-    @Override
-    public CodeBlock generateBytecode(BytecodeGenerator state) {
-        return state.enclose(this, () -> curry().generateBytecode(state));
     }
 
     public List<Argument> getArguments() {
@@ -215,18 +200,6 @@ public class PatternMatcher extends Value implements Scoped {
             .reduce(returnType, (result, arg) -> fn(arg, result));
     }
 
-    private CurriedPattern curry() {
-        return curry_(new ArrayDeque<>(arguments));
-    }
-
-    private CurriedPattern curry_(Deque<Argument> arguments) {
-        if (arguments.isEmpty()) {
-            return new CurriedBody(patternCases);
-        } else {
-            return new CurriedLambda(arguments.pop(), curry_(arguments));
-        }
-    }
-
     private PatternMatcher encloseArguments(TypeChecker state, Supplier<PatternMatcher> supplier) {
         return state.enclose(this, () -> {
             arguments.stream()
@@ -252,13 +225,6 @@ public class PatternMatcher extends Value implements Scoped {
             patternCases.stream().map(patternCaseMapper).collect(toList()),
             type
         );
-    }
-
-    private interface CurriedPattern {
-
-        CodeBlock generateBytecode(BytecodeGenerator state);
-
-        Type getType();
     }
 
     public static class Builder implements SyntaxBuilder<PatternMatcher> {
@@ -308,57 +274,6 @@ public class PatternMatcher extends Value implements Scoped {
         public Builder withType(Type type) {
             this.type = Optional.of(type);
             return this;
-        }
-    }
-
-    private static final class CurriedBody implements CurriedPattern {
-
-        private final List<PatternCase> patternCases;
-
-        public CurriedBody(List<PatternCase> patternCases) {
-            this.patternCases = ImmutableList.copyOf(patternCases);
-        }
-
-        @Override
-        public CodeBlock generateBytecode(BytecodeGenerator state) {
-            return new CodeBlock() {{
-                state.beginCases(patternCases.size());
-                patternCases.forEach(matcher -> append(matcher.generateBytecode(state)));
-                label(state.endCases());
-            }};
-        }
-
-        @Override
-        public Type getType() {
-            return patternCases.get(0).getType();
-        }
-    }
-
-    @AllArgsConstructor
-    private static final class CurriedLambda implements CurriedPattern {
-
-        private final Argument       argument;
-        private final CurriedPattern body;
-
-        @Override
-        public CodeBlock generateBytecode(BytecodeGenerator state) {
-            return new CodeBlock() {{
-                append(state.captureLambda(argument.getName()));
-                lambda(state.currentClass(), new LambdaBlock(state.reserveLambda()) {{
-                    function(p(Applicable.class), "apply", sig(Callable.class, Callable.class));
-                    capture(state.getLambdaCaptureTypes());
-                    delegateTo(ACC_STATIC, sig(state.typeOf(body.getType()), state.getLambdaType()), new CodeBlock() {{
-                        append(body.generateBytecode(state));
-                        areturn();
-                    }});
-                }});
-                state.releaseLambda(argument.getName());
-            }};
-        }
-
-        @Override
-        public Type getType() {
-            return fn(argument.getType(), body.getType());
         }
     }
 }

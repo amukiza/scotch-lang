@@ -1,4 +1,4 @@
-package scotch.compiler.steps;
+package scotch.compiler.analyzer;
 
 import static java.util.stream.Collectors.toList;
 import static scotch.compiler.syntax.definition.DefinitionEntry.entry;
@@ -26,14 +26,14 @@ import scotch.symbol.Symbol;
 import scotch.symbol.type.VariableType;
 import scotch.symbol.util.SymbolGenerator;
 
-public class PatternReducerStep implements PatternReducer {
+public class PatternAnalyzer implements PatternReducer {
 
     private final DefinitionGraph       graph;
     private final List<DefinitionEntry> entries;
     private final Deque<Scope>          scopes;
     private final PatternReducer        patternReducer;
 
-    public PatternReducerStep(DefinitionGraph graph) {
+    public PatternAnalyzer(DefinitionGraph graph) {
         this.graph = graph;
         this.entries = new ArrayList<>();
         this.scopes = new ArrayDeque<>();

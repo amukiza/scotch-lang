@@ -126,12 +126,12 @@ public class TestUtil {
         return Values.construct(NULL_SOURCE, symbol(name), type, arguments);
     }
 
-    public static DataConstructorDescriptor constructor(int ordinal, String dataType, String name) {
-        return constructor(ordinal, dataType, name, emptyList());
+    public static DataConstructorDescriptor constructor(int ordinal, String dataType, String name, String className) {
+        return constructor(ordinal, dataType, name, className, emptyList());
     }
 
-    public static DataConstructorDescriptor constructor(int ordinal, String dataType, String name, List<DataFieldDescriptor> fields) {
-        return DataConstructorDescriptor.builder(ordinal, symbol(dataType), symbol(name))
+    public static DataConstructorDescriptor constructor(int ordinal, String dataType, String name, String className, List<DataFieldDescriptor> fields) {
+        return DataConstructorDescriptor.builder(ordinal, symbol(dataType), symbol(name), className)
             .withFields(fields)
             .build();
     }

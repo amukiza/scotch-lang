@@ -115,10 +115,8 @@ public class DefaultPatternReducer implements PatternReducer {
             if (conditions.isEmpty()) {
                 return reduceBody();
             } else {
-                List<Value> reverseConditions = new ArrayList<>(conditions);
-                reverse(conditions);
                 Value resultCondition = conditions.get(0);
-                for (Value condition : reverseConditions.subList(1, reverseConditions.size())) {
+                for (Value condition : conditions.subList(1, conditions.size())) {
                     resultCondition = apply(
                         apply(id(condition.getSourceLocation(), symbol("scotch.data.bool.(&&)"), reserveType()), resultCondition, reserveType()),
                         condition,

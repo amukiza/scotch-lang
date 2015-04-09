@@ -1,23 +1,19 @@
 package scotch.compiler.syntax.value;
 
-import static lombok.AccessLevel.PACKAGE;
 import static scotch.compiler.syntax.builder.BuilderUtil.require;
 
 import java.util.Optional;
-import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
-import me.qmx.jitescript.CodeBlock;
+import scotch.compiler.analyzer.DependencyAccumulator;
+import scotch.compiler.analyzer.NameAccumulator;
+import scotch.compiler.analyzer.OperatorAccumulator;
+import scotch.compiler.analyzer.PrecedenceParser;
+import scotch.compiler.analyzer.ScopedNameQualifier;
+import scotch.compiler.analyzer.TypeChecker;
 import scotch.compiler.intermediate.IntermediateGenerator;
 import scotch.compiler.intermediate.IntermediateValue;
-import scotch.compiler.steps.BytecodeGenerator;
-import scotch.compiler.steps.DependencyAccumulator;
-import scotch.compiler.steps.NameAccumulator;
-import scotch.compiler.steps.OperatorAccumulator;
-import scotch.compiler.steps.PrecedenceParser;
-import scotch.compiler.steps.ScopedNameQualifier;
-import scotch.compiler.steps.TypeChecker;
 import scotch.compiler.syntax.builder.SyntaxBuilder;
 import scotch.compiler.syntax.pattern.PatternReducer;
 import scotch.compiler.text.SourceLocation;
@@ -25,7 +21,6 @@ import scotch.symbol.FieldSignature;
 import scotch.symbol.Symbol;
 import scotch.symbol.type.Type;
 
-@AllArgsConstructor(access = PACKAGE)
 @EqualsAndHashCode(callSuper = false)
 @ToString(exclude = "sourceLocation")
 public class ConstantReference extends Value {
@@ -42,6 +37,15 @@ public class ConstantReference extends Value {
     @Getter
     private final Type           type;
 
+    @java.beans.ConstructorProperties({ "sourceLocation", "symbol", "dataType", "constantField", "type" })
+    ConstantReference(SourceLocation sourceLocation, Symbol symbol, Symbol dataType, FieldSignature constantField, Type type) {
+        this.sourceLocation = sourceLocation;
+        this.symbol = symbol;
+        this.dataType = dataType;
+        this.constantField = constantField;
+        this.type = type;
+    }
+
     @Override
     public Value accumulateDependencies(DependencyAccumulator state) {
         return this;
@@ -54,7 +58,7 @@ public class ConstantReference extends Value {
 
     @Override
     public IntermediateValue generateIntermediateCode(IntermediateGenerator state) {
-        throw new UnsupportedOperationException(); // TODO
+        return state.constantReference(symbol, dataType, constantField);
     }
 
     @Override
@@ -75,11 +79,6 @@ public class ConstantReference extends Value {
     @Override
     public Value defineOperators(OperatorAccumulator state) {
         return this;
-    }
-
-    @Override
-    public CodeBlock generateBytecode(BytecodeGenerator state) {
-        return constantField.getValue();
     }
 
     @Override

@@ -1,4 +1,4 @@
-package scotch.compiler.steps;
+package scotch.compiler.analyzer;
 
 import static java.util.Arrays.asList;
 import static scotch.compiler.syntax.value.Values.apply;
@@ -18,7 +18,7 @@ import scotch.compiler.Compiler;
 import scotch.compiler.CompilerTest;
 import scotch.compiler.syntax.definition.DefinitionGraph;
 
-public class PatternReducerStepTest extends CompilerTest<ClassLoaderResolver> {
+public class PatternAnalyzerTest extends CompilerTest<ClassLoaderResolver> {
 
     @Test
     public void shouldReduceCapturesToLets() {

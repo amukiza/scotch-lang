@@ -9,12 +9,10 @@ import com.google.common.collect.ImmutableList;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
-import me.qmx.jitescript.CodeBlock;
-import scotch.compiler.steps.BytecodeGenerator;
-import scotch.compiler.steps.DependencyAccumulator;
-import scotch.compiler.steps.NameAccumulator;
-import scotch.compiler.steps.ScopedNameQualifier;
-import scotch.compiler.steps.TypeChecker;
+import scotch.compiler.analyzer.DependencyAccumulator;
+import scotch.compiler.analyzer.NameAccumulator;
+import scotch.compiler.analyzer.ScopedNameQualifier;
+import scotch.compiler.analyzer.TypeChecker;
 import scotch.compiler.syntax.builder.SyntaxBuilder;
 import scotch.compiler.syntax.scope.Scope;
 import scotch.compiler.syntax.value.Value;
@@ -68,11 +66,6 @@ public class UnshuffledStructureMatch extends PatternMatch {
 
     @Override
     public PatternMatch checkTypes(TypeChecker state) {
-        throw new UnsupportedOperationException(); // TODO
-    }
-
-    @Override
-    public CodeBlock generateBytecode(BytecodeGenerator state) {
         throw new UnsupportedOperationException(); // TODO
     }
 

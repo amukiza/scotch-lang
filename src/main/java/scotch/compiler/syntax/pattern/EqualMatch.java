@@ -1,8 +1,6 @@
 package scotch.compiler.syntax.pattern;
 
 import static lombok.AccessLevel.PACKAGE;
-import static me.qmx.jitescript.util.CodegenUtils.p;
-import static me.qmx.jitescript.util.CodegenUtils.sig;
 import static scotch.compiler.syntax.builder.BuilderUtil.require;
 import static scotch.compiler.syntax.value.Values.apply;
 import static scotch.compiler.syntax.value.Values.id;
@@ -13,18 +11,14 @@ import java.util.function.Function;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import me.qmx.jitescript.CodeBlock;
-import scotch.compiler.steps.BytecodeGenerator;
-import scotch.compiler.steps.DependencyAccumulator;
-import scotch.compiler.steps.NameAccumulator;
-import scotch.compiler.steps.ScopedNameQualifier;
-import scotch.compiler.steps.TypeChecker;
+import scotch.compiler.analyzer.DependencyAccumulator;
+import scotch.compiler.analyzer.NameAccumulator;
+import scotch.compiler.analyzer.ScopedNameQualifier;
+import scotch.compiler.analyzer.TypeChecker;
 import scotch.compiler.syntax.builder.SyntaxBuilder;
 import scotch.compiler.syntax.scope.Scope;
 import scotch.compiler.syntax.value.Value;
 import scotch.compiler.text.SourceLocation;
-import scotch.runtime.Callable;
-import scotch.runtime.RuntimeSupport;
 import scotch.symbol.type.Type;
 
 @AllArgsConstructor(access = PACKAGE)
@@ -81,17 +75,6 @@ public class EqualMatch extends PatternMatch {
     @Override
     public PatternMatch checkTypes(TypeChecker state) {
         return map(value -> value.checkTypes(state));
-    }
-
-    @Override
-    public CodeBlock generateBytecode(BytecodeGenerator state) {
-        return new CodeBlock() {{
-            append(match
-                .orElseThrow(() -> new IllegalStateException("No match found"))
-                .generateBytecode(state));
-            invokestatic(p(RuntimeSupport.class), "unboxBool", sig(boolean.class, Callable.class));
-            iffalse(state.nextCase());
-        }};
     }
 
     @Override

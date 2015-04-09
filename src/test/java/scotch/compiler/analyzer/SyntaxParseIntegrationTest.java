@@ -1,4 +1,4 @@
-package scotch.compiler.steps;
+package scotch.compiler.analyzer;
 
 import static java.util.Arrays.asList;
 import static scotch.compiler.syntax.StubResolver.defaultEq;

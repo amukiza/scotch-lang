@@ -12,13 +12,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.google.common.collect.ImmutableList;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import me.qmx.jitescript.CodeBlock;
-import scotch.compiler.steps.BytecodeGenerator;
-import scotch.compiler.steps.NameAccumulator;
-import scotch.compiler.steps.OperatorAccumulator;
-import scotch.compiler.steps.PrecedenceParser;
-import scotch.compiler.steps.ScopedNameQualifier;
-import scotch.compiler.steps.TypeChecker;
+import scotch.compiler.analyzer.NameAccumulator;
+import scotch.compiler.analyzer.OperatorAccumulator;
+import scotch.compiler.analyzer.PrecedenceParser;
+import scotch.compiler.analyzer.ScopedNameQualifier;
 import scotch.compiler.syntax.Scoped;
 import scotch.compiler.syntax.builder.SyntaxBuilder;
 import scotch.compiler.syntax.definition.Definition;
@@ -58,19 +55,6 @@ public class PatternCase implements Scoped {
 
     public PatternCase defineOperators(OperatorAccumulator state) {
         return state.scoped(this, () -> withBody(body.defineOperators(state)));
-    }
-
-    public CodeBlock generateBytecode(BytecodeGenerator state) {
-        return new CodeBlock() {{
-            state.generate(PatternCase.this, () -> {
-                label(state.beginCase());
-                state.beginMatches();
-                patternMatches.forEach(match -> append(match.generateBytecode(state)));
-                append(body.generateBytecode(state));
-                go_to(state.endCase());
-                state.endMatches();
-            });
-        }};
     }
 
     public int getArity() {
