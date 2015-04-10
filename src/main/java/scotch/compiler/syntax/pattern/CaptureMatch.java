@@ -129,8 +129,9 @@ public class CaptureMatch extends PatternMatch {
         return this;
     }
 
-    public Value reducePattern(SymbolGenerator generator, Value result) {
-        return let(sourceLocation, generator.reserveType(), symbol.getCanonicalName(), getArgument(), result);
+    public Value reducePattern(PatternReducer reducer, SymbolGenerator generator, Value result) {
+        Value argument = reducer.getTaggedArgument(getArgument());
+        return let(sourceLocation, generator.reserveType(), symbol.getCanonicalName(), argument, result);
     }
 
     @Override

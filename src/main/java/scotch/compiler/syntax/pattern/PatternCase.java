@@ -91,7 +91,7 @@ public class PatternCase implements Scoped {
             AtomicInteger counter = new AtomicInteger();
             List<PatternMatch> boundMatches = patternMatches.stream()
                 .map(match -> match.bind(
-                    arg(sourceLocation.getStartPoint(), "#" + counter.getAndIncrement(), state.reserveType()),
+                    arg(sourceLocation.getStartPoint(), "#" + counter.getAndIncrement(), state.reserveType(), Optional.empty()),
                     state.scope()))
                 .collect(toList());
             return withSymbol(state.reserveSymbol())

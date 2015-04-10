@@ -10,6 +10,8 @@ public interface PatternReducer {
 
     void addCondition(Value condition);
 
+    void addTaggedArgument(Value taggedArgument);
+
     void beginPattern(PatternMatcher matcher);
 
     void beginPatternCase(PatternCase patternCase);
@@ -17,6 +19,8 @@ public interface PatternReducer {
     void endPattern();
 
     void endPatternCase();
+
+    Value getTaggedArgument(Value argument);
 
     void markFunction(FunctionValue function);
 

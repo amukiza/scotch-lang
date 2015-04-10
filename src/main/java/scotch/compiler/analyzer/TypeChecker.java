@@ -31,6 +31,7 @@ import lombok.ToString;
 import scotch.compiler.error.SyntaxError;
 import scotch.symbol.Symbol;
 import scotch.symbol.descriptor.DataConstructorDescriptor;
+import scotch.symbol.descriptor.DataTypeDescriptor;
 import scotch.symbol.descriptor.TypeInstanceDescriptor;
 import scotch.symbol.type.InstanceType;
 import scotch.symbol.type.SumType;
@@ -111,6 +112,14 @@ public class TypeChecker implements TypeScope {
             .build();
     }
 
+    public Optional<DataTypeDescriptor> getDataType(Type type) {
+        if (type instanceof SumType) {
+            return scope().getDataType(((SumType) type).getSymbol());
+        } else {
+            return Optional.empty();
+        }
+    }
+
     public Optional<DataConstructorDescriptor> getDataConstructor(Symbol symbol) {
         return scope().getDataConstructor(symbol);
     }
@@ -181,6 +190,12 @@ public class TypeChecker implements TypeScope {
     @Override
     public Set<Symbol> getContext(Type type) {
         return scope().getContext(type);
+    }
+
+    public Optional<Type> getDataConstructorType(Symbol constructor) {
+        return scope().getDataConstructor(constructor)
+            .flatMap(descriptor -> scope().getDataType(descriptor.getDataType()))
+                .map(dataType -> dataType.getType(() -> scope().reserveType()));
     }
 
     public Optional<Definition> getDefinition(DefinitionReference reference) {
@@ -363,7 +378,8 @@ public class TypeChecker implements TypeScope {
                 .map(classRef -> arg(
                     definition.getSourceLocation().getStartPoint(),
                     "#" + counter.getAndIncrement() + "i",
-                    Types.instance(classRef.getSymbol(), type.simplify())
+                    Types.instance(classRef.getSymbol(), type.simplify()),
+                    Optional.empty()
                 ))))
             .collect(toList());
     }

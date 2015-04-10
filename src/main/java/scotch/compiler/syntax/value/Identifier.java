@@ -114,27 +114,27 @@ public class Identifier extends Value {
 
                 @Override
                 public Value visit(UnqualifiedSymbol symbol) {
-                    return arg(sourceLocation, symbol.getSimpleName(), valueType);
+                    return arg(sourceLocation, symbol.getSimpleName(), valueType, Optional.empty());
                 }
             }));
     }
 
     @Override
-    public Value bindMethods(TypeChecker state) {
+    public Value bindMethods(TypeChecker typeChecker) {
         return this;
     }
 
     @Override
-    public Value bindTypes(TypeChecker state) {
-        return withType(state.generate(type));
+    public Value bindTypes(TypeChecker typeChecker) {
+        return withType(typeChecker.generate(type));
     }
 
     @Override
-    public Value checkTypes(TypeChecker state) {
-        return bind(state.scope())
-            .map(value -> value.checkTypes(state))
+    public Value checkTypes(TypeChecker typeChecker) {
+        return bind(typeChecker.scope())
+            .map(value -> value.checkTypes(typeChecker))
             .orElseGet(() -> {
-                state.error(symbolNotFound(symbol, sourceLocation));
+                typeChecker.error(symbolNotFound(symbol, sourceLocation));
                 return this;
             });
     }

@@ -2,6 +2,8 @@ package scotch.symbol.descriptor;
 
 import static java.util.Collections.sort;
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
+import static scotch.symbol.type.Types.sum;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -9,8 +11,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Supplier;
+import com.google.common.collect.ImmutableList;
 import scotch.symbol.Symbol;
 import scotch.symbol.type.Type;
+import scotch.symbol.type.VariableType;
 
 public class DataTypeDescriptor {
 
@@ -49,6 +54,10 @@ public class DataTypeDescriptor {
         return Optional.ofNullable(constructors.get(symbol));
     }
 
+    public List<DataConstructorDescriptor> getConstructors() {
+        return ImmutableList.copyOf(constructors.values());
+    }
+
     public List<Type> getParameters() {
         return parameters;
     }
@@ -57,9 +66,28 @@ public class DataTypeDescriptor {
         return symbol;
     }
 
+    public Type getType() {
+        return sum(symbol, parameters);
+    }
+
+    public Type getType(Supplier<VariableType> generator) {
+        return sum(symbol, parameters.stream()
+            .map(parameter -> generator.get().withContext(parameter.getContext()))
+            .collect(toList()));
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(symbol, parameters, constructors);
+    }
+
+    public DataTypeDescriptor mapParameters(Map<Type, Type> mappedParameters) {
+        List<Type> reifiedParameters = parameters.stream()
+            .map(parameter -> Optional.of(mappedParameters.get(parameter)).<RuntimeException>orElseThrow(UnsupportedOperationException::new /* TODO */))
+            .collect(toList());
+        return new DataTypeDescriptor(symbol, reifiedParameters, constructors.values().stream()
+            .map(constructor -> constructor.mapParameters(mappedParameters))
+            .collect(toList()));
     }
 
     @Override

@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import lombok.EqualsAndHashCode;
@@ -23,7 +24,6 @@ import scotch.symbol.NameQualifier;
 import scotch.symbol.Symbol;
 import scotch.compiler.text.SourceLocation;
 import scotch.compiler.util.Pair;
-import scotch.runtime.Callable;
 
 @EqualsAndHashCode(callSuper = false)
 public class SumType extends Type {
@@ -82,11 +82,6 @@ public class SumType extends Type {
         return ImmutableMap.of();
     }
 
-    @Override
-    public Class<?> getJavaType() {
-        return Callable.class;
-    }
-
     public List<Type> getParameters() {
         return parameters;
     }
@@ -99,6 +94,13 @@ public class SumType extends Type {
     @Override
     public SourceLocation getSourceLocation() {
         return sourceLocation;
+    }
+
+    @Override
+    public Type mapVariables(Function<VariableType, Type> mapper) {
+        return withParameters(parameters.stream()
+            .map(parameter -> parameter.mapVariables(mapper))
+            .collect(toList()));
     }
 
     public Symbol getSymbol() {

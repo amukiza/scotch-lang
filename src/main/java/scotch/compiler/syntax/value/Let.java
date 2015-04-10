@@ -45,24 +45,25 @@ public class Let extends Value {
     }
 
     @Override
-    public Value bindMethods(TypeChecker state) {
-        return new Let(sourceLocation, name, value.bindMethods(state), scope.bindMethods(state), type);
+    public Value bindMethods(TypeChecker typeChecker) {
+        return new Let(sourceLocation, name, value.bindMethods(typeChecker), scope.bindMethods(typeChecker), type);
     }
 
     @Override
-    public Value bindTypes(TypeChecker state) {
-        return new Let(sourceLocation, name, value.bindTypes(state), scope.bindTypes(state), state.generate(type));
+    public Value bindTypes(TypeChecker typeChecker) {
+        return new Let(sourceLocation, name, value.bindTypes(typeChecker), scope.bindTypes(typeChecker), typeChecker.generate(type));
     }
 
     @Override
-    public Value checkTypes(TypeChecker state) {
-        state.addLocal(symbol(name));
-        Value checkedValue = value.checkTypes(state);
-        state.scope().redefineValue(symbol(name), checkedValue.getType());
-        Value checkedScope = scope.checkTypes(state);
+    public Value checkTypes(TypeChecker typeChecker) {
+        typeChecker.addLocal(symbol(name));
+        Value checkedValue = value.checkTypes(typeChecker);
+        typeChecker.scope().redefineValue(symbol(name), checkedValue.getType());
+        typeChecker.specialize(checkedValue.getType());
+        Value checkedScope = scope.checkTypes(typeChecker);
         return new Let(sourceLocation, name, checkedValue, checkedScope,
-            checkedScope.getType().unify(type, state).orElseGet(unification -> {
-                state.error(typeError(unification, scope.getSourceLocation()));
+            checkedScope.getType().unify(type, typeChecker).orElseGet(unification -> {
+                typeChecker.error(typeError(unification, scope.getSourceLocation()));
                 return type;
             }));
     }

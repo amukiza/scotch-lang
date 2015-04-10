@@ -6,6 +6,7 @@ import static scotch.compiler.util.Either.left;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import scotch.compiler.analyzer.DependencyAccumulator;
 import scotch.compiler.analyzer.NameAccumulator;
 import scotch.compiler.analyzer.OperatorAccumulator;
@@ -20,6 +21,7 @@ import scotch.compiler.text.SourceLocation;
 import scotch.compiler.util.Either;
 import scotch.compiler.util.Pair;
 import scotch.symbol.Operator;
+import scotch.symbol.Symbol;
 import scotch.symbol.type.SumType;
 import scotch.symbol.type.Type;
 
@@ -51,11 +53,11 @@ public abstract class Value {
         return Optional.empty();
     }
 
-    public abstract Value bindMethods(TypeChecker state);
+    public abstract Value bindMethods(TypeChecker typeChecker);
 
-    public abstract Value bindTypes(TypeChecker state);
+    public abstract Value bindTypes(TypeChecker typeChecker);
 
-    public abstract Value checkTypes(TypeChecker state);
+    public abstract Value checkTypes(TypeChecker typeChecker);
 
     public Value collapse() {
         return this;
@@ -70,9 +72,17 @@ public abstract class Value {
     @Override
     public abstract boolean equals(Object o);
 
+    public boolean equalsBeta(Value o) {
+        return false;
+    }
+
     public abstract IntermediateValue generateIntermediateCode(IntermediateGenerator state);
 
     public abstract SourceLocation getSourceLocation();
+
+    public Optional<Symbol> getTag() {
+        return Optional.empty();
+    }
 
     public abstract Type getType();
 
@@ -81,6 +91,10 @@ public abstract class Value {
 
     public boolean isOperator(Scope scope) {
         return false;
+    }
+
+    public Value mapTags(Function<Value, Value> mapper) {
+        throw new UnsupportedOperationException();
     }
 
     public abstract Value parsePrecedence(PrecedenceParser state);
@@ -93,6 +107,10 @@ public abstract class Value {
 
     public abstract Value reducePatterns(PatternReducer reducer);
 
+    public Value reTag(Value value) {
+        return value.getTag().map(this::withTag).orElse(this);
+    }
+
     @Override
     public abstract String toString();
 
@@ -102,6 +120,10 @@ public abstract class Value {
 
     public WithArguments withArguments() {
         return withoutArguments(this);
+    }
+
+    public Value withTag(Symbol tag) {
+        throw new UnsupportedOperationException(getClass().getName()); // TODO
     }
 
     public abstract Value withType(Type type);

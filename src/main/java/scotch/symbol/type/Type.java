@@ -2,8 +2,8 @@ package scotch.symbol.type;
 
 import static java.util.Collections.reverse;
 import static java.util.stream.Collectors.joining;
-import static scotch.symbol.type.Unification.unified;
 import static scotch.compiler.util.Pair.pair;
+import static scotch.symbol.type.Unification.unified;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,14 +14,15 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import scotch.symbol.NameQualifier;
-import scotch.symbol.Symbol;
 import scotch.compiler.text.SourceLocation;
 import scotch.compiler.util.Pair;
+import scotch.symbol.NameQualifier;
+import scotch.symbol.Symbol;
 
 public abstract class Type {
 
@@ -106,8 +107,6 @@ public abstract class Type {
         return ImmutableList.of();
     }
 
-    public abstract Class<?> getJavaType();
-
     public abstract String getSignature();
 
     public abstract SourceLocation getSourceLocation();
@@ -118,6 +117,8 @@ public abstract class Type {
 
     @Override
     public abstract int hashCode();
+
+    public abstract Type mapVariables(Function<VariableType, Type> mapper);
 
     public abstract Type qualifyNames(NameQualifier qualifier);
 
@@ -233,11 +234,6 @@ public abstract class Type {
         }
 
         @Override
-        public Class<?> getJavaType() {
-            throw new UnsupportedOperationException(); // TODO
-        }
-
-        @Override
         public String getSignature() {
             throw new UnsupportedOperationException(); // TODO
         }
@@ -245,6 +241,11 @@ public abstract class Type {
         @Override
         public SourceLocation getSourceLocation() {
             throw new UnsupportedOperationException(); // TODO
+        }
+
+        @Override
+        public Type mapVariables(Function<VariableType, Type> mapper) {
+            return this;
         }
 
         @Override

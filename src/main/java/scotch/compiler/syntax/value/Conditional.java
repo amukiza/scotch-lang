@@ -58,24 +58,24 @@ public class Conditional extends Value {
     }
 
     @Override
-    public Value bindMethods(TypeChecker state) {
-        return parse(state, Value::bindMethods);
+    public Value bindMethods(TypeChecker typeChecker) {
+        return parse(typeChecker, Value::bindMethods);
     }
 
     @Override
-    public Value bindTypes(TypeChecker state) {
-        return parse(state, Value::bindTypes);
+    public Value bindTypes(TypeChecker typeChecker) {
+        return parse(typeChecker, Value::bindTypes);
     }
 
     @Override
-    public Value checkTypes(TypeChecker state) {
-        Value checkedCondition = condition.checkTypes(state);
-        Value checkedWhenTrue = whenTrue.checkTypes(state);
-        Value checkedWhenFalse = whenFalse.checkTypes(state);
-        Type resultType = Bool.TYPE.unify(checkedCondition.getType(), state)
-            .map(ct -> checkedWhenTrue.getType().unify(checkedWhenFalse.getType(), state))
+    public Value checkTypes(TypeChecker typeChecker) {
+        Value checkedCondition = condition.checkTypes(typeChecker);
+        Value checkedWhenTrue = whenTrue.checkTypes(typeChecker);
+        Value checkedWhenFalse = whenFalse.checkTypes(typeChecker);
+        Type resultType = Bool.TYPE.unify(checkedCondition.getType(), typeChecker)
+            .map(ct -> checkedWhenTrue.getType().unify(checkedWhenFalse.getType(), typeChecker))
             .orElseGet(unification -> {
-                state.error(typeError(unification, checkedWhenFalse.getSourceLocation()));
+                typeChecker.error(typeError(unification, checkedWhenFalse.getSourceLocation()));
                 return type;
             });
         return new Conditional(sourceLocation, checkedCondition, checkedWhenTrue, checkedWhenFalse, resultType);

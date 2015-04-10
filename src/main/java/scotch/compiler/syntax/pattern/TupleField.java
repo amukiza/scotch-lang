@@ -34,7 +34,7 @@ public class TupleField {
             sourceLocation,
             Optional.of(field),
             type,
-            patternMatch.bind(access(sourceLocation, argument, field, scope.reserveType()), scope)
+            patternMatch.bind(access(sourceLocation, argument, field, scope.reserveType(), Optional.empty()), scope)
         );
     }
 

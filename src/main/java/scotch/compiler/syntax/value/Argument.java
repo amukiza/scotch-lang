@@ -8,9 +8,12 @@ import static scotch.compiler.syntax.builder.BuilderUtil.require;
 import static scotch.compiler.syntax.value.Values.arg;
 import static scotch.symbol.Symbol.unqualified;
 
+import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.ToString;
 import scotch.compiler.analyzer.DependencyAccumulator;
 import scotch.compiler.analyzer.NameAccumulator;
@@ -29,15 +32,17 @@ import scotch.symbol.type.Type;
 @AllArgsConstructor(access = PACKAGE)
 @EqualsAndHashCode(callSuper = false)
 @ToString(exclude = "sourceLocation")
+@Getter
 public class Argument extends Value {
 
     public static Builder builder() {
         return new Builder();
     }
 
-    private final SourceLocation sourceLocation;
-    private final String         name;
-    private final Type           type;
+    private final SourceLocation   sourceLocation;
+    private final String           name;
+    private final Type             type;
+    private final Optional<Symbol> tag;
 
     @Override
     public Argument accumulateDependencies(DependencyAccumulator state) {
@@ -57,26 +62,31 @@ public class Argument extends Value {
     }
 
     @Override
-    public Argument bindMethods(TypeChecker state) {
+    public Value mapTags(Function<Value, Value> mapper) {
+        return mapper.apply(this);
+    }
+
+    @Override
+    public Argument bindMethods(TypeChecker typeChecker) {
         return this;
     }
 
     @Override
-    public Argument bindTypes(TypeChecker state) {
-        return withType(state.generate(getType()));
+    public Argument bindTypes(TypeChecker typeChecker) {
+        return withType(typeChecker.generate(getType()));
     }
 
     @Override
-    public Argument checkTypes(TypeChecker state) {
-        state.capture(getSymbol());
-        return state.scope().getValue(getSymbol())
-            .map(actualType -> withType(actualType.unify(type, state.scope())
+    public Argument checkTypes(TypeChecker typeChecker) {
+        typeChecker.capture(getSymbol());
+        return typeChecker.scope().getValue(getSymbol())
+            .map(actualType -> withType(actualType.unify(type, typeChecker.scope())
                 .orElseGet(unification -> {
-                    state.error(typeError(unification, sourceLocation));
+                    typeChecker.error(typeError(unification, sourceLocation));
                     return type;
                 })))
             .orElseGet(() -> {
-                state.error(symbolNotFound(getSymbol(), sourceLocation));
+                typeChecker.error(symbolNotFound(getSymbol(), sourceLocation));
                 return this;
             });
     }
@@ -86,22 +96,13 @@ public class Argument extends Value {
         return this;
     }
 
-    public String getName() {
-        return name;
-    }
-
     @Override
-    public SourceLocation getSourceLocation() {
-        return sourceLocation;
+    public boolean equalsBeta(Value o) {
+        return equals(o) || Objects.equals(name, ((Argument) o).name);
     }
 
     public Symbol getSymbol() {
         return unqualified(name);
-    }
-
-    @Override
-    public Type getType() {
-        return type;
     }
 
     @Override
@@ -111,7 +112,7 @@ public class Argument extends Value {
 
     @Override
     public Argument qualifyNames(ScopedNameQualifier state) {
-        return new Argument(sourceLocation, name, type.qualifyNames(state));
+        return new Argument(sourceLocation, name, type.qualifyNames(state), tag);
     }
 
     @Override
@@ -120,8 +121,13 @@ public class Argument extends Value {
     }
 
     @Override
+    public Value withTag(Symbol tag) {
+        return arg(sourceLocation, name, type, Optional.of(tag));
+    }
+
+    @Override
     public Argument withType(Type type) {
-        return arg(sourceLocation, name, type);
+        return arg(sourceLocation, name, type, tag);
     }
 
     public static class Builder implements SyntaxBuilder<Argument> {
@@ -141,7 +147,8 @@ public class Argument extends Value {
             return arg(
                 require(sourceLocation, "Source location"),
                 require(name, "Argument name"),
-                require(type, "Argument type")
+                require(type, "Argument type"),
+                Optional.empty()
             );
         }
 

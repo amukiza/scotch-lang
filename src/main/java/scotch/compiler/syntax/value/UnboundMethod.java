@@ -56,17 +56,17 @@ public class UnboundMethod extends Value {
     }
 
     @Override
-    public Value bindMethods(TypeChecker state) {
+    public Value bindMethods(TypeChecker typeChecker) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public Value bindTypes(TypeChecker state) {
-        return bind(state).bindTypes(state);
+    public Value bindTypes(TypeChecker typeChecker) {
+        return bind(typeChecker).bindTypes(typeChecker);
     }
 
     @Override
-    public Value checkTypes(TypeChecker state) {
+    public Value checkTypes(TypeChecker typeChecker) {
         return this;
     }
 

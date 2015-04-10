@@ -83,11 +83,19 @@ import scotch.symbol.type.Type;
 public class TestUtil {
 
     public static Accessor access(Value target, String field, Type type) {
-        return Values.access(NULL_SOURCE, target, field, type);
+        return Values.access(NULL_SOURCE, target, field, type, Optional.empty());
+    }
+
+    public static Accessor access(Value target, String field, Type type, String tag) {
+        return Values.access(NULL_SOURCE, target, field, type, Optional.of(symbol(tag)));
     }
 
     public static Argument arg(String name, Type type) {
-        return Values.arg(NULL_SOURCE, name, type);
+        return Values.arg(NULL_SOURCE, name, type, Optional.empty());
+    }
+
+    public static Argument arg(String name, Type type, String tag) {
+        return Values.arg(NULL_SOURCE, name, type, Optional.of(symbol(tag)));
     }
 
     public static Type boolType() {

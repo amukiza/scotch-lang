@@ -20,7 +20,6 @@ import static scotch.symbol.type.Unification.mismatch;
 
 import java.util.Optional;
 import java.util.function.Function;
-import org.junit.Ignore;
 import org.junit.Test;
 import scotch.compiler.ClassLoaderResolver;
 import scotch.compiler.Compiler;
@@ -81,7 +80,6 @@ public class TypeCheckerIntegrationTest extends CompilerTest<ClassLoaderResolver
         shouldHaveValue("scotch.test.addedStuff", sum("scotch.data.maybe.Maybe", asList(intType)));
     }
 
-    @Ignore("Type inferencing busted")
     @Test
     public void shouldDestructure2Tuples() {
         compile(
@@ -90,18 +88,19 @@ public class TypeCheckerIntegrationTest extends CompilerTest<ClassLoaderResolver
             "third (_, (_, c)) = c"
         );
         shouldNotHaveErrors();
-        Type tuple = tupleType(t(2), t(4));
+        Type tuple = tupleType(t(49), t(50));
+        String tag = "scotch.data.tuple.(,)";
+        shouldHaveValue("scotch.test.second", fn(tuple, t(50)));
         shouldHaveValue("scotch.test.second", fn("scotch.test.(second#0)", arg("#0", tuple),
             conditional(
-                isConstructor(arg("#0", tuple), "scotch.data.tuple.(,)"),
+                isConstructor(arg("#0", tuple, tag), tag),
                 scope("scotch.test.(second#0#0)",
-                    let(t(4), "b", access(arg("#0", tuple), "_1", t(4)),
-                        arg("b", t(4)))),
-                raise("Incomplete match", t(4)),
-                t(4)
+                    let(t(50), "b", access(arg("#0", tuple, tag), "_1", t(50)), arg("b", t(50)))),
+                raise("Incomplete match", t(50)),
+                t(50)
             )
         ));
-        shouldHaveValue("scotch.test.third", fn(tupleType(t(11), tupleType(t(14), t(16))), t(16)));
+        shouldHaveValue("scotch.test.third", fn(tupleType(t(45), tupleType(t(47), t(48))), t(48)));
     }
 
     private static SumType tupleType(Type... types) {

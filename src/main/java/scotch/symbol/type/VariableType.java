@@ -20,6 +20,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
@@ -27,7 +28,6 @@ import scotch.symbol.NameQualifier;
 import scotch.symbol.Symbol;
 import scotch.compiler.text.SourceLocation;
 import scotch.compiler.util.Pair;
-import scotch.runtime.Callable;
 
 public class VariableType extends Type {
 
@@ -119,11 +119,6 @@ public class VariableType extends Type {
         return instances;
     }
 
-    @Override
-    public Class<?> getJavaType() {
-        return Callable.class;
-    }
-
     public String getName() {
         return name;
     }
@@ -141,6 +136,11 @@ public class VariableType extends Type {
     @Override
     public int hashCode() {
         return Objects.hash(name, context);
+    }
+
+    @Override
+    public Type mapVariables(Function<VariableType, Type> mapper) {
+        return mapper.apply(this);
     }
 
     public boolean is(String variable) {

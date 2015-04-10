@@ -44,26 +44,26 @@ public class Apply extends Value {
     }
 
     @Override
-    public Value bindMethods(TypeChecker state) {
-        return withFunction(function.bindMethods(state))
-            .withArgument(argument.bindMethods(state));
+    public Value bindMethods(TypeChecker typeChecker) {
+        return withFunction(function.bindMethods(typeChecker))
+            .withArgument(argument.bindMethods(typeChecker));
     }
 
     @Override
-    public Value bindTypes(TypeChecker state) {
-        return new Apply(sourceLocation, function.bindTypes(state), argument.bindTypes(state), state.generate(type));
+    public Value bindTypes(TypeChecker typeChecker) {
+        return new Apply(sourceLocation, function.bindTypes(typeChecker), argument.bindTypes(typeChecker), typeChecker.generate(type));
     }
 
     @Override
-    public Value checkTypes(TypeChecker state) {
-        Value checkedFunction = function.checkTypes(state);
-        Value checkedArgument = argument.checkTypes(state);
+    public Value checkTypes(TypeChecker typeChecker) {
+        Value checkedFunction = function.checkTypes(typeChecker);
+        Value checkedArgument = argument.checkTypes(typeChecker);
         Unification unify = fn(checkedArgument.getType(), type)
-            .unify(checkedFunction.getType(), state.scope());
+            .unify(checkedFunction.getType(), typeChecker.scope());
         return new Apply(sourceLocation, checkedFunction, checkedArgument, unify
             .mapType(t -> ((FunctionType) t).getResult())
             .orElseGet(unification -> {
-                state.error(typeError(unification.flip(), checkedArgument.getSourceLocation()));
+                typeChecker.error(typeError(unification.flip(), checkedArgument.getSourceLocation()));
                 return type;
             }));
     }

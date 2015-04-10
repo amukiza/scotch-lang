@@ -7,12 +7,15 @@ import static me.qmx.jitescript.util.CodegenUtils.sig;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import scotch.runtime.Callable;
 import scotch.symbol.MethodSignature;
 import scotch.symbol.Symbol;
+import scotch.symbol.type.Type;
 
 @EqualsAndHashCode(callSuper = false)
 public class DataConstructorDescriptor implements Comparable<DataConstructorDescriptor> {
@@ -45,6 +48,18 @@ public class DataConstructorDescriptor implements Comparable<DataConstructorDesc
     public MethodSignature getConstructorSignature() {
         return MethodSignature.constructor(className + ":<init>:"
             + sig(void.class, fields.stream().map(field -> Callable.class).collect(toList()).toArray(new Class<?>[fields.size()])));
+    }
+
+    public Optional<DataFieldDescriptor> getField(String field) {
+        return fields.stream()
+            .filter(f -> f.getName().equals(field))
+            .findFirst();
+    }
+
+    public DataConstructorDescriptor mapParameters(Map<Type, Type> mappedParameters) {
+        return new DataConstructorDescriptor(ordinal, dataType, symbol, className, fields.stream()
+            .map(field -> field.mapParameters(mappedParameters))
+            .collect(toList()));
     }
 
     @Override

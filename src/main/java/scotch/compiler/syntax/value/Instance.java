@@ -46,17 +46,17 @@ public class Instance extends Value {
     }
 
     @Override
-    public Value bindMethods(TypeChecker state) {
+    public Value bindMethods(TypeChecker typeChecker) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public Value checkTypes(TypeChecker state) {
+    public Value checkTypes(TypeChecker typeChecker) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public Value bindTypes(TypeChecker state) {
+    public Value bindTypes(TypeChecker typeChecker) {
         throw new UnsupportedOperationException();
     }
 

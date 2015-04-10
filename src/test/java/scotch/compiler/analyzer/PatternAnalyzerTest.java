@@ -24,10 +24,6 @@ public class PatternAnalyzerTest extends CompilerTest<ClassLoaderResolver> {
     public void shouldReduceCapturesToLets() {
         compile(
             "module scotch.test",
-            "import scotch.data.eq",
-            "import scotch.data.int",
-            "import scotch.data.ord",
-            "",
             "max a b = if a >= b",
             "            then a",
             "            else b"

@@ -57,7 +57,7 @@ public class Method extends Value {
     }
 
     @Override
-    public Value bindMethods(TypeChecker state) {
+    public Value bindMethods(TypeChecker typeChecker) {
         List<InstanceType> instanceTypes = new ArrayList<>();
         Type type = this.type;
         for (int i = 0; i < this.instances.size(); i++) {
@@ -68,13 +68,13 @@ public class Method extends Value {
         for (InstanceType instanceType : instanceTypes) {
             Value typeArgument;
             if (instanceType.isBound()) {
-                typeArgument = state.findInstance(this, instanceType);
+                typeArgument = typeChecker.findInstance(this, instanceType);
             } else {
-                Optional<Value> optionalTypeArgument = state.findArgument(instanceType);
+                Optional<Value> optionalTypeArgument = typeChecker.findArgument(instanceType);
                 if (optionalTypeArgument.isPresent()) {
                     typeArgument = optionalTypeArgument.get();
                 } else {
-                    state.error(noBinding(reference.getSymbol(), sourceLocation));
+                    typeChecker.error(noBinding(reference.getSymbol(), sourceLocation));
                     return this;
                 }
             }
@@ -84,12 +84,12 @@ public class Method extends Value {
     }
 
     @Override
-    public Value bindTypes(TypeChecker state) {
-        return withType(state.generate(type));
+    public Value bindTypes(TypeChecker typeChecker) {
+        return withType(typeChecker.generate(type));
     }
 
     @Override
-    public Value checkTypes(TypeChecker state) {
+    public Value checkTypes(TypeChecker typeChecker) {
         return this;
     }
 

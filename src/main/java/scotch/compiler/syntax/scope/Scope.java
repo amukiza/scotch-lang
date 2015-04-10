@@ -86,11 +86,8 @@ public abstract class Scope implements TypeScope {
         return getEntry(symbol).flatMap(SymbolEntry::getDataConstructor);
     }
 
-    public String getDataConstructorClass(Symbol symbol) {
-        return getEntry(symbol)
-            .flatMap(SymbolEntry::getDataConstructor)
-            .map(constructor -> constructor.getSymbol().getClassNameAsChildOf(constructor.getDataType()))
-            .orElseThrow(() -> new IllegalStateException("Can't get data constructor class for " + symbol.quote()));
+    public Optional<DataTypeDescriptor> getDataType(Symbol symbol) {
+        return getEntry(symbol).flatMap(SymbolEntry::getDataType);
     }
 
     public abstract Set<Symbol> getDependencies();

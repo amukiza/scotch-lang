@@ -36,7 +36,7 @@ public class TupleMatch extends PatternMatch {
 
     @Getter
     private final SourceLocation   sourceLocation;
-    private final Optional<Value> argument;
+    private final Optional<Value>  argument;
     private final Symbol           constructor;
     @Getter
     private final Type             type;
@@ -89,7 +89,9 @@ public class TupleMatch extends PatternMatch {
 
     @Override
     public void reducePatterns(PatternReducer reducer) {
-        reducer.addCondition(isConstructor(sourceLocation, argument.orElseThrow(IllegalStateException::new), constructor));
+        Value taggedArgument = argument.orElseThrow(IllegalStateException::new).withTag(constructor);
+        reducer.addTaggedArgument(taggedArgument);
+        reducer.addCondition(isConstructor(sourceLocation, taggedArgument, constructor));
         fields.forEach(field -> field.reducePatterns(reducer));
     }
 

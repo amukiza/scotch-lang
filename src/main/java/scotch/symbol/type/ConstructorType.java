@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import scotch.symbol.NameQualifier;
@@ -40,11 +41,6 @@ public class ConstructorType extends Type {
     }
 
     @Override
-    public Class<?> getJavaType() {
-        throw new UnsupportedOperationException(); // TODO
-    }
-
-    @Override
     public String getSignature() {
         throw new UnsupportedOperationException(); // TODO
     }
@@ -52,6 +48,11 @@ public class ConstructorType extends Type {
     @Override
     public SourceLocation getSourceLocation() {
         throw new UnsupportedOperationException(); // TODO
+    }
+
+    @Override
+    public Type mapVariables(Function<VariableType, Type> mapper) {
+        return new ConstructorType(head.mapVariables(mapper), tail.mapVariables(mapper));
     }
 
     @Override

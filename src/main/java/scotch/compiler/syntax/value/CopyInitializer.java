@@ -47,21 +47,21 @@ public class CopyInitializer extends Value {
     }
 
     @Override
-    public Value bindTypes(TypeChecker state) {
-        return new CopyInitializer(sourceLocation, value.bindTypes(state), fields.stream()
-            .map(field -> field.bindTypes(state))
+    public Value bindTypes(TypeChecker typeChecker) {
+        return new CopyInitializer(sourceLocation, value.bindTypes(typeChecker), fields.stream()
+            .map(field -> field.bindTypes(typeChecker))
             .collect(toList()));
     }
 
     @Override
-    public Value bindMethods(TypeChecker state) {
-        return new CopyInitializer(sourceLocation, value.bindTypes(state), fields.stream()
-            .map(field -> field.bindMethods(state))
+    public Value bindMethods(TypeChecker typeChecker) {
+        return new CopyInitializer(sourceLocation, value.bindTypes(typeChecker), fields.stream()
+            .map(field -> field.bindMethods(typeChecker))
             .collect(toList()));
     }
 
     @Override
-    public Value checkTypes(TypeChecker state) {
+    public Value checkTypes(TypeChecker typeChecker) {
         throw new UnsupportedOperationException();
     }
 

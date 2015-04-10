@@ -23,7 +23,6 @@ import scotch.symbol.NameQualifier;
 import scotch.symbol.Symbol;
 import scotch.compiler.text.SourceLocation;
 import scotch.compiler.util.Pair;
-import scotch.runtime.Applicable;
 
 @EqualsAndHashCode(callSuper = false)
 public class FunctionType extends Type {
@@ -71,11 +70,6 @@ public class FunctionType extends Type {
         return instances;
     }
 
-    @Override
-    public Class<?> getJavaType() {
-        return Applicable.class;
-    }
-
     public Type getResult() {
         return result;
     }
@@ -88,6 +82,11 @@ public class FunctionType extends Type {
     @Override
     public SourceLocation getSourceLocation() {
         return sourceLocation;
+    }
+
+    @Override
+    public Type mapVariables(Function<VariableType, Type> mapper) {
+        return new FunctionType(sourceLocation, argument.mapVariables(mapper), result.mapVariables(mapper));
     }
 
     @Override

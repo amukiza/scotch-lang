@@ -35,6 +35,7 @@ import static scotch.compiler.util.TestUtil.pattern;
 import static scotch.compiler.util.TestUtil.root;
 import static scotch.compiler.util.TestUtil.scopeRef;
 import static scotch.compiler.util.TestUtil.signatureRef;
+import static scotch.compiler.util.TestUtil.tuple;
 import static scotch.compiler.util.TestUtil.unshuffled;
 import static scotch.compiler.util.TestUtil.unshuffledMatch;
 import static scotch.control.monad.Monad.fail;
@@ -58,7 +59,6 @@ import scotch.compiler.syntax.definition.DefinitionGraph;
 import scotch.compiler.syntax.pattern.PatternMatch;
 import scotch.compiler.syntax.reference.DefinitionReference;
 import scotch.compiler.syntax.value.Value;
-import scotch.compiler.util.TestUtil;
 import scotch.runtime.Callable;
 import scotch.symbol.Value.Fixity;
 import scotch.symbol.type.VariableType;
@@ -634,9 +634,9 @@ public class InputParserTest extends IsolatedCompilerTest {
             "second (_, b) = b"
         );
         shouldHavePattern("scotch.test.(#0)",
-            asList(capture("second", t(0)), TestUtil.tuple("scotch.data.tuple.(,)", t(5), asList(
-                TestUtil.field(t(6), ignore(t(2))),
-                TestUtil.field(t(7), capture("b", t(4)))))),
+            asList(capture("second", t(0)), tuple("scotch.data.tuple.(,)", t(5), asList(
+                field(t(6), ignore(t(2))),
+                field(t(7), capture("b", t(4)))))),
             unshuffled(id("b", t(8)))
         );
     }
@@ -659,9 +659,9 @@ public class InputParserTest extends IsolatedCompilerTest {
             "second (_, (b)) = b"
         );
         shouldHavePattern("scotch.test.(#0)",
-            asList(capture("second", t(0)), TestUtil.tuple("scotch.data.tuple.(,)", t(7), asList(
-                TestUtil.field(t(8), ignore(t(2))),
-                TestUtil.field(t(9), capture("b", t(5)))))),
+            asList(capture("second", t(0)), tuple("scotch.data.tuple.(,)", t(7), asList(
+                field(t(8), ignore(t(2))),
+                field(t(9), capture("b", t(5)))))),
             unshuffled(id("b", t(10)))
         );
     }
@@ -673,11 +673,11 @@ public class InputParserTest extends IsolatedCompilerTest {
             "secondSecond (_, (_, b)) = b"
         );
         shouldHavePattern("scotch.test.(#0)",
-            asList(capture("secondSecond", t(0)), TestUtil.tuple("scotch.data.tuple.(,)", t(11), asList(
-                TestUtil.field(t(12), ignore(t(2))),
-                TestUtil.field(t(13), TestUtil.tuple("scotch.data.tuple.(,)", t(8), asList(
-                    TestUtil.field(t(9), ignore(t(5))),
-                    TestUtil.field(t(10), capture("b", t(7))))))))),
+            asList(capture("secondSecond", t(0)), tuple("scotch.data.tuple.(,)", t(11), asList(
+                field(t(12), ignore(t(2))),
+                field(t(13), tuple("scotch.data.tuple.(,)", t(8), asList(
+                    field(t(9), ignore(t(5))),
+                    field(t(10), capture("b", t(7))))))))),
             unshuffled(id("b", t(14)))
         );
     }

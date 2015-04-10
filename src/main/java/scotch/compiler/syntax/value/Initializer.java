@@ -72,19 +72,19 @@ public class Initializer extends Value {
     }
 
     @Override
-    public Value bindMethods(TypeChecker state) {
+    public Value bindMethods(TypeChecker typeChecker) {
         return this;
     }
 
     @Override
-    public Value bindTypes(TypeChecker state) {
+    public Value bindTypes(TypeChecker typeChecker) {
         return this;
     }
 
     @Override
-    public Value checkTypes(TypeChecker state) {
+    public Value checkTypes(TypeChecker typeChecker) {
         return value
-            .asInitializer(this, state)
+            .asInitializer(this, typeChecker)
             .orElse(this);
     }
 

@@ -3,6 +3,8 @@ package scotch.compiler.syntax.pattern;
 import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static scotch.compiler.syntax.value.Values.apply;
 import static scotch.compiler.text.SourceLocation.NULL_SOURCE;
 import static scotch.compiler.util.TestUtil.access;
@@ -28,6 +30,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import scotch.compiler.syntax.value.Value;
+import scotch.symbol.type.VariableType;
 import scotch.symbol.util.DefaultSymbolGenerator;
 import scotch.symbol.util.SymbolGenerator;
 
@@ -38,6 +41,7 @@ public class DefaultPatternReducerTest {
 
     @Test
     public void shouldReduceCapturesToLets() {
+        // max a b = a b
         Value pattern = matcher("scotch.test.max", t(1), asList(arg("#0", t(2)), arg("#1", t(3))),
             pattern(
                 "scotch.test.(max#0)",
@@ -66,6 +70,8 @@ public class DefaultPatternReducerTest {
 
     @Test
     public void shouldCreateIfAndElseForPattern() {
+        // empty? [] = true
+        // empty? _  = false
         Value pattern = matcher("scotch.test.(empty?)", t(1), arg("#0", t(2)),
             pattern("scotch.test.(empty?#0)",
                 asList(equal(arg("#0", t(3)), id("[]", t(4)), value -> apply(
@@ -94,6 +100,8 @@ public class DefaultPatternReducerTest {
 
     @Test
     public void shouldRaiseErrorWhenPatternHasNonTerminalDefaultCase() {
+        // max a b = a
+        // max a b = b
         exception.expect(PatternReductionException.class);
         exception.expect(is(new PatternReductionException("Non-terminal default pattern case", NULL_SOURCE)));
         Value pattern = matcher("scotch.test.max", t(1), asList(arg("#0", t(2)), arg("#1", t(3))),
@@ -114,6 +122,8 @@ public class DefaultPatternReducerTest {
 
     @Test
     public void patternShouldAddDefaultCase() {
+        // oneOrZero 1 = true
+        // oneOrZero 0 = true
         Value pattern = matcher("scotch.test.oneOrZero", t(1), arg("#0", t(2)),
             pattern("scotch.test.(oneOrZero#0)", asList(equal(arg("#0", t(3)), literal(1), value -> apply(
                 apply(id("scotch.data.eq.(==)", t(4)), literal(1), t(5)),
@@ -153,6 +163,7 @@ public class DefaultPatternReducerTest {
 
     @Test
     public void shouldAddAssignmentsWithinCondition() {
+        // oneAndVar 1 n = n
         Value pattern = matcher("scotch.test.oneAndVar", t(1), asList(arg("#0", t(2)), arg("#1", t(3))),
             pattern("scotch.test.(oneAndVar#0)",
                 asList(
@@ -182,10 +193,12 @@ public class DefaultPatternReducerTest {
     }
 
     @Test
-    public void shouldDestructureTuple() {
+    public void shouldDestructureTupleAndTagValues() {
+        // second (_, b) = b
+        String tuple2 = "scotch.data.tuple.(,)";
         Value pattern = matcher("scotch.test.second", t(1), arg("#0", t(2)),
             pattern("scotch.test.(second#0)",
-                asList(tuple(arg("#0", t(3)), "scotch.data.tuple.(,)", t(4), asList(
+                asList(tuple(arg("#0", t(3)), tuple2, t(4), asList(
                     field("_0", t(5), ignore(t(6))),
                     field("_1", t(7), capture(access(arg("#0", t(8)), "_1", t(9)), "b", t(10)))
                 ))),
@@ -197,10 +210,43 @@ public class DefaultPatternReducerTest {
         }};
         assertThat(pattern.reducePatterns(new DefaultPatternReducer(generator)),
             is(fn("scotch.test.second", arg("#0", t(2)), conditional(
-                isConstructor(arg("#0", t(3)), "scotch.data.tuple.(,)"),
-                scope("scotch.test.(second#0)", let(t(13), "b", access(arg("#0", t(8)), "_1", t(9)), id("b", t(11)))),
+                isConstructor(arg("#0", t(3), tuple2), tuple2),
+                scope("scotch.test.(second#0)", let(t(13), "b", access(arg("#0", t(8), tuple2), "_1", t(9)), id("b", t(11)))),
                 raise("Incomplete match", t(12)),
                 t(14)
+            ))));
+    }
+
+    @Test
+    public void shouldDestructureNestedTupleAndTagValues() {
+        // third (_, (_, c)) = c
+        VariableType t = t(0);
+        Value pattern = matcher("scotch.test.third", t, arg("#0", t),
+            pattern("scotch.test.(third#0)",
+                asList(tuple(arg("#0", t), "scotch.data.tuple.(,)", t, asList(
+                    field("_0", t, ignore(t)),
+                    field("_1", t, tuple(access(arg("#0", t), "_1", t), "scotch.data.tuple.(,)", t, asList(
+                        field("_0", t, ignore(t)),
+                        field("_1", t, capture(access(access(arg("#0", t), "_1", t), "_1", t), "c", t))
+                    )))
+                ))),
+                id("c", t)
+            )
+        );
+        SymbolGenerator generator = mock(SymbolGenerator.class);
+        when(generator.reserveType()).thenReturn(t);
+        assertThat(pattern.reducePatterns(new DefaultPatternReducer(generator)),
+            is(fn("scotch.test.third", arg("#0", t), conditional(
+                apply(
+                    apply(
+                        id("scotch.data.bool.(&&)", t),
+                        isConstructor(arg("#0", t, "scotch.data.tuple.(,)"), "scotch.data.tuple.(,)"),
+                        t),
+                    isConstructor(access(arg("#0", t), "_1", t, "scotch.data.tuple.(,)"), "scotch.data.tuple.(,)"),
+                    t),
+                scope("scotch.test.(third#0)", let(t, "c", access(access(arg("#0", t, "scotch.data.tuple.(,)"), "_1", t, "scotch.data.tuple.(,)"), "_1", t), id("c", t))),
+                raise("Incomplete match", t),
+                t
             ))));
     }
 }

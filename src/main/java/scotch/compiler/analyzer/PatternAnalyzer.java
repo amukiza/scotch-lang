@@ -51,6 +51,11 @@ public class PatternAnalyzer implements PatternReducer {
     }
 
     @Override
+    public void addTaggedArgument(Value taggedArgument) {
+        patternReducer.addTaggedArgument(taggedArgument);
+    }
+
+    @Override
     public void markFunction(FunctionValue function) {
         entries.add(entry(graph.getScope(function.getReference()), function.getDefinition()));
     }
@@ -75,6 +80,11 @@ public class PatternAnalyzer implements PatternReducer {
     @Override
     public void endPatternCase() {
         patternReducer.endPatternCase();
+    }
+
+    @Override
+    public Value getTaggedArgument(Value argument) {
+        return patternReducer.getTaggedArgument(argument);
     }
 
     public Definition keep(Definition definition) {

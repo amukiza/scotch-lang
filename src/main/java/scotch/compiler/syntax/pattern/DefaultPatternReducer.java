@@ -33,12 +33,21 @@ public class DefaultPatternReducer implements PatternReducer {
 
     @Override
     public void addAssignment(CaptureMatch capture) {
-        patterns.peek().addAssignment(capture);
+        pattern().addAssignment(capture);
     }
 
     @Override
     public void addCondition(Value condition) {
-        patterns.peek().addCondition(condition);
+        pattern().addCondition(condition);
+    }
+
+    @Override
+    public void addTaggedArgument(Value taggedArgument) {
+        pattern().addTaggedArgument(taggedArgument);
+    }
+
+    private PatternState pattern() {
+        return patterns.peek();
     }
 
     @Override
@@ -53,7 +62,7 @@ public class DefaultPatternReducer implements PatternReducer {
 
     @Override
     public void beginPatternCase(PatternCase patternCase) {
-        patterns.peek().beginPatternCase(patternCase);
+        pattern().beginPatternCase(patternCase);
     }
 
     @Override
@@ -63,12 +72,17 @@ public class DefaultPatternReducer implements PatternReducer {
 
     @Override
     public void endPatternCase() {
-        patterns.peek().endPatternCase();
+        pattern().endPatternCase();
+    }
+
+    @Override
+    public Value getTaggedArgument(Value argument) {
+        return pattern().getTaggedArgument(argument);
     }
 
     @Override
     public Value reducePattern() {
-        return patterns.peek().reducePattern();
+        return pattern().reducePattern();
     }
 
     private VariableType reserveType() {
@@ -138,7 +152,7 @@ public class DefaultPatternReducer implements PatternReducer {
             List<CaptureMatch> reverseAssignments = new ArrayList<>(assignments);
             reverse(reverseAssignments);
             for (CaptureMatch match : reverseAssignments) {
-                result = match.reducePattern(generator, result);
+                result = match.reducePattern(DefaultPatternReducer.this, generator, result);
             }
             return scope(patternCase.getSourceLocation(), patternCase.getSymbol(), result);
         }
@@ -148,11 +162,13 @@ public class DefaultPatternReducer implements PatternReducer {
 
         private final PatternMatcher  matcher;
         private final List<CaseState> cases;
+        private final List<Value>     taggedArguments;
         private       CaseState       currentCase;
 
         public PatternState(PatternMatcher matcher) {
             this.matcher = matcher;
             this.cases = new ArrayList<>();
+            this.taggedArguments = new ArrayList<>();
         }
 
         public void addAssignment(CaptureMatch capture) {
@@ -163,13 +179,29 @@ public class DefaultPatternReducer implements PatternReducer {
             currentCase.addCondition(condition);
         }
 
+        public void addTaggedArgument(Value taggedArgument) {
+            taggedArguments.add(taggedArgument);
+        }
+
         public void beginPatternCase(PatternCase patternCase) {
             currentCase = new CaseState(patternCase);
+            taggedArguments.clear();
         }
 
         public void endPatternCase() {
             cases.add(currentCase);
             currentCase = null;
+        }
+
+        public Value getTaggedArgument(Value argument) {
+            return argument.mapTags(value -> {
+                for (Value taggedArgument : taggedArguments) {
+                    if (value.equalsBeta(taggedArgument)) {
+                        return value.reTag(taggedArgument);
+                    }
+                }
+                return value;
+            });
         }
 
         public Value reducePattern() {

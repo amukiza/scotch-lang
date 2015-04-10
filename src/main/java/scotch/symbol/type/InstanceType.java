@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import scotch.symbol.NameQualifier;
@@ -47,11 +48,6 @@ public class InstanceType extends Type {
     }
 
     @Override
-    public Class<?> getJavaType() {
-        throw new UnsupportedOperationException(); // TODO
-    }
-
-    @Override
     public String getSignature() {
         throw new UnsupportedOperationException(); // TODO
     }
@@ -73,6 +69,11 @@ public class InstanceType extends Type {
     @Override
     public int hashCode() {
         return Objects.hash(symbol);
+    }
+
+    @Override
+    public Type mapVariables(Function<VariableType, Type> mapper) {
+        return new InstanceType(symbol, binding.mapVariables(mapper));
     }
 
     public boolean is(Type type) {

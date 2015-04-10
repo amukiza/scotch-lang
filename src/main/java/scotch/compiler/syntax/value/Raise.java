@@ -41,17 +41,17 @@ public class Raise extends Value {
     }
 
     @Override
-    public Value bindMethods(TypeChecker state) {
+    public Value bindMethods(TypeChecker typeChecker) {
         return this;
     }
 
     @Override
-    public Value bindTypes(TypeChecker state) {
-        return withType(state.generate(type));
+    public Value bindTypes(TypeChecker typeChecker) {
+        return withType(typeChecker.generate(type));
     }
 
     @Override
-    public Value checkTypes(TypeChecker state) {
+    public Value checkTypes(TypeChecker typeChecker) {
         return this;
     }
 

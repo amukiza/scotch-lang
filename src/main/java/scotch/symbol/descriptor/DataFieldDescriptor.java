@@ -1,11 +1,13 @@
 package scotch.symbol.descriptor;
 
-import java.util.Objects;
+import java.util.Map;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import scotch.symbol.type.Type;
 
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 @Getter
 public class DataFieldDescriptor implements Comparable<DataFieldDescriptor> {
 
@@ -22,23 +24,8 @@ public class DataFieldDescriptor implements Comparable<DataFieldDescriptor> {
         return ordinal - o.ordinal;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (o == this) {
-            return true;
-        } else if (o instanceof DataFieldDescriptor) {
-            DataFieldDescriptor other = (DataFieldDescriptor) o;
-            return Objects.equals(ordinal, other.ordinal)
-                && Objects.equals(name, other.name)
-                && Objects.equals(type, other.type);
-        } else {
-            return false;
-        }
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(ordinal, name, type);
+    public DataFieldDescriptor mapParameters(Map<Type, Type> mappedParameters) {
+        return new DataFieldDescriptor(ordinal, name, type.mapVariables(variable -> mappedParameters.getOrDefault(variable, type)));
     }
 
     @Override

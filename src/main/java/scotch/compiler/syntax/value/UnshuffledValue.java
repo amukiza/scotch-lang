@@ -59,23 +59,23 @@ public class UnshuffledValue extends Value {
     }
 
     @Override
-    public Value bindMethods(TypeChecker state) {
+    public Value bindMethods(TypeChecker typeChecker) {
         return withValues(values.stream()
-            .map(value -> value.bindMethods(state))
+            .map(value -> value.bindMethods(typeChecker))
             .collect(toList()));
     }
 
     @Override
-    public Value bindTypes(TypeChecker state) {
+    public Value bindTypes(TypeChecker typeChecker) {
         return withValues(values.stream()
-            .map(value -> value.bindTypes(state))
+            .map(value -> value.bindTypes(typeChecker))
             .collect(toList()));
     }
 
     @Override
-    public Value checkTypes(TypeChecker state) {
+    public Value checkTypes(TypeChecker typeChecker) {
         return withValues(values.stream()
-            .map(value -> value.checkTypes(state))
+            .map(value -> value.checkTypes(typeChecker))
             .collect(toList()));
     }
 

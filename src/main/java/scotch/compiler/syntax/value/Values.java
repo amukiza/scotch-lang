@@ -15,16 +15,16 @@ import scotch.symbol.type.Type;
 
 public class Values {
 
-    public static Accessor access(SourceLocation sourceLocation, Value target, String field, Type type) {
-        return new Accessor(sourceLocation, target, field, type);
+    public static Accessor access(SourceLocation sourceLocation, Value target, String field, Type type, Optional<Symbol> tag) {
+        return new Accessor(sourceLocation, target, field, type, tag);
     }
 
     public static Apply apply(Value function, Value argument, Type type) {
         return new Apply(function.getSourceLocation().extend(argument.getSourceLocation()), function, argument, type);
     }
 
-    public static Argument arg(SourceLocation sourceLocation, String name, Type type) {
-        return new Argument(sourceLocation, name, type);
+    public static Argument arg(SourceLocation sourceLocation, String name, Type type, Optional<Symbol> tag) {
+        return new Argument(sourceLocation, name, type, tag);
     }
 
     public static Conditional conditional(SourceLocation sourceLocation, Value condition, Value whenTrue, Value whenFalse, Type type) {

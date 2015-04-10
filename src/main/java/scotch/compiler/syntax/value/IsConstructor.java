@@ -1,6 +1,8 @@
 package scotch.compiler.syntax.value;
 
 import static lombok.AccessLevel.PACKAGE;
+import static scotch.compiler.error.SymbolNotFoundError.symbolNotFound;
+import static scotch.compiler.syntax.TypeError.typeError;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -40,18 +42,31 @@ public class IsConstructor extends Value {
     }
 
     @Override
-    public Value bindMethods(TypeChecker state) {
-        return new IsConstructor(sourceLocation, value.bindMethods(state), constructor);
+    public Value bindMethods(TypeChecker typeChecker) {
+        return new IsConstructor(sourceLocation, value.bindMethods(typeChecker), constructor);
     }
 
     @Override
-    public Value bindTypes(TypeChecker state) {
-        return new IsConstructor(sourceLocation, value.bindTypes(state), constructor);
+    public Value bindTypes(TypeChecker typeChecker) {
+        return new IsConstructor(sourceLocation, value.bindTypes(typeChecker), constructor);
     }
 
     @Override
-    public Value checkTypes(TypeChecker state) {
-        return new IsConstructor(sourceLocation, value.checkTypes(state), constructor);
+    public Value checkTypes(TypeChecker typeChecker) {
+        return typeChecker.getDataConstructorType(constructor)
+            .map(parentType -> {
+                Value checkedValue = value.checkTypes(typeChecker);
+                parentType.unify(checkedValue.getType(), typeChecker)
+                    .orElseGet(unification -> {
+                        typeChecker.error(typeError(unification, checkedValue.getSourceLocation()));
+                        return checkedValue.getType();
+                    });
+                return new IsConstructor(sourceLocation, checkedValue, constructor);
+            })
+            .orElseGet(() -> {
+                typeChecker.error(symbolNotFound(constructor, sourceLocation));
+                return this;
+            });
     }
 
     @Override

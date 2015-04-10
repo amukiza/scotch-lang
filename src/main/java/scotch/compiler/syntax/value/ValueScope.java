@@ -57,18 +57,18 @@ public class ValueScope extends Value implements Scoped {
     }
 
     @Override
-    public Value bindMethods(TypeChecker state) {
-        return state.scoped(this, () -> new ValueScope(sourceLocation, symbol, value.bindMethods(state)));
+    public Value bindMethods(TypeChecker typeChecker) {
+        return typeChecker.scoped(this, () -> new ValueScope(sourceLocation, symbol, value.bindMethods(typeChecker)));
     }
 
     @Override
-    public Value bindTypes(TypeChecker state) {
-        return new ValueScope(sourceLocation, symbol, value.bindTypes(state));
+    public Value bindTypes(TypeChecker typeChecker) {
+        return new ValueScope(sourceLocation, symbol, value.bindTypes(typeChecker));
     }
 
     @Override
-    public Value checkTypes(TypeChecker state) {
-        return state.scoped(this, () -> new ValueScope(sourceLocation, symbol, value.checkTypes(state)));
+    public Value checkTypes(TypeChecker typeChecker) {
+        return typeChecker.scoped(this, () -> new ValueScope(sourceLocation, symbol, value.checkTypes(typeChecker)));
     }
 
     @Override
