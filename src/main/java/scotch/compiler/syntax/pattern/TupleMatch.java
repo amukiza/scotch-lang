@@ -91,7 +91,7 @@ public class TupleMatch extends PatternMatch {
     public void reducePatterns(PatternReducer reducer) {
         Value taggedArgument = argument.orElseThrow(IllegalStateException::new).withTag(constructor);
         reducer.addTaggedArgument(taggedArgument);
-        reducer.addCondition(isConstructor(sourceLocation, taggedArgument, constructor));
+        reducer.addCondition(isConstructor(sourceLocation, reducer.getTaggedArgument(taggedArgument), constructor));
         fields.forEach(field -> field.reducePatterns(reducer));
     }
 

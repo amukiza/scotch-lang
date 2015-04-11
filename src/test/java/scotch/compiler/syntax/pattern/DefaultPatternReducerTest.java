@@ -221,11 +221,12 @@ public class DefaultPatternReducerTest {
     public void shouldDestructureNestedTupleAndTagValues() {
         // third (_, (_, c)) = c
         VariableType t = t(0);
+        String tag = "scotch.data.tuple.(,)";
         Value pattern = matcher("scotch.test.third", t, arg("#0", t),
             pattern("scotch.test.(third#0)",
-                asList(tuple(arg("#0", t), "scotch.data.tuple.(,)", t, asList(
+                asList(tuple(arg("#0", t), tag, t, asList(
                     field("_0", t, ignore(t)),
-                    field("_1", t, tuple(access(arg("#0", t), "_1", t), "scotch.data.tuple.(,)", t, asList(
+                    field("_1", t, tuple(access(arg("#0", t), "_1", t), tag, t, asList(
                         field("_0", t, ignore(t)),
                         field("_1", t, capture(access(access(arg("#0", t), "_1", t), "_1", t), "c", t))
                     )))
@@ -240,11 +241,11 @@ public class DefaultPatternReducerTest {
                 apply(
                     apply(
                         id("scotch.data.bool.(&&)", t),
-                        isConstructor(arg("#0", t, "scotch.data.tuple.(,)"), "scotch.data.tuple.(,)"),
+                        isConstructor(arg("#0", t, tag), tag),
                         t),
-                    isConstructor(access(arg("#0", t), "_1", t, "scotch.data.tuple.(,)"), "scotch.data.tuple.(,)"),
+                    isConstructor(access(arg("#0", t, tag), "_1", t, tag), tag),
                     t),
-                scope("scotch.test.(third#0)", let(t, "c", access(access(arg("#0", t, "scotch.data.tuple.(,)"), "_1", t, "scotch.data.tuple.(,)"), "_1", t), id("c", t))),
+                scope("scotch.test.(third#0)", let(t, "c", access(access(arg("#0", t, tag), "_1", t, tag), "_1", t), id("c", t))),
                 raise("Incomplete match", t),
                 t
             ))));
