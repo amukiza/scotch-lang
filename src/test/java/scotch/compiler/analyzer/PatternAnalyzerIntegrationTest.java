@@ -9,6 +9,7 @@ import static scotch.compiler.util.TestUtil.fn;
 import static scotch.compiler.util.TestUtil.id;
 import static scotch.compiler.util.TestUtil.isConstructor;
 import static scotch.compiler.util.TestUtil.let;
+import static scotch.compiler.util.TestUtil.literal;
 import static scotch.compiler.util.TestUtil.raise;
 import static scotch.compiler.util.TestUtil.scope;
 import static scotch.symbol.type.Types.t;
@@ -73,6 +74,31 @@ public class PatternAnalyzerIntegrationTest extends CompilerTest<ClassLoaderReso
                         id("d", t(20)))),
                 raise("Incomplete match", t(30)),
                 t(38)
+            )));
+    }
+
+    @Test
+    public void shouldTagDestructuredToast() {
+        compile(
+            "module scotch.test",
+            "data Toast { kind :: String, burnLevel :: Int }",
+            "isBurned? Toast { burnLevel = b } = b > 3"
+        );
+        String tag = "scotch.test.Toast";
+        shouldHaveValue("scotch.test.(isBurned?)", fn("scotch.test.(isBurned?#0)", arg("#0", t(6)),
+            conditional(
+                isConstructor(arg("#0", t(8), tag), tag),
+                scope("scotch.test.(isBurned?#0#0)",
+                    let(t(13), "b", access(arg("#0", t(8), tag), "burnLevel",  t(9)),
+                        apply(
+                            apply(
+                                id("scotch.data.ord.(>)", t(5)),
+                                id("b", t(4)),
+                                t(10)),
+                            literal(3),
+                            t(11)))),
+                raise("Incomplete match", t(12)),
+                t(14)
             )));
     }
 

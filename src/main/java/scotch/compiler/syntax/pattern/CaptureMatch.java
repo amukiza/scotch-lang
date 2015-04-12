@@ -169,14 +169,23 @@ public class CaptureMatch extends PatternMatch {
         }
 
         public Builder withIdentifier(Identifier identifier) {
-            this.symbol = Optional.of(identifier.getSymbol());
-            this.type = Optional.of(identifier.getType());
-            return this;
+            return withSymbol(identifier.getSymbol())
+                .withType(identifier.getType());
         }
 
         @Override
         public Builder withSourceLocation(SourceLocation sourceLocation) {
             this.sourceLocation = Optional.of(sourceLocation);
+            return this;
+        }
+
+        public Builder withSymbol(Symbol symbol) {
+            this.symbol = Optional.of(symbol);
+            return this;
+        }
+
+        public Builder withType(Type type) {
+            this.type = Optional.of(type);
             return this;
         }
     }

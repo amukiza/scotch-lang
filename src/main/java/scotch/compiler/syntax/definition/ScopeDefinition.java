@@ -1,11 +1,13 @@
 package scotch.compiler.syntax.definition;
 
+import static lombok.AccessLevel.PACKAGE;
 import static scotch.compiler.syntax.builder.BuilderUtil.require;
 import static scotch.compiler.syntax.reference.DefinitionReference.scopeRef;
-import static scotch.util.StringUtil.stringify;
 
-import java.util.Objects;
 import java.util.Optional;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import scotch.compiler.analyzer.DependencyAccumulator;
 import scotch.compiler.analyzer.NameAccumulator;
 import scotch.compiler.analyzer.OperatorAccumulator;
@@ -19,6 +21,9 @@ import scotch.compiler.syntax.reference.DefinitionReference;
 import scotch.compiler.text.SourceLocation;
 import scotch.symbol.Symbol;
 
+@AllArgsConstructor(access = PACKAGE)
+@EqualsAndHashCode(callSuper = false)
+@ToString(exclude = "sourceLocation")
 public class ScopeDefinition extends Definition {
 
     public static Builder builder() {
@@ -27,11 +32,6 @@ public class ScopeDefinition extends Definition {
 
     private final SourceLocation sourceLocation;
     private final Symbol         symbol;
-
-    ScopeDefinition(SourceLocation sourceLocation, Symbol symbol) {
-        this.sourceLocation = sourceLocation;
-        this.symbol = symbol;
-    }
 
     @Override
     public Definition accumulateDependencies(DependencyAccumulator state) {
@@ -54,19 +54,6 @@ public class ScopeDefinition extends Definition {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (o == this) {
-            return true;
-        } else if (o instanceof ScopeDefinition) {
-            ScopeDefinition other = (ScopeDefinition) o;
-            return Objects.equals(sourceLocation, other.sourceLocation)
-                && Objects.equals(symbol, other.symbol);
-        } else {
-            return false;
-        }
-    }
-
-    @Override
     public Optional<DefinitionReference> generateIntermediateCode(IntermediateGenerator generator) {
         throw new UnsupportedOperationException(); // TODO
     }
@@ -82,11 +69,6 @@ public class ScopeDefinition extends Definition {
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(symbol);
-    }
-
-    @Override
     public Optional<Definition> parsePrecedence(PrecedenceParser state) {
         return Optional.of(state.keep(this));
     }
@@ -99,11 +81,6 @@ public class ScopeDefinition extends Definition {
     @Override
     public Definition reducePatterns(PatternAnalyzer state) {
         throw new UnsupportedOperationException(); // TODO
-    }
-
-    @Override
-    public String toString() {
-        return stringify(this) + "(" + symbol.getCanonicalName() + ")";
     }
 
     public static class Builder implements SyntaxBuilder<ScopeDefinition> {

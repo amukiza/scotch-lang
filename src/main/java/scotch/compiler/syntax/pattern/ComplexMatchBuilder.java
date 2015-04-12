@@ -8,6 +8,7 @@ import static scotch.symbol.Symbol.qualified;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import scotch.compiler.syntax.builder.SyntaxBuilder;
 import scotch.compiler.text.SourceLocation;
 import scotch.symbol.Symbol;
@@ -80,12 +81,13 @@ public class ComplexMatchBuilder implements SyntaxBuilder<PatternMatch> {
         @Override
         public PatternMatch build() {
             Symbol constructor = qualified("scotch.data.tuple", "(" + repeat(",", patternMatches.size() - 1) + ")");
-            TupleMatch.Builder structureMatch = TupleMatch.builder()
+            AtomicInteger counter = new AtomicInteger();
+            StructMatch.Builder structureMatch = StructMatch.builder()
                 .withSourceLocation(require(sourceLocation, "Source location"))
                 .withType(symbolGenerator.reserveType())
                 .withConstructor(constructor);
             patternMatches.stream()
-                .map(match -> field(match.getSourceLocation(), Optional.empty(), symbolGenerator.reserveType(), match))
+                .map(match -> field(match.getSourceLocation(), "_" + counter.getAndIncrement(), symbolGenerator.reserveType(), match))
                 .forEach(structureMatch::withField);
             return structureMatch.build();
         }

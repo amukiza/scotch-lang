@@ -21,16 +21,16 @@ public final class Patterns {
         return new IgnorePattern(sourceLocation, type);
     }
 
-    public static TupleField field(SourceLocation sourceLocation, Optional<String> field, Type type, PatternMatch patternMatch) {
-        return new TupleField(sourceLocation, field, type, patternMatch);
+    public static StructField field(SourceLocation sourceLocation, String field, Type type, PatternMatch patternMatch) {
+        return new StructField(sourceLocation, field, type, patternMatch);
     }
 
     public static PatternCase pattern(SourceLocation sourceLocation, Symbol symbol, List<PatternMatch> patternMatches, Value body) {
         return new PatternCase(sourceLocation, symbol, patternMatches, body);
     }
 
-    public static TupleMatch tuple(SourceLocation sourceLocation, Optional<Value> argument, Symbol dataType, Type type, List<TupleField> fields) {
-        return new TupleMatch(sourceLocation, argument, dataType, type, fields);
+    public static StructMatch struct(SourceLocation sourceLocation, Optional<Value> argument, Symbol dataType, Type type, List<StructField> fields) {
+        return new StructMatch(sourceLocation, argument, dataType, type, fields);
     }
 
     public static UnshuffledStructureMatch unshuffledMatch(SourceLocation sourceLocation, Type type, List<PatternMatch> patternMatches) {

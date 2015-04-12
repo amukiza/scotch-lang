@@ -1,6 +1,7 @@
 package scotch.compiler.syntax.pattern;
 
 import static java.util.stream.Collectors.toList;
+import static scotch.compiler.error.SymbolNotFoundError.symbolNotFound;
 import static scotch.compiler.syntax.builder.BuilderUtil.require;
 import static scotch.compiler.syntax.value.Values.isConstructor;
 import static scotch.compiler.text.TextUtil.repeat;
@@ -9,8 +10,7 @@ import static scotch.symbol.type.Types.sum;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiFunction;
+import java.util.function.Function;
 import com.google.common.collect.ImmutableList;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -28,21 +28,21 @@ import scotch.symbol.type.Type;
 
 @EqualsAndHashCode(callSuper = false)
 @ToString(exclude = "sourceLocation")
-public class TupleMatch extends PatternMatch {
+public class StructMatch extends PatternMatch {
 
     public static Builder builder() {
         return new Builder();
     }
 
     @Getter
-    private final SourceLocation   sourceLocation;
-    private final Optional<Value>  argument;
-    private final Symbol           constructor;
+    private final SourceLocation    sourceLocation;
+    private final Optional<Value>   argument;
+    private final Symbol            constructor;
     @Getter
-    private final Type             type;
-    private final List<TupleField> fields;
+    private final Type              type;
+    private final List<StructField> fields;
 
-    TupleMatch(SourceLocation sourceLocation, Optional<Value> argument, Symbol constructor, Type type, List<TupleField> fields) {
+    StructMatch(SourceLocation sourceLocation, Optional<Value> argument, Symbol constructor, Type type, List<StructField> fields) {
         this.sourceLocation = sourceLocation;
         this.argument = argument;
         this.constructor = constructor;
@@ -57,34 +57,45 @@ public class TupleMatch extends PatternMatch {
 
     @Override
     public PatternMatch accumulateNames(NameAccumulator state) {
-        return map((field, ordinal) -> field.accumulateNames(state));
+        return map(field -> field.accumulateNames(state));
     }
 
     @Override
     public PatternMatch bind(Value argument, Scope scope) {
-        return withArgument(argument).map((field, ordinal) -> field.bind(argument, ordinal, scope));
+        return withArgument(argument).map(field -> field.bind(argument, scope));
     }
 
     @Override
     public PatternMatch bindMethods(TypeChecker state) {
-        return map((field, ordinal) -> field.bindMethods(state));
+        return map(field -> field.bindMethods(state));
     }
 
     @Override
     public PatternMatch bindTypes(TypeChecker state) {
-        return map((field, ordinal) -> field.bindTypes(state)).withType(state.generate(type)).withArgument(argument
-            .orElseThrow(IllegalStateException::new)
-            .bindTypes(state));
+        return map(field -> field.bindTypes(state))
+            .withType(state.generate(type))
+            .withArgument(argument
+                .orElseThrow(IllegalStateException::new)
+                .bindTypes(state));
     }
 
     @Override
     public PatternMatch checkTypes(TypeChecker state) {
-        return map((field, ordinal) -> field.checkTypes(state)).bindType(state);
+        return map(field -> field.checkTypes(state)).bindType(state);
     }
 
     @Override
     public PatternMatch qualifyNames(ScopedNameQualifier state) {
-        return this;
+        return new StructMatch(
+            sourceLocation,
+            argument.map(arg -> arg.qualifyNames(state)),
+            state.qualify(constructor).orElseGet(() -> {
+                state.error(symbolNotFound(constructor, sourceLocation));
+                return constructor;
+            }),
+            type,
+            fields
+        );
     }
 
     @Override
@@ -96,44 +107,41 @@ public class TupleMatch extends PatternMatch {
     }
 
     @Override
-    public TupleMatch withType(Type type) {
-        return new TupleMatch(sourceLocation, argument, constructor, type, fields);
+    public StructMatch withType(Type type) {
+        return new StructMatch(sourceLocation, argument, constructor, type, fields);
     }
 
-    private TupleMatch bindType(TypeChecker state) {
+    private StructMatch bindType(TypeChecker state) {
         Type type = sum(
             "scotch.data.tuple.(" + repeat(",", fields.size() - 1) + ")",
             fields.stream()
-                .map(TupleField::getType)
+                .map(StructField::getType)
                 .collect(toList()));
         argument.map(arg -> type.unify(arg.getType(), state));
         return withType(type);
     }
 
-    private TupleMatch map(BiFunction<TupleField, Integer, TupleField> mapper) {
-        AtomicInteger counter = new AtomicInteger();
-        return new TupleMatch(
+    private StructMatch map(Function<StructField, StructField> mapper) {
+        return new StructMatch(
             sourceLocation, argument, constructor, type,
-            fields.stream()
-                .map(field -> mapper.apply(field, counter.getAndIncrement()))
-                .collect(toList())
+            fields.stream().map(mapper::apply).collect(toList())
         );
     }
 
-    private TupleMatch withArgument(Value argument) {
-        return new TupleMatch(sourceLocation, Optional.of(argument), constructor, type, fields);
+    private StructMatch withArgument(Value argument) {
+        return new StructMatch(sourceLocation, Optional.of(argument), constructor, type, fields);
     }
 
-    public static class Builder implements SyntaxBuilder<TupleMatch> {
+    public static class Builder implements SyntaxBuilder<StructMatch> {
 
         private Optional<SourceLocation> sourceLocation = Optional.empty();
-        private List<TupleField>         fields         = new ArrayList<>();
+        private List<StructField>        fields         = new ArrayList<>();
         private Optional<Symbol>         constructor    = Optional.empty();
         private Optional<Type>           type           = Optional.empty();
 
         @Override
-        public TupleMatch build() {
-            return new TupleMatch(
+        public StructMatch build() {
+            return new StructMatch(
                 require(sourceLocation, "Source location"),
                 Optional.empty(),
                 require(constructor, "Constructor"),
@@ -147,7 +155,7 @@ public class TupleMatch extends PatternMatch {
             return this;
         }
 
-        public Builder withField(TupleField field) {
+        public Builder withField(StructField field) {
             fields.add(field);
             return this;
         }

@@ -23,7 +23,7 @@ import static scotch.compiler.util.TestUtil.matcher;
 import static scotch.compiler.util.TestUtil.pattern;
 import static scotch.compiler.util.TestUtil.raise;
 import static scotch.compiler.util.TestUtil.scope;
-import static scotch.compiler.util.TestUtil.tuple;
+import static scotch.compiler.util.TestUtil.struct;
 import static scotch.symbol.type.Types.t;
 
 import org.junit.Rule;
@@ -198,7 +198,7 @@ public class DefaultPatternReducerTest {
         String tuple2 = "scotch.data.tuple.(,)";
         Value pattern = matcher("scotch.test.second", t(1), arg("#0", t(2)),
             pattern("scotch.test.(second#0)",
-                asList(tuple(arg("#0", t(3)), tuple2, t(4), asList(
+                asList(struct(arg("#0", t(3)), tuple2, t(4), asList(
                     field("_0", t(5), ignore(t(6))),
                     field("_1", t(7), capture(access(arg("#0", t(8)), "_1", t(9)), "b", t(10)))
                 ))),
@@ -224,9 +224,9 @@ public class DefaultPatternReducerTest {
         String tag = "scotch.data.tuple.(,)";
         Value pattern = matcher("scotch.test.third", t, arg("#0", t),
             pattern("scotch.test.(third#0)",
-                asList(tuple(arg("#0", t), tag, t, asList(
+                asList(struct(arg("#0", t), tag, t, asList(
                     field("_0", t, ignore(t)),
-                    field("_1", t, tuple(access(arg("#0", t), "_1", t), tag, t, asList(
+                    field("_1", t, struct(access(arg("#0", t), "_1", t), tag, t, asList(
                         field("_0", t, ignore(t)),
                         field("_1", t, capture(access(access(arg("#0", t), "_1", t), "_1", t), "c", t))
                     )))

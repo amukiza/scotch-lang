@@ -94,6 +94,8 @@ import scotch.compiler.syntax.pattern.EqualMatch;
 import scotch.compiler.syntax.pattern.IgnorePattern;
 import scotch.compiler.syntax.pattern.PatternCase;
 import scotch.compiler.syntax.pattern.PatternMatch;
+import scotch.compiler.syntax.pattern.StructField;
+import scotch.compiler.syntax.pattern.StructMatch;
 import scotch.compiler.syntax.pattern.UnshuffledStructureMatch;
 import scotch.compiler.syntax.reference.DefinitionReference;
 import scotch.compiler.syntax.scope.Scope;
@@ -221,6 +223,10 @@ public class InputParser {
 
     private boolean expectsDefinitions() {
         return !expectsModule() && !expects(END_OF_FILE);
+    }
+
+    private boolean expectsIgnoreMatch() {
+        return expectsWord("_");
     }
 
     private boolean expectsImport() {
@@ -596,6 +602,19 @@ public class InputParser {
         });
     }
 
+    private StructField parseFieldMatch() {
+        return node(StructField.builder(), builder -> {
+            builder.withFieldName(requireWord());
+            builder.withType(reserveType());
+            if (expects(ASSIGN)) {
+                nextToken();
+                builder.withPatternMatch(parseRequiredMatch());
+            } else {
+                builder.withImplicitCapture();
+            }
+        });
+    }
+
     private List<InitializerField> parseFields() {
         List<InitializerField> fields = new ArrayList<>();
         require(LEFT_CURLY_BRACE);
@@ -611,6 +630,13 @@ public class InputParser {
         }
         require(RIGHT_CURLY_BRACE);
         return fields;
+    }
+
+    private IgnorePattern parseIgnoreMatch() {
+        return node(IgnorePattern.builder(), builder -> {
+            requireWord("_");
+            builder.withType(reserveType());
+        });
     }
 
     private Import parseImport() {
@@ -689,23 +715,16 @@ public class InputParser {
         return Optional.ofNullable(match);
     }
 
-    private IgnorePattern parseIgnoreMatch() {
-        return node(IgnorePattern.builder(), builder -> {
-            requireWord("_");
-            builder.withType(reserveType());
-        });
-    }
-
-    private boolean expectsIgnoreMatch() {
-        return expectsWord("_");
-    }
-
     private Optional<PatternMatch> parseMatch(boolean required) {
         PatternMatch match = null;
         if (expectsIgnoreMatch()) {
             match = parseIgnoreMatch();
         } else if (expectsWord()) {
-            match = parseCaptureMatch();
+            if (expectsAt(1, LEFT_CURLY_BRACE)) {
+                match = parseStructMatch();
+            } else {
+                match = parseCaptureMatch();
+            }
         } else if (expectsLiteral()) {
             match = node(EqualMatch.builder(), builder -> builder.withValue(parseLiteral()));
         } else if (expects(LEFT_PARENTHESIS)) {
@@ -942,6 +961,23 @@ public class InputParser {
             }
         }
         return emptyMap();
+    }
+
+    private PatternMatch parseStructMatch() {
+        return node(StructMatch.builder(), builder -> {
+            builder.withConstructor(symbol(requireWord()));
+            builder.withType(reserveType());
+            require(LEFT_CURLY_BRACE);
+            builder.withField(parseFieldMatch());
+            while (expects(COMMA) && expectsWordAt(1)) {
+                nextToken();
+                builder.withField(parseFieldMatch());
+            }
+            if (expects(COMMA)) {
+                nextToken();
+            }
+            require(RIGHT_CURLY_BRACE);
+        });
     }
 
     private Symbol parseSymbol() {

@@ -35,8 +35,8 @@ import scotch.compiler.syntax.pattern.IgnorePattern;
 import scotch.compiler.syntax.pattern.PatternCase;
 import scotch.compiler.syntax.pattern.PatternMatch;
 import scotch.compiler.syntax.pattern.Patterns;
-import scotch.compiler.syntax.pattern.TupleField;
-import scotch.compiler.syntax.pattern.TupleMatch;
+import scotch.compiler.syntax.pattern.StructField;
+import scotch.compiler.syntax.pattern.StructMatch;
 import scotch.compiler.syntax.pattern.UnshuffledStructureMatch;
 import scotch.compiler.syntax.reference.ClassReference;
 import scotch.compiler.syntax.reference.DataReference;
@@ -190,12 +190,8 @@ public class TestUtil {
         return InitializerField.field(NULL_SOURCE, name, value);
     }
 
-    public static TupleField field(Type type, PatternMatch patternMatch) {
-        return Patterns.field(NULL_SOURCE, Optional.empty(), type, patternMatch);
-    }
-
-    public static TupleField field(String field, Type type, PatternMatch patternMatch) {
-        return Patterns.field(NULL_SOURCE, Optional.of(field), type, patternMatch);
+    public static StructField field(String field, Type type, PatternMatch patternMatch) {
+        return Patterns.field(NULL_SOURCE, field, type, patternMatch);
     }
 
     public static DataFieldDefinition fieldDef(int ordinal, String name, Type type) {
@@ -331,12 +327,12 @@ public class TestUtil {
         return token;
     }
 
-    public static TupleMatch tuple(String dataType, Type type, List<TupleField> fields) {
-        return Patterns.tuple(NULL_SOURCE, Optional.empty(), symbol(dataType), type, fields);
+    public static StructMatch struct(String dataType, Type type, List<StructField> fields) {
+        return Patterns.struct(NULL_SOURCE, Optional.empty(), symbol(dataType), type, fields);
     }
 
-    public static TupleMatch tuple(Value argument, String dataType, Type type, List<TupleField> fields) {
-        return Patterns.tuple(NULL_SOURCE, Optional.of(argument), symbol(dataType), type, fields);
+    public static StructMatch struct(Value argument, String dataType, Type type, List<StructField> fields) {
+        return Patterns.struct(NULL_SOURCE, Optional.of(argument), symbol(dataType), type, fields);
     }
 
     public static TypeClassDescriptor typeClass(String name, List<Type> parameters, List<String> members) {

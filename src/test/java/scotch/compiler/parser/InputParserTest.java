@@ -35,7 +35,7 @@ import static scotch.compiler.util.TestUtil.pattern;
 import static scotch.compiler.util.TestUtil.root;
 import static scotch.compiler.util.TestUtil.scopeRef;
 import static scotch.compiler.util.TestUtil.signatureRef;
-import static scotch.compiler.util.TestUtil.tuple;
+import static scotch.compiler.util.TestUtil.struct;
 import static scotch.compiler.util.TestUtil.unshuffled;
 import static scotch.compiler.util.TestUtil.unshuffledMatch;
 import static scotch.control.monad.Monad.fail;
@@ -634,9 +634,9 @@ public class InputParserTest extends IsolatedCompilerTest {
             "second (_, b) = b"
         );
         shouldHavePattern("scotch.test.(#0)",
-            asList(capture("second", t(0)), tuple("scotch.data.tuple.(,)", t(5), asList(
-                field(t(6), ignore(t(2))),
-                field(t(7), capture("b", t(4)))))),
+            asList(capture("second", t(0)), struct("scotch.data.tuple.(,)", t(5), asList(
+                field("_0", t(6), ignore(t(2))),
+                field("_1", t(7), capture("b", t(4)))))),
             unshuffled(id("b", t(8)))
         );
     }
@@ -659,9 +659,9 @@ public class InputParserTest extends IsolatedCompilerTest {
             "second (_, (b)) = b"
         );
         shouldHavePattern("scotch.test.(#0)",
-            asList(capture("second", t(0)), tuple("scotch.data.tuple.(,)", t(7), asList(
-                field(t(8), ignore(t(2))),
-                field(t(9), capture("b", t(5)))))),
+            asList(capture("second", t(0)), struct("scotch.data.tuple.(,)", t(7), asList(
+                field("_0", t(8), ignore(t(2))),
+                field("_1", t(9), capture("b", t(5)))))),
             unshuffled(id("b", t(10)))
         );
     }
@@ -673,13 +673,71 @@ public class InputParserTest extends IsolatedCompilerTest {
             "secondSecond (_, (_, b)) = b"
         );
         shouldHavePattern("scotch.test.(#0)",
-            asList(capture("secondSecond", t(0)), tuple("scotch.data.tuple.(,)", t(11), asList(
-                field(t(12), ignore(t(2))),
-                field(t(13), tuple("scotch.data.tuple.(,)", t(8), asList(
-                    field(t(9), ignore(t(5))),
-                    field(t(10), capture("b", t(7))))))))),
+            asList(capture("secondSecond", t(0)), struct("scotch.data.tuple.(,)", t(11), asList(
+                field("_0", t(12), ignore(t(2))),
+                field("_1", t(13), struct("scotch.data.tuple.(,)", t(8), asList(
+                    field("_0", t(9), ignore(t(5))),
+                    field("_1", t(10), capture("b", t(7))))))))),
             unshuffled(id("b", t(14)))
         );
+    }
+
+    @Test
+    public void shouldDestructureToast() {
+        compile(
+            "module scotch.test",
+            "data Toast { kind :: String, burnLevel :: Int }",
+            "isBurned? Toast { burnLevel = b } = b > 3"
+        );
+        shouldNotHaveErrors();
+        shouldHavePattern("scotch.test.(#1)",
+            asList(
+                capture("isBurned?", t(0)),
+                struct("Toast", t(1), asList(
+                    field("burnLevel", t(2), capture("b", t(3)))
+                ))
+            ),
+            unshuffled(id("b", t(4)), id(">", t(5)), literal(3))
+        );
+    }
+
+    @Test
+    public void shouldDestructureToastWithImplicitFieldCapture() {
+        compile(
+            "module scotch.test",
+            "data Toast { kind :: String, burnLevel :: Int }",
+            "isBurned? Toast { burnLevel } = burnLevel > 3"
+        );
+        shouldNotHaveErrors();
+        shouldHavePattern("scotch.test.(#1)",
+            asList(
+                capture("isBurned?", t(0)),
+                struct("Toast", t(1), asList(
+                    field("burnLevel", t(2), capture("burnLevel", t(2)))
+                ))
+            ),
+            unshuffled(id("burnLevel", t(3)), id(">", t(4)), literal(3))
+        );
+    }
+
+    @Test
+    public void shouldDestructureToastWithTupleFieldMatch() {
+        compile(
+            "module scotch.test",
+            "data Person { name :: (String, String) }",
+            "firstName Person { name = (fn, _) } = fn"
+        );
+        shouldHavePattern("scotch.test.(#1)",
+            asList(
+                capture("firstName", t(0)),
+                struct("Person", t(1), asList(
+                    field("name", t(2), struct("scotch.data.tuple.(,)", t(7), asList(
+                        field("_0", t(8), capture("fn", t(4))),
+                        field("_1", t(9), ignore(t(6)))
+                    )))
+                ))
+            ),
+            unshuffled(id("fn", t(10))));
     }
 
     private void shouldHaveDataType(String name, DataTypeDefinition value) {
