@@ -272,3 +272,76 @@ colors = [Red, Blue, Green]
 // two sausage links
 twoSausages = SausageLink Sausage (SausageLink Sausage NoMoreSausage)
 ```
+
+## Whitespace
+
+Scotch uses whitespace ([off-side rule](http://en.wikipedia.org/wiki/Off-side_rule))
+to delimit blocks of code in a way that is similar to Haskell and F#. When semicolons
+and curly braces aren't used to delimit blocks, they are inserted automatically by
+using whitespace. Curly braces are inserted around `do` blocks and `let` declarations, while semicolons are inserted at the ends of lines. Both curly braces
+and semicolons are optional and may be left out as long as the following rules
+are followed.
+
+### Value Declarations
+
+Expressions may be broken across lines as long as all following lines are indented
+further than the first line. This rule applies regardless of whether semicolons
+are used:
+
+```
+fn a b = something being
+  done with a and b
+
+a >= b = if compare a b == GreaterThan
+         then True
+         else False
+```
+
+### Do-Notation
+
+Do-notation can use curly braces instead of whitespace and this be indented
+arbitrarily:
+
+```
+actuallyNumber = Just 1
+actuallyAnotherNumber = Just 2
+
+expression = do {
+  	x <- actuallyNumber;
+	y <- actuallyAnotherNumber;
+	 return $ x + y;
+}
+```
+
+### Data Declarations
+
+Data declarations must have the last curly brace indented further than the `data`
+keyword, otherwise a semicolon is inserted before the closing brace:
+
+```
+// right syntax
+data Pickle {
+    numberOfBumps :: Int,
+    texture :: MouthFeel
+  }
+
+// wrong syntax
+data Pickle {
+    numberOfBumps :: Int,
+    texture :: MouthFeel
+}
+
+// because this happens
+data Pickle {
+    numberOfBumps :: Int,
+    texture :: MouthFeel
+;}
+```
+
+Because of this restriction, data declarations are recommended to use syntax
+similar to the following:
+
+```
+data Pickle { numberOfBumps :: Int,
+              texture :: MouthFeel }
+```
