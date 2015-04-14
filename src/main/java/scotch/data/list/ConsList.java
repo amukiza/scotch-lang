@@ -111,7 +111,7 @@ public abstract class ConsList<A> {
             } else if (o instanceof ConsCell) {
                 ConsCell other = (ConsCell) o;
                 return Objects.equals(head.call(), other.head.call())
-                    && Objects.equals((Callable) tail.call(), other.tail.call());
+                    && Objects.equals(tail.call(), other.tail.call());
             } else {
                 return false;
             }
