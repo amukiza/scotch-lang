@@ -1,6 +1,7 @@
 package scotch.compiler.syntax.pattern;
 
 import static scotch.compiler.syntax.builder.BuilderUtil.require;
+import static scotch.compiler.util.Either.right;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,17 +12,19 @@ import lombok.Getter;
 import lombok.ToString;
 import scotch.compiler.analyzer.DependencyAccumulator;
 import scotch.compiler.analyzer.NameAccumulator;
+import scotch.compiler.analyzer.PrecedenceParser;
 import scotch.compiler.analyzer.ScopedNameQualifier;
 import scotch.compiler.analyzer.TypeChecker;
 import scotch.compiler.syntax.builder.SyntaxBuilder;
 import scotch.compiler.syntax.scope.Scope;
 import scotch.compiler.syntax.value.Value;
 import scotch.compiler.text.SourceLocation;
+import scotch.compiler.util.Either;
 import scotch.symbol.type.Type;
 
 @EqualsAndHashCode(callSuper = false)
 @ToString(exclude = "sourceLocation")
-public class UnshuffledStructureMatch extends PatternMatch {
+public class UnshuffledStructMatch extends PatternMatch {
 
     public static Builder builder() {
         return new Builder();
@@ -33,7 +36,7 @@ public class UnshuffledStructureMatch extends PatternMatch {
     private final Type               type;
     private final List<PatternMatch> patternMatches;
 
-    public UnshuffledStructureMatch(SourceLocation sourceLocation, Type type, List<PatternMatch> patternMatches) {
+    public UnshuffledStructMatch(SourceLocation sourceLocation, Type type, List<PatternMatch> patternMatches) {
         this.sourceLocation = sourceLocation;
         this.type = type;
         this.patternMatches = ImmutableList.copyOf(patternMatches);
@@ -51,7 +54,7 @@ public class UnshuffledStructureMatch extends PatternMatch {
 
     @Override
     public PatternMatch bind(Value argument, Scope scope) {
-        throw new UnsupportedOperationException(); // TODO
+        return this;
     }
 
     @Override
@@ -70,6 +73,15 @@ public class UnshuffledStructureMatch extends PatternMatch {
     }
 
     @Override
+    public Either<PatternMatch, List<PatternMatch>> destructure() {
+        return right(patternMatches);
+    }
+
+    public List<PatternMatch> getPatternMatches() {
+        return patternMatches;
+    }
+
+    @Override
     public PatternMatch qualifyNames(ScopedNameQualifier state) {
         throw new UnsupportedOperationException(); // TODO
     }
@@ -77,6 +89,11 @@ public class UnshuffledStructureMatch extends PatternMatch {
     @Override
     public void reducePatterns(PatternReducer reducer) {
         throw new UnsupportedOperationException(); // TODO
+    }
+
+    @Override
+    public PatternMatch shuffle(PrecedenceParser state) {
+        return state.shuffle(this);
     }
 
     @Override
@@ -95,7 +112,7 @@ public class UnshuffledStructureMatch extends PatternMatch {
             if (patternMatches.size() == 1) {
                 return patternMatches.get(0);
             } else {
-                return new UnshuffledStructureMatch(
+                return new UnshuffledStructMatch(
                     require(sourceLocation, "Source location"),
                     require(type, "Type"),
                     patternMatches

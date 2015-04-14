@@ -212,7 +212,7 @@ public class IntermediateGeneratorTest {
         );
         shouldHaveValue("scotch.test.second", function(emptyList(), "#0", conditional(
             instanceOf(variable("#0"), "scotch/data/tuple/Tuple2$Tuple2Data"),
-            assign("b", access(asList("#0"), variable("#0"), "_1"), variable("b")),
+            assign("b", access(asList("#0"), variable("#0"), "_1", "get_1"), variable("b")),
             raise("Incomplete match")
         )));
     }
@@ -229,8 +229,8 @@ public class IntermediateGeneratorTest {
                     valueRef("scotch.data.bool.(&&)",
                         staticMethod("scotch/data/bool/Bool", "and", sig(Applicable.class))),
                     instanceOf(variable("#0"), "scotch/data/tuple/Tuple2$Tuple2Data")),
-                instanceOf(access(asList("#0"), variable("#0"), "_1"), "scotch/data/tuple/Tuple2$Tuple2Data")),
-            assign("c", access(asList("#0"), access(asList("#0"), variable("#0"), "_1"), "_1"), variable("c")),
+                instanceOf(access(asList("#0"), variable("#0"), "_1", "get_1"), "scotch/data/tuple/Tuple2$Tuple2Data")),
+            assign("c", access(asList("#0"), access(asList("#0"), variable("#0"), "_1", "get_1"), "_1", "get_1"), variable("c")),
             raise("Incomplete match")
         )));
     }

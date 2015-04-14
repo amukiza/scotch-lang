@@ -102,6 +102,64 @@ public class PatternAnalyzerIntegrationTest extends CompilerTest<ClassLoaderReso
             )));
     }
 
+    @Test
+    public void shouldTagSecondTail() {
+        compile(
+            "module scotch.test",
+            "secondTail (_:_:xs) = xs"
+        );
+        String tag = "scotch.data.list.(:)";
+        shouldHaveValue("scotch.test.secondTail", fn("scotch.test.(secondTail#0)", arg("#0", t(9)),
+            conditional(
+                apply(
+                    apply(
+                        id("scotch.data.bool.(&&)", t(23)),
+                        isConstructor(arg("#0", t(17), tag), tag),
+                        t(24)),
+                    isConstructor(access(arg("#0", t(17), tag), "_1", t(19), tag), tag),
+                    t(25)),
+                scope("scotch.test.(secondTail#0#0)",
+                    let(t(26), "xs", access(access(arg("#0", t(17), tag), "_1", t(19), tag), "_1", t(21)), id("xs", t(8)))),
+                raise("Incomplete match", t(22)),
+                t(27)
+            )));
+    }
+
+    @Test
+    public void shouldDestructurePersonWithMultipleCases() {
+        compile(
+            "module scotch.test",
+            "data Person { age :: Int }",
+            "newborn? Person { age = 0 } = True",
+            "newborn? Person { age = _ } = False",
+            "run = newborn? Person { age = 1 }"
+        );
+        String tag = "scotch.test.Person";
+        shouldHaveValue("scotch.test.(newborn?)", fn("scotch.test.(newborn?#0)", arg("#0", t(11)),
+            conditional(
+                apply(
+                    apply(
+                        id("scotch.data.bool.(&&)", t(22)),
+                        isConstructor(arg("#0", t(13), tag), tag),
+                        t(23)),
+                    apply(
+                        apply(
+                            id("scotch.data.eq.(==)", t(17)),
+                            access(arg("#0", t(13), tag), "age", t(14)),
+                            t(18)),
+                        literal(0),
+                        t(19)),
+                    t(24)),
+                scope("scotch.test.(newborn?#0#0)", literal(true)),
+                conditional(
+                    isConstructor(arg("#0", t(15), tag), tag),
+                    scope("scotch.test.(newborn?#0#1)", literal(false)),
+                    raise("Incomplete match", t(20)),
+                    t(21)),
+                t(25)
+            )));
+    }
+
     @Override
     protected Function<Compiler, DefinitionGraph> compile() {
         return Compiler::reducePatterns;

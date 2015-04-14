@@ -2,6 +2,7 @@ package scotch.data.list;
 
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.joining;
+import static scotch.runtime.RuntimeSupport.box;
 import static scotch.symbol.Value.Fixity.RIGHT_INFIX;
 import static scotch.symbol.type.Types.fn;
 import static scotch.symbol.type.Types.sum;
@@ -42,6 +43,15 @@ public abstract class ConsList<A> {
     @ValueType(forMember = ":")
     public static Type cons$type() {
         return fn(var("a"), fn(sum("scotch.data.list.[]", var("a")), sum("scotch.data.list.[]", var("a"))));
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> ConsList<T> eagerCons(T... numbers) {
+        Callable<ConsList<Object>> tail = (Callable) empty();
+        for (int i = numbers.length - 1; i >= 0; i--) {
+            tail = cons().apply(box(numbers[i])).call().apply(tail);
+        }
+        return (ConsList) tail.call();
     }
 
     @SuppressWarnings("unchecked")
@@ -93,6 +103,7 @@ public abstract class ConsList<A> {
         private final Callable<A> head;
         private final Callable<ConsList<A>> tail;
 
+        @SuppressWarnings("unchecked")
         @Override
         public boolean equals(Object o) {
             if (o == this) {
@@ -100,7 +111,7 @@ public abstract class ConsList<A> {
             } else if (o instanceof ConsCell) {
                 ConsCell other = (ConsCell) o;
                 return Objects.equals(head.call(), other.head.call())
-                    && Objects.equals(tail.call(), other.tail.call());
+                    && Objects.equals((Callable) tail.call(), other.tail.call());
             } else {
                 return false;
             }

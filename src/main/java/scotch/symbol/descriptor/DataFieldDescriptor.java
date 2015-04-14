@@ -11,12 +11,13 @@ import scotch.symbol.type.Type;
 @Getter
 public class DataFieldDescriptor implements Comparable<DataFieldDescriptor> {
 
-    public static DataFieldDescriptor field(int ordinal, String name, Type type) {
-        return new DataFieldDescriptor(ordinal, name, type);
+    public static DataFieldDescriptor field(int ordinal, String name, String methodName, Type type) {
+        return new DataFieldDescriptor(ordinal, name, methodName, type);
     }
 
     private final int    ordinal;
     private final String name;
+    private final String methodName;
     private final Type   type;
 
     @Override
@@ -25,7 +26,7 @@ public class DataFieldDescriptor implements Comparable<DataFieldDescriptor> {
     }
 
     public DataFieldDescriptor mapParameters(Map<Type, Type> mappedParameters) {
-        return new DataFieldDescriptor(ordinal, name, type.mapVariables(variable -> mappedParameters.getOrDefault(variable, type)));
+        return new DataFieldDescriptor(ordinal, name, methodName, type.mapVariables(variable -> mappedParameters.getOrDefault(variable, type)));
     }
 
     @Override
@@ -34,6 +35,6 @@ public class DataFieldDescriptor implements Comparable<DataFieldDescriptor> {
     }
 
     public DataFieldDescriptor withType(Type type) {
-        return new DataFieldDescriptor(ordinal, name, type);
+        return new DataFieldDescriptor(ordinal, name, methodName, type);
     }
 }

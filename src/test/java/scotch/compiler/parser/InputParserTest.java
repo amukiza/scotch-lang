@@ -21,6 +21,7 @@ import static scotch.compiler.util.TestUtil.construct;
 import static scotch.compiler.util.TestUtil.ctorDef;
 import static scotch.compiler.util.TestUtil.dataDef;
 import static scotch.compiler.util.TestUtil.dataRef;
+import static scotch.compiler.util.TestUtil.equal;
 import static scotch.compiler.util.TestUtil.field;
 import static scotch.compiler.util.TestUtil.fieldDef;
 import static scotch.compiler.util.TestUtil.fn;
@@ -648,7 +649,7 @@ public class InputParserTest extends IsolatedCompilerTest {
             "tail (_:xs) = xs"
         );
         shouldHavePattern("scotch.test.(#0)",
-            asList(capture("tail", t(0)), unshuffledMatch(t(1), ignore(t(2)), capture(":", t(3)), capture("xs", t(4)))),
+            asList(capture("tail", t(0)), unshuffledMatch(t(1), ignore(t(2)), equal(id(":", t(3))), capture("xs", t(4)))),
             unshuffled(id("xs", t(6))));
     }
 
@@ -738,6 +739,17 @@ public class InputParserTest extends IsolatedCompilerTest {
                 ))
             ),
             unshuffled(id("fn", t(10))));
+    }
+
+    @Test
+    public void shouldParseConstructorsAsEqualMatchesInPatterns() {
+        compile(
+            "module scotch.test",
+            "empty? [] = True"
+        );
+        shouldHavePattern("scotch.test.(#0)",
+            asList(capture("empty?", t(0)), equal(id("[]", t(1)))),
+            unshuffled(literal(true)));
     }
 
     private void shouldHaveDataType(String name, DataTypeDefinition value) {

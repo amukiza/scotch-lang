@@ -66,7 +66,7 @@ public class PatternShuffler {
         }
 
         private OperatorPair<CaptureMatch> getOperator(PatternMatch match, boolean expectsPrefix) {
-            return match.asOperator(scope)
+            return match.asCaptureOperator(scope)
                 .map(pair -> pair.into((capture, operator) -> {
                     if (expectsPrefix && !operator.isPrefix()) {
                         throw new ShuffleException(parseError("Unexpected binary operator " + capture.getSymbol(), capture.getSourceLocation()));

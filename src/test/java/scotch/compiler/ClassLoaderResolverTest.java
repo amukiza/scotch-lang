@@ -99,7 +99,7 @@ public class ClassLoaderResolverTest {
                     1, "scotch.data.maybe.Maybe",
                     "scotch.data.maybe.Just",
                     "scotch/data/maybe/Maybe$Just",
-                    asList(field(0, "value", var("a")))
+                    asList(field(0, "value", "getValue", var("a")))
                 )
             )
         ))));

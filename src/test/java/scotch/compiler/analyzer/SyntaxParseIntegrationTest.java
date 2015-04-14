@@ -60,40 +60,32 @@ public class SyntaxParseIntegrationTest extends IsolatedCompilerTest {
             "fib n = fib (n - 1) + fib (n - 2)"
         );
         shouldHaveValue("scotch.test.fib", matcher("scotch.test.(fib#0)", t(16), asList(arg("#0", t(15))),
-            pattern("scotch.test.(fib#0#0)", asList(equal(arg("#0", t(17)), literal(0), value -> apply(
-                apply(id("scotch.data.eq.(==)", t(18)), arg("#0", t(17)), t(19)),
-                value,
-                t(20)
-            ))), literal(0)),
-            pattern("scotch.test.(fib#0#1)", asList(equal(arg("#0", t(21)), literal(1), value -> apply(
-                apply(id("scotch.data.eq.(==)", t(22)), arg("#0", t(21)), t(23)),
-                value,
-                t(24)
-            ))), literal(1)),
-            pattern("scotch.test.(fib#0#2)", asList(capture(arg("#0", t(25)), "n", t(3))), apply(
+            pattern("scotch.test.(fib#0#0)", asList(equal(arg("#0", t(17)), literal(0))), literal(0)),
+            pattern("scotch.test.(fib#0#1)", asList(equal(arg("#0", t(18)), literal(1))), literal(1)),
+            pattern("scotch.test.(fib#0#2)", asList(capture(arg("#0", t(19)), "n", t(3))), apply(
                 apply(
                     id("scotch.test.(+)", t(9)),
                     apply(
                         id("scotch.test.fib", t(4)),
                         apply(
-                            apply(id("scotch.test.(-)", t(6)), id("n", t(5)), t(26)),
+                            apply(id("scotch.test.(-)", t(6)), id("n", t(5)), t(20)),
                             literal(1),
-                            t(27)
+                            t(21)
                         ),
-                        t(28)
+                        t(22)
                     ),
-                    t(32)
+                    t(26)
                 ),
                 apply(
                     id("scotch.test.fib", t(10)),
                     apply(
-                        apply(id("scotch.test.(-)", t(12)), id("n", t(11)), t(29)),
+                        apply(id("scotch.test.(-)", t(12)), id("n", t(11)), t(23)),
                         literal(2),
-                        t(30)
+                        t(24)
                     ),
-                    t(31)
+                    t(25)
                 ),
-                t(33)
+                t(27)
             ))
         ));
     }

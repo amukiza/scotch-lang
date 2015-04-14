@@ -12,7 +12,6 @@ import static scotch.symbol.type.Types.sum;
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 import scotch.compiler.ClassLoaderResolver;
 import scotch.compiler.output.GeneratedClass;
 import scotch.compiler.scanner.Scanner;
@@ -37,7 +36,7 @@ import scotch.compiler.syntax.pattern.PatternMatch;
 import scotch.compiler.syntax.pattern.Patterns;
 import scotch.compiler.syntax.pattern.StructField;
 import scotch.compiler.syntax.pattern.StructMatch;
-import scotch.compiler.syntax.pattern.UnshuffledStructureMatch;
+import scotch.compiler.syntax.pattern.UnshuffledStructMatch;
 import scotch.compiler.syntax.reference.ClassReference;
 import scotch.compiler.syntax.reference.DataReference;
 import scotch.compiler.syntax.reference.DefinitionReference;
@@ -179,11 +178,11 @@ public class TestUtil {
     }
 
     public static EqualMatch equal(Value value) {
-        return Patterns.equal(NULL_SOURCE, Optional.empty(), value, Optional.empty());
+        return Patterns.equal(NULL_SOURCE, Optional.empty(), value);
     }
 
-    public static EqualMatch equal(Value argument, Value value, Function<Value, Value> matchTransform) {
-        return Patterns.equal(NULL_SOURCE, Optional.of(argument), value, Optional.of(matchTransform.apply(value)));
+    public static EqualMatch equal(Value argument, Value value) {
+        return Patterns.equal(NULL_SOURCE, Optional.of(argument), value);
     }
 
     public static InitializerField field(String name, Value value) {
@@ -353,7 +352,7 @@ public class TestUtil {
         return Definitions.unshuffled(NULL_SOURCE, symbol(name), matches, body);
     }
 
-    public static UnshuffledStructureMatch unshuffledMatch(Type type, PatternMatch... matches) {
+    public static UnshuffledStructMatch unshuffledMatch(Type type, PatternMatch... matches) {
         return Patterns.unshuffledMatch(NULL_SOURCE, type, asList(matches));
     }
 

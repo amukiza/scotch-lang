@@ -2,8 +2,6 @@ package scotch.compiler.intermediate;
 
 import static me.qmx.jitescript.util.CodegenUtils.p;
 import static me.qmx.jitescript.util.CodegenUtils.sig;
-import static org.apache.commons.lang.WordUtils.capitalize;
-import static scotch.symbol.Symbol.toJavaName;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -24,11 +22,13 @@ public class IntermediateAccessor extends IntermediateValue {
     private final List<String> captures;
     private final IntermediateValue target;
     private final String fieldName;
+    private final String methodName;
 
-    IntermediateAccessor(List<String> captures, IntermediateValue target, String fieldName) {
+    IntermediateAccessor(List<String> captures, IntermediateValue target, String fieldName, String methodName) {
         this.captures = ImmutableList.copyOf(captures);
         this.target = target;
         this.fieldName = fieldName;
+        this.methodName = methodName;
     }
 
     @Override
@@ -47,7 +47,7 @@ public class IntermediateAccessor extends IntermediateValue {
                     List<String> arguments = generator.getArguments();
                     generator.beginMethod(arguments);
                     append(target.generateBytecode(generator));
-                    ldc("get" + capitalize(toJavaName(fieldName)));
+                    ldc(methodName);
                     invokestatic(p(AccessorSupport.class), "access", sig(Callable.class, Callable.class, String.class));
                     areturn();
                     generator.endMethod();

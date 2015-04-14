@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import scotch.compiler.analyzer.NameAccumulator;
+import scotch.compiler.analyzer.ScopedNameQualifier;
 import scotch.compiler.analyzer.TypeChecker;
 import scotch.compiler.syntax.builder.SyntaxBuilder;
 import scotch.compiler.syntax.scope.Scope;
@@ -57,6 +58,10 @@ public class StructField {
 
     public Type getType() {
         return type;
+    }
+
+    public StructField qualifyNames(ScopedNameQualifier state) {
+        return withPatternMatch(patternMatch.qualifyNames(state));
     }
 
     public void reducePatterns(PatternReducer reducer) {

@@ -59,8 +59,8 @@ public class CaptureMatch extends PatternMatch {
     }
 
     @Override
-    public Optional<Pair<CaptureMatch, Operator>> asOperator(Scope scope) {
-        return scope.qualify(symbol)
+    public Optional<Pair<CaptureMatch, Operator>> asCaptureOperator(Scope scope) {
+        return scope.qualify(getSymbol())
             .flatMap(scope::getOperator)
             .map(operator -> pair(this, operator));
     }
@@ -140,6 +140,10 @@ public class CaptureMatch extends PatternMatch {
     }
 
     public CaptureMatch withSourceLocation(SourceLocation sourceLocation) {
+        return new CaptureMatch(sourceLocation, argument, symbol, type);
+    }
+
+    public CaptureMatch withSymbol(Symbol symbol) {
         return new CaptureMatch(sourceLocation, argument, symbol, type);
     }
 

@@ -99,6 +99,11 @@ public class IntermediateGenerator {
             .orElseThrow(() -> new IllegalStateException("Constructor " + quote(constructor) + " not found"));
     }
 
+    public String getFieldMethod(Symbol symbol, String field) {
+        DataConstructorDescriptor constructor = scope().getDataConstructor(symbol).get();
+        return constructor.getField(field).get().getMethodName();
+    }
+
     public MethodSignature instanceGetter(InstanceReference reference) {
         return scope().getTypeInstance(
             reference.getClassReference(),

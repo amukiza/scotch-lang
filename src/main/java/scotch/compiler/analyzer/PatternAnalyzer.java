@@ -20,6 +20,7 @@ import scotch.compiler.syntax.pattern.PatternReducer;
 import scotch.compiler.syntax.reference.DefinitionReference;
 import scotch.compiler.syntax.scope.Scope;
 import scotch.compiler.syntax.value.FunctionValue;
+import scotch.compiler.syntax.value.IsConstructor;
 import scotch.compiler.syntax.value.PatternMatcher;
 import scotch.compiler.syntax.value.Value;
 import scotch.symbol.Symbol;
@@ -46,8 +47,13 @@ public class PatternAnalyzer implements PatternReducer {
     }
 
     @Override
-    public void addCondition(Value condition) {
-        patternReducer.addCondition(condition);
+    public void addCondition(Value argument, Value value) {
+        patternReducer.addCondition(argument, value);
+    }
+
+    @Override
+    public void addCondition(IsConstructor constructor) {
+        patternReducer.addCondition(constructor);
     }
 
     @Override

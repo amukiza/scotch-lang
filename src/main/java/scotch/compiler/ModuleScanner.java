@@ -164,13 +164,14 @@ public class ModuleScanner {
 
             stream(clazz.getDeclaredMethods())
                 .filter(method -> method.isAnnotationPresent(DataField.class))
-                .map(method -> method.getAnnotation(DataField.class))
-                .forEach(field -> builder.addField(field(
+                .map(method -> pair(method, method.getAnnotation(DataField.class)))
+                .forEach(pair -> pair.into((method, field) -> builder.addField(field(
                     field.ordinal(),
                     field.memberName(),
+                    method.getName(),
                     Optional.ofNullable(fieldTypes.get(field.memberName()))
                         .orElseThrow(() -> incompleteDataType(clazz, DataFieldType.class))
-                )));
+                ))));
 
             getBuilder(dataType).dataType().addConstructor(builder.build());
         });

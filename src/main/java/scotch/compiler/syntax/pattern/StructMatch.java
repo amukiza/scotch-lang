@@ -94,7 +94,7 @@ public class StructMatch extends PatternMatch {
                 return constructor;
             }),
             type,
-            fields
+            fields.stream().map(field -> field.qualifyNames(state)).collect(toList())
         );
     }
 

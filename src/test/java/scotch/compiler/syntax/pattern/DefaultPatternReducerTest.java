@@ -74,11 +74,7 @@ public class DefaultPatternReducerTest {
         // empty? _  = false
         Value pattern = matcher("scotch.test.(empty?)", t(1), arg("#0", t(2)),
             pattern("scotch.test.(empty?#0)",
-                asList(equal(arg("#0", t(3)), id("[]", t(4)), value -> apply(
-                    apply(id("scotch.data.eq.(==)", t(5)), value, t(6)),
-                    id("[]", t(7)),
-                    t(8)
-                ))),
+                asList(equal(arg("#0", t(3)), id("[]", t(4)))),
                 literal(true)),
             pattern("scotch.test.(empty?#1)", asList(ignore(t(9))), literal(false))
         );
@@ -88,13 +84,13 @@ public class DefaultPatternReducerTest {
         assertThat(pattern.reducePatterns(new DefaultPatternReducer(generator)),
             is(fn("scotch.test.(empty?)", arg("#0", t(2)), conditional(
                 apply(
-                    apply(id("scotch.data.eq.(==)", t(5)), id("[]", t(4)), t(6)),
-                    id("[]", t(7)),
-                    t(8)
+                    apply(id("scotch.data.eq.(==)", t(10)), arg("#0", t(3)), t(11)),
+                    id("[]", t(4)),
+                    t(12)
                 ),
                 scope("scotch.test.(empty?#0)", literal(true)),
                 scope("scotch.test.(empty?#1)", literal(false)),
-                t(10)
+                t(13)
             ))));
     }
 
@@ -125,16 +121,8 @@ public class DefaultPatternReducerTest {
         // oneOrZero 1 = true
         // oneOrZero 0 = true
         Value pattern = matcher("scotch.test.oneOrZero", t(1), arg("#0", t(2)),
-            pattern("scotch.test.(oneOrZero#0)", asList(equal(arg("#0", t(3)), literal(1), value -> apply(
-                apply(id("scotch.data.eq.(==)", t(4)), literal(1), t(5)),
-                value,
-                t(9)
-            ))), literal(true)),
-            pattern("scotch.test.(oneOrZero#1)", asList(equal(arg("#0", t(10)), literal(0), value -> apply(
-                apply(id("scotch.data.eq.(==)", t(11)), literal(0), t(12)),
-                value,
-                t(13)
-            ))), literal(true))
+            pattern("scotch.test.(oneOrZero#0)", asList(equal(arg("#0", t(3)), literal(1))), literal(true)),
+            pattern("scotch.test.(oneOrZero#1)", asList(equal(arg("#0", t(10)), literal(0))), literal(true))
         );
         SymbolGenerator generator = new DefaultSymbolGenerator() {{
             startTypesAt(14);
@@ -142,22 +130,22 @@ public class DefaultPatternReducerTest {
         assertThat(pattern.reducePatterns(new DefaultPatternReducer(generator)),
             is(fn("scotch.test.oneOrZero", arg("#0", t(2)), conditional(
                 apply(
-                    apply(id("scotch.data.eq.(==)", t(4)), literal(1), t(5)),
+                    apply(id("scotch.data.eq.(==)", t(14)), arg("#0", t(3)), t(15)),
                     literal(1),
-                    t(9)
+                    t(16)
                 ),
                 scope("scotch.test.(oneOrZero#0)", literal(true)),
                 conditional(
                     apply(
-                        apply(id("scotch.data.eq.(==)", t(11)), literal(0), t(12)),
+                        apply(id("scotch.data.eq.(==)", t(17)), arg("#0", t(10)), t(18)),
                         literal(0),
-                        t(13)
+                        t(19)
                     ),
                     scope("scotch.test.(oneOrZero#1)", literal(true)),
-                    raise("Incomplete match", t(14)),
-                    t(15)
+                    raise("Incomplete match", t(20)),
+                    t(21)
                 ),
-                t(16)
+                t(22)
             ))));
     }
 
@@ -167,11 +155,7 @@ public class DefaultPatternReducerTest {
         Value pattern = matcher("scotch.test.oneAndVar", t(1), asList(arg("#0", t(2)), arg("#1", t(3))),
             pattern("scotch.test.(oneAndVar#0)",
                 asList(
-                    equal(arg("#0", t(4)), literal(1), value -> apply(
-                        apply(id("scotch.data.eq.(==)", t(5)), literal(1), t(6)),
-                        value,
-                        t(7)
-                    )),
+                    equal(arg("#0", t(4)), literal(1)),
                     capture(arg("#0", t(8)), "n", t(9))
                 ),
                 id("n", t(10)))
@@ -182,13 +166,13 @@ public class DefaultPatternReducerTest {
         assertThat(pattern.reducePatterns(new DefaultPatternReducer(generator)),
             is(fn("scotch.test.oneAndVar", asList(arg("#0", t(2)), arg("#1", t(3))), conditional(
                 apply(
-                    apply(id("scotch.data.eq.(==)", t(5)), literal(1), t(6)),
+                    apply(id("scotch.data.eq.(==)", t(11)), arg("#0", t(4)), t(12)),
                     literal(1),
-                    t(7)
+                    t(13)
                 ),
-                scope("scotch.test.(oneAndVar#0)", let(t(12), "n", arg("#0", t(8)), id("n", t(10)))),
-                raise("Incomplete match", t(11)),
-                t(13)
+                scope("scotch.test.(oneAndVar#0)", let(t(15), "n", arg("#0", t(8)), id("n", t(10)))),
+                raise("Incomplete match", t(14)),
+                t(16)
             ))));
     }
 

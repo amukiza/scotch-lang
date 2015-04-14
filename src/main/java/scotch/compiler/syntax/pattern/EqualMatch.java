@@ -2,9 +2,7 @@ package scotch.compiler.syntax.pattern;
 
 import static lombok.AccessLevel.PACKAGE;
 import static scotch.compiler.syntax.builder.BuilderUtil.require;
-import static scotch.compiler.syntax.value.Values.apply;
-import static scotch.compiler.syntax.value.Values.id;
-import static scotch.symbol.Symbol.symbol;
+import static scotch.compiler.util.Pair.pair;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -17,13 +15,17 @@ import scotch.compiler.analyzer.ScopedNameQualifier;
 import scotch.compiler.analyzer.TypeChecker;
 import scotch.compiler.syntax.builder.SyntaxBuilder;
 import scotch.compiler.syntax.scope.Scope;
+import scotch.compiler.syntax.value.Identifier;
 import scotch.compiler.syntax.value.Value;
 import scotch.compiler.text.SourceLocation;
+import scotch.compiler.util.Pair;
+import scotch.symbol.Operator;
+import scotch.symbol.Symbol;
 import scotch.symbol.type.Type;
 
 @AllArgsConstructor(access = PACKAGE)
-@EqualsAndHashCode(callSuper = false)
-@ToString(exclude = "sourceLocation")
+@EqualsAndHashCode(callSuper = false, doNotUseGetters = true)
+@ToString(exclude = "sourceLocation", doNotUseGetters = true)
 public class EqualMatch extends PatternMatch {
 
     public static Builder builder() {
@@ -33,7 +35,6 @@ public class EqualMatch extends PatternMatch {
     private final SourceLocation  sourceLocation;
     private final Optional<Value> argument;
     private final Value           value;
-    private final Optional<Value> match;
 
     @Override
     public PatternMatch accumulateDependencies(DependencyAccumulator state) {
@@ -46,19 +47,18 @@ public class EqualMatch extends PatternMatch {
     }
 
     @Override
+    public Optional<Pair<EqualMatch, Operator>> asConstructorOperator(Scope scope) {
+        return scope.qualify(getSymbol())
+            .flatMap(scope::getOperator)
+            .map(operator -> pair(this, operator));
+    }
+
+    @Override
     public PatternMatch bind(Value argument, Scope scope) {
         if (this.argument.isPresent()) {
             throw new IllegalStateException();
         } else {
-            return new EqualMatch(sourceLocation, Optional.of(argument), value, Optional.of(apply(
-                apply(
-                    id(sourceLocation, symbol("scotch.data.eq.(==)"), scope.reserveType()),
-                    argument,
-                    scope.reserveType()
-                ),
-                value,
-                scope.reserveType()
-            )));
+            return new EqualMatch(sourceLocation, Optional.of(argument), value);
         }
     }
 
@@ -82,6 +82,10 @@ public class EqualMatch extends PatternMatch {
         return sourceLocation;
     }
 
+    public Symbol getSymbol() {
+        return getSymbol_().orElseThrow(IllegalStateException::new);
+    }
+
     @Override
     public Type getType() {
         return value.getType();
@@ -92,17 +96,22 @@ public class EqualMatch extends PatternMatch {
     }
 
     @Override
+    public boolean isOperator(Scope scope) {
+        return getSymbol_().map(scope::isOperator).orElse(false);
+    }
+
+    @Override
     public PatternMatch qualifyNames(ScopedNameQualifier state) {
         return withValue(value.qualifyNames(state));
     }
 
     @Override
     public void reducePatterns(PatternReducer reducer) {
-        reducer.addCondition(match.orElseThrow(IllegalStateException::new));
+        reducer.addCondition(reducer.getTaggedArgument(getArgument()), value);
     }
 
     public EqualMatch withSourceLocation(SourceLocation sourceLocation) {
-        return new EqualMatch(sourceLocation, argument, value, match);
+        return new EqualMatch(sourceLocation, argument, value);
     }
 
     @Override
@@ -110,17 +119,28 @@ public class EqualMatch extends PatternMatch {
         throw new UnsupportedOperationException(); // TODO
     }
 
+    private Value getArgument() {
+        return argument.orElseThrow(IllegalStateException::new);
+    }
+
+    private Optional<Symbol> getSymbol_() {
+        if (value instanceof Identifier) {
+            return Optional.of(((Identifier) value).getSymbol());
+        } else {
+            return Optional.empty();
+        }
+    }
+
     private PatternMatch map(Function<Value, Value> function) {
         return new EqualMatch(
             sourceLocation,
-            Optional.of(function.apply(argument.orElseThrow(IllegalStateException::new))),
-            function.apply(value),
-            match.map(function)
+            Optional.of(function.apply(getArgument())),
+            function.apply(value)
         );
     }
 
     private EqualMatch withValue(Value value) {
-        return new EqualMatch(sourceLocation, argument, value, match);
+        return new EqualMatch(sourceLocation, argument, value);
     }
 
     public static class Builder implements SyntaxBuilder<EqualMatch> {
@@ -137,8 +157,7 @@ public class EqualMatch extends PatternMatch {
             return Patterns.equal(
                 require(sourceLocation, "Source location"),
                 Optional.empty(),
-                require(value, "Capture value"),
-                Optional.empty()
+                require(value, "Capture value")
             );
         }
 

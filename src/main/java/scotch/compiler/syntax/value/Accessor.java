@@ -110,7 +110,7 @@ public class Accessor extends Value {
     @Override
     public IntermediateValue generateIntermediateCode(IntermediateGenerator state) {
         IntermediateValue intermediateTarget = target.generateIntermediateCode(state);
-        return Intermediates.access(state.capture(), intermediateTarget, field);
+        return Intermediates.access(state.capture(), intermediateTarget, field, state.getFieldMethod(target.getTag().get(), field));
     }
 
     public DataConstructorDescriptor mapConstructor(TypeChecker typeChecker, Value checkedTarget, SumType targetType) {
@@ -136,7 +136,9 @@ public class Accessor extends Value {
 
     @Override
     public Value qualifyNames(ScopedNameQualifier state) {
-        throw new UnsupportedOperationException(); // TODO
+        return tag
+            .flatMap(t -> state.qualify(t).map(this::withTag))
+            .orElse(this);
     }
 
     @Override

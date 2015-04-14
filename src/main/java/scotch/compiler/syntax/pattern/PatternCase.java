@@ -89,7 +89,7 @@ public class PatternCase implements Scoped {
     public PatternCase parsePrecedence(PrecedenceParser state) {
         return state.scoped(this, () -> {
             AtomicInteger counter = new AtomicInteger();
-            List<PatternMatch> boundMatches = patternMatches.stream()
+            List<PatternMatch> boundMatches = state.shuffle(patternMatches).stream()
                 .map(match -> match.bind(
                     arg(sourceLocation.getStartPoint(), "#" + counter.getAndIncrement(), state.reserveType(), Optional.empty()),
                     state.scope()))

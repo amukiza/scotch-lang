@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import scotch.compiler.syntax.value.FunctionValue;
+import scotch.compiler.syntax.value.IsConstructor;
 import scotch.compiler.syntax.value.PatternMatcher;
 import scotch.compiler.syntax.value.Value;
 import scotch.compiler.text.SourceLocation;
@@ -37,8 +38,13 @@ public class DefaultPatternReducer implements PatternReducer {
     }
 
     @Override
-    public void addCondition(Value condition) {
-        pattern().addCondition(condition);
+    public void addCondition(Value argument, Value value) {
+        pattern().addCondition(argument, value);
+    }
+
+    @Override
+    public void addCondition(IsConstructor constructor) {
+        pattern().addCondition(constructor);
     }
 
     @Override
@@ -105,8 +111,20 @@ public class DefaultPatternReducer implements PatternReducer {
             assignments.add(capture);
         }
 
-        public void addCondition(Value condition) {
-            conditions.add(condition);
+        public void addCondition(Value argument, Value value) {
+            conditions.add(apply(
+                apply(
+                    id(value.getSourceLocation(), symbol("scotch.data.eq.(==)"), generator.reserveType()),
+                    argument,
+                    generator.reserveType()
+                ),
+                value,
+                generator.reserveType()
+            ));
+        }
+
+        public void addCondition(IsConstructor constructor) {
+            conditions.add(constructor);
         }
 
         public SourceLocation getSourceLocation() {
@@ -175,8 +193,12 @@ public class DefaultPatternReducer implements PatternReducer {
             currentCase.addAssignment(capture);
         }
 
-        public void addCondition(Value condition) {
-            currentCase.addCondition(condition);
+        public void addCondition(Value argument, Value value) {
+            currentCase.addCondition(argument, value);
+        }
+
+        public void addCondition(IsConstructor constructor) {
+            currentCase.addCondition(constructor);
         }
 
         public void addTaggedArgument(Value taggedArgument) {

@@ -19,7 +19,7 @@ public class DataTypeDescriptorTest {
     @Test
     public void shouldReifyConstructorFieldType() {
         DataConstructorDescriptor dataConstructor = DataConstructorDescriptor.builder(0, symbol("Maybe"), symbol("Just"), "Just")
-            .addField(field(0, "_0", var("a")))
+            .addField(field(0, "_0", "get_0", var("a")))
             .build();
         DataTypeDescriptor dataType = DataTypeDescriptor.builder(symbol("Maybe"))
             .addParameter(var("a"))
@@ -33,6 +33,6 @@ public class DataTypeDescriptorTest {
         DataTypeDescriptor reifiedDataType = dataType.mapParameters(mappedParameters);
 
         assertThat(reifiedDataType.getParameters(), contains(t(2)));
-        assertThat(reifiedDataType.getConstructor(symbol("Just")).get().getField("_0"), is(Optional.of(field(0, "_0", t(2)))));
+        assertThat(reifiedDataType.getConstructor(symbol("Just")).get().getField("_0"), is(Optional.of(field(0, "_0", "get_0", t(2)))));
     }
 }

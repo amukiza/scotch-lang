@@ -13,8 +13,8 @@ public final class Patterns {
         return new CaptureMatch(sourceLocation, argument, symbol, type);
     }
 
-    public static EqualMatch equal(SourceLocation sourceLocation, Optional<Value> argument, Value value, Optional<Value> match) {
-        return new EqualMatch(sourceLocation, argument, value, match);
+    public static EqualMatch equal(SourceLocation sourceLocation, Optional<Value> argument, Value value) {
+        return new EqualMatch(sourceLocation, argument, value);
     }
 
     public static IgnorePattern ignore(SourceLocation sourceLocation, Type type) {
@@ -33,8 +33,8 @@ public final class Patterns {
         return new StructMatch(sourceLocation, argument, dataType, type, fields);
     }
 
-    public static UnshuffledStructureMatch unshuffledMatch(SourceLocation sourceLocation, Type type, List<PatternMatch> patternMatches) {
-        return new UnshuffledStructureMatch(sourceLocation, type, patternMatches);
+    public static UnshuffledStructMatch unshuffledMatch(SourceLocation sourceLocation, Type type, List<PatternMatch> patternMatches) {
+        return new UnshuffledStructMatch(sourceLocation, type, patternMatches);
     }
 
     private Patterns() {

@@ -63,7 +63,7 @@ public class ComplexMatchBuilder implements SyntaxBuilder<PatternMatch> {
 
         @Override
         public PatternMatch build() {
-            UnshuffledStructureMatch.Builder structureMatch = UnshuffledStructureMatch.builder()
+            UnshuffledStructMatch.Builder structureMatch = UnshuffledStructMatch.builder()
                 .withSourceLocation(require(sourceLocation, "Source location"))
                 .withType(symbolGenerator.reserveType());
             patternMatches.forEach(structureMatch::withPatternMatch);

@@ -96,7 +96,7 @@ import scotch.compiler.syntax.pattern.PatternCase;
 import scotch.compiler.syntax.pattern.PatternMatch;
 import scotch.compiler.syntax.pattern.StructField;
 import scotch.compiler.syntax.pattern.StructMatch;
-import scotch.compiler.syntax.pattern.UnshuffledStructureMatch;
+import scotch.compiler.syntax.pattern.UnshuffledStructMatch;
 import scotch.compiler.syntax.reference.DefinitionReference;
 import scotch.compiler.syntax.scope.Scope;
 import scotch.compiler.syntax.value.Argument;
@@ -722,6 +722,8 @@ public class InputParser {
         } else if (expectsWord()) {
             if (expectsAt(1, LEFT_CURLY_BRACE)) {
                 match = parseStructMatch();
+            } else if (symbol(peekAt(0).getValueAs(String.class)).isConstructorName()) {
+                match = node(EqualMatch.builder(), builder -> builder.withValue(parseWordReference()));
             } else {
                 match = parseCaptureMatch();
             }
@@ -1092,7 +1094,7 @@ public class InputParser {
     }
 
     private PatternMatch parseUnshuffledMatch() {
-        return node(UnshuffledStructureMatch.builder(), builder -> {
+        return node(UnshuffledStructMatch.builder(), builder -> {
             builder.withType(reserveType());
             builder.withPatternMatch(parseRequiredMatch());
             while (expectsMatch()) {

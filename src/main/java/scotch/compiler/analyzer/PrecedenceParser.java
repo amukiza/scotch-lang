@@ -30,6 +30,8 @@ import scotch.compiler.syntax.definition.DefinitionGraph;
 import scotch.compiler.syntax.definition.UnshuffledDefinition;
 import scotch.compiler.syntax.definition.ValueDefinition;
 import scotch.compiler.syntax.pattern.PatternCase;
+import scotch.compiler.syntax.pattern.PatternMatch;
+import scotch.compiler.syntax.pattern.UnshuffledStructMatch;
 import scotch.compiler.syntax.reference.DefinitionReference;
 import scotch.compiler.syntax.scope.Scope;
 import scotch.compiler.syntax.value.Argument;
@@ -91,7 +93,10 @@ public class PrecedenceParser {
         scopes.pop();
     }
 
-    public List<DefinitionReference> map(List<DefinitionReference> references, BiFunction<? super Definition, PrecedenceParser, ? extends Definition> function) {
+    public List<DefinitionReference> map(
+        List<DefinitionReference> references,
+        BiFunction<? super Definition, PrecedenceParser, ? extends Definition> function
+    ) {
         return references.stream()
             .map(this::getDefinition)
             .filter(Optional::isPresent)
@@ -101,7 +106,10 @@ public class PrecedenceParser {
             .collect(toList());
     }
 
-    public List<DefinitionReference> mapOptional(List<DefinitionReference> references, BiFunction<? super Definition, PrecedenceParser, Optional<? extends Definition>> function) {
+    public List<DefinitionReference> mapOptional(
+        List<DefinitionReference> references,
+        BiFunction<? super Definition, PrecedenceParser, Optional<? extends Definition>> function
+    ) {
         return references.stream()
             .map(this::getDefinition)
             .filter(Optional::isPresent)
@@ -206,23 +214,39 @@ public class PrecedenceParser {
         }
     }
 
+    public List<PatternMatch> shuffle(List<PatternMatch> patternMatches) {
+        return patternMatches.stream()
+            .map(patternMatch -> patternMatch.shuffle(this))
+            .collect(toList());
+    }
+
     public Optional<Definition> shuffle(UnshuffledDefinition pattern) {
         return new PatternShuffler().shuffle(scope(), memberNames.peek(), pattern)
             .map(r -> {
                 addPattern(r.getSymbol(), pattern.asPatternMatcher(r.getMatches()));
                 return Optional.<Definition>empty();
             })
-            .orElseGet(error -> {
-                errors.add(error);
+            .orElseGet(syntaxError -> {
+                errors.add(syntaxError);
                 return Optional.of((Definition) pattern);
             });
     }
 
     public Value shuffle(UnshuffledValue value) {
         return new ValueShuffler(v -> v.parsePrecedence(this))
-            .shuffle(scope(), value.getValues()).orElseGet(left -> {
-                error(left);
+            .shuffle(scope(), value.getValues())
+            .orElseGet(syntaxError -> {
+                error(syntaxError);
                 return value;
+            });
+    }
+
+    public PatternMatch shuffle(UnshuffledStructMatch patternMatch) {
+        return new StructMatchShuffler()
+            .shuffle(scope(), patternMatch.getPatternMatches())
+            .orElseGet(left -> {
+                error(left);
+                return patternMatch;
             });
     }
 

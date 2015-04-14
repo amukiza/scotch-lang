@@ -19,8 +19,8 @@ import scotch.symbol.type.Type;
 
 public final class Intermediates {
 
-    public static IntermediateAccessor access(List<String> captures, IntermediateValue target, String fieldName) {
-        return new IntermediateAccessor(captures, target, fieldName);
+    public static IntermediateAccessor access(List<String> captures, IntermediateValue target, String fieldName, String methodName) {
+        return new IntermediateAccessor(captures, target, fieldName, methodName);
     }
 
     public static IntermediateApply apply(List<String> captures, IntermediateValue function, IntermediateValue argument) {

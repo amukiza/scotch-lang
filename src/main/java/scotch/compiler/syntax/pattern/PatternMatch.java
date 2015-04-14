@@ -2,9 +2,11 @@ package scotch.compiler.syntax.pattern;
 
 import static scotch.compiler.util.Either.left;
 
+import java.util.List;
 import java.util.Optional;
 import scotch.compiler.analyzer.DependencyAccumulator;
 import scotch.compiler.analyzer.NameAccumulator;
+import scotch.compiler.analyzer.PrecedenceParser;
 import scotch.compiler.analyzer.ScopedNameQualifier;
 import scotch.compiler.analyzer.TypeChecker;
 import scotch.compiler.syntax.scope.Scope;
@@ -29,7 +31,11 @@ public abstract class PatternMatch {
         return left(this);
     }
 
-    public Optional<Pair<CaptureMatch, Operator>> asOperator(Scope scope) {
+    public Optional<Pair<CaptureMatch, Operator>> asCaptureOperator(Scope scope) {
+        return Optional.empty();
+    }
+
+    public Optional<Pair<EqualMatch, Operator>> asConstructorOperator(Scope scope) {
         return Optional.empty();
     }
 
@@ -40,6 +46,10 @@ public abstract class PatternMatch {
     public abstract PatternMatch bindTypes(TypeChecker state);
 
     public abstract PatternMatch checkTypes(TypeChecker state);
+
+    public Either<PatternMatch, List<PatternMatch>> destructure() {
+        return left(this);
+    }
 
     @Override
     public abstract boolean equals(Object o);
@@ -62,6 +72,10 @@ public abstract class PatternMatch {
     public abstract PatternMatch qualifyNames(ScopedNameQualifier state);
 
     public abstract void reducePatterns(PatternReducer reducer);
+
+    public PatternMatch shuffle(PrecedenceParser state) {
+        return this;
+    }
 
     @Override
     public abstract String toString();

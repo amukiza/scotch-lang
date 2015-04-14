@@ -1,7 +1,9 @@
 package scotch.compiler.syntax.definition;
 
+import static org.apache.commons.lang.StringUtils.capitalize;
 import static scotch.compiler.syntax.builder.BuilderUtil.require;
 import static scotch.symbol.Symbol.symbol;
+import static scotch.symbol.Symbol.toJavaName;
 import static scotch.symbol.descriptor.DataFieldDescriptor.field;
 
 import java.util.Optional;
@@ -44,7 +46,7 @@ public class DataFieldDefinition implements Comparable<DataFieldDefinition> {
     }
 
     public DataFieldDescriptor getDescriptor() {
-        return field(ordinal, name, type);
+        return field(ordinal, name, "get" + capitalize(toJavaName(name)), type);
     }
 
     public String getJavaName() {

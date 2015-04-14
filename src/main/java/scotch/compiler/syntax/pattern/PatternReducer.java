@@ -1,6 +1,7 @@
 package scotch.compiler.syntax.pattern;
 
 import scotch.compiler.syntax.value.FunctionValue;
+import scotch.compiler.syntax.value.IsConstructor;
 import scotch.compiler.syntax.value.PatternMatcher;
 import scotch.compiler.syntax.value.Value;
 
@@ -8,7 +9,9 @@ public interface PatternReducer {
 
     void addAssignment(CaptureMatch capture);
 
-    void addCondition(Value condition);
+    void addCondition(Value argument, Value value);
+
+    void addCondition(IsConstructor constructor);
 
     void addTaggedArgument(Value taggedArgument);
 
