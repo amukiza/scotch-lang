@@ -3,10 +3,10 @@ package scotch.compiler.scanner;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static scotch.compiler.scanner.Scanner.forString;
-import static scotch.compiler.scanner.Token.TokenKind.IDENTIFIER;
-import static scotch.compiler.scanner.Token.TokenKind.KEYWORD_IN;
-import static scotch.compiler.scanner.Token.TokenKind.LEFT_CURLY_BRACE;
-import static scotch.compiler.scanner.Token.TokenKind.RIGHT_CURLY_BRACE;
+import static scotch.compiler.scanner.Token.TokenKind.ID;
+import static scotch.compiler.scanner.Token.TokenKind.IN;
+import static scotch.compiler.scanner.Token.TokenKind.OPEN_CURLY;
+import static scotch.compiler.scanner.Token.TokenKind.CLOSE_CURLY;
 import static scotch.compiler.scanner.Token.TokenKind.SEMICOLON;
 import static scotch.compiler.util.TestUtil.token;
 import static scotch.compiler.util.TestUtil.tokenAt;
@@ -27,13 +27,13 @@ public class LayoutScannerTest {
             "let two = 2",
             "three one two"
         );
-        assertThat(tokenAt(scanner, 2), equalTo(token(LEFT_CURLY_BRACE, "{")));
+        assertThat(tokenAt(scanner, 2), equalTo(token(OPEN_CURLY, "{")));
         assertThat(tokenAt(scanner, 4), equalTo(token(SEMICOLON, ";")));
-        assertThat(tokenAt(scanner, 1), equalTo(token(IDENTIFIER, "two")));
+        assertThat(tokenAt(scanner, 1), equalTo(token(ID, "two")));
         assertThat(tokenAt(scanner, 3), equalTo(token(SEMICOLON, ";")));
-        assertThat(tokenAt(scanner, 1), equalTo(token(RIGHT_CURLY_BRACE, "}")));
-        assertThat(tokenAt(scanner, 1), equalTo(token(KEYWORD_IN, "in")));
-        assertThat(tokenAt(scanner, 1), equalTo(token(IDENTIFIER, "three")));
+        assertThat(tokenAt(scanner, 1), equalTo(token(CLOSE_CURLY, "}")));
+        assertThat(tokenAt(scanner, 1), equalTo(token(IN, "in")));
+        assertThat(tokenAt(scanner, 1), equalTo(token(ID, "three")));
     }
 
     @Test
@@ -43,20 +43,20 @@ public class LayoutScannerTest {
             "    y = 2",
             "x + y"
         );
-        assertThat(tokenAt(scanner, 2), equalTo(token(LEFT_CURLY_BRACE, "{")));
+        assertThat(tokenAt(scanner, 2), equalTo(token(OPEN_CURLY, "{")));
         assertThat(tokenAt(scanner, 4), equalTo(token(SEMICOLON, ";")));
-        assertThat(tokenAt(scanner, 1), equalTo(token(IDENTIFIER, "y")));
+        assertThat(tokenAt(scanner, 1), equalTo(token(ID, "y")));
         assertThat(tokenAt(scanner, 3), equalTo(token(SEMICOLON, ";")));
-        assertThat(tokenAt(scanner, 1), equalTo(token(RIGHT_CURLY_BRACE, "}")));
-        assertThat(tokenAt(scanner, 1), equalTo(token(KEYWORD_IN, "in")));
+        assertThat(tokenAt(scanner, 1), equalTo(token(CLOSE_CURLY, "}")));
+        assertThat(tokenAt(scanner, 1), equalTo(token(IN, "in")));
     }
 
     @Test
     public void shouldGetTokensOnSameLine() {
         Scanner scanner = scan("one two three");
-        assertThat(scanner.nextToken(), equalTo(token(IDENTIFIER, "one")));
-        assertThat(scanner.nextToken(), equalTo(token(IDENTIFIER, "two")));
-        assertThat(scanner.nextToken(), equalTo(token(IDENTIFIER, "three")));
+        assertThat(scanner.nextToken(), equalTo(token(ID, "one")));
+        assertThat(scanner.nextToken(), equalTo(token(ID, "two")));
+        assertThat(scanner.nextToken(), equalTo(token(ID, "three")));
     }
 
     @Test
@@ -67,13 +67,13 @@ public class LayoutScannerTest {
             "  y = 2",
             "x + y"
         );
-        assertThat(tokenAt(scanner, 2), equalTo(token(LEFT_CURLY_BRACE, "{")));
+        assertThat(tokenAt(scanner, 2), equalTo(token(OPEN_CURLY, "{")));
         assertThat(tokenAt(scanner, 4), equalTo(token(SEMICOLON, ";")));
-        assertThat(tokenAt(scanner, 1), equalTo(token(IDENTIFIER, "y")));
+        assertThat(tokenAt(scanner, 1), equalTo(token(ID, "y")));
         assertThat(tokenAt(scanner, 3), equalTo(token(SEMICOLON, ";")));
-        assertThat(tokenAt(scanner, 1), equalTo(token(RIGHT_CURLY_BRACE, "}")));
-        assertThat(tokenAt(scanner, 1), equalTo(token(KEYWORD_IN, "in")));
-        assertThat(tokenAt(scanner, 1), equalTo(token(IDENTIFIER, "x")));
+        assertThat(tokenAt(scanner, 1), equalTo(token(CLOSE_CURLY, "}")));
+        assertThat(tokenAt(scanner, 1), equalTo(token(IN, "in")));
+        assertThat(tokenAt(scanner, 1), equalTo(token(ID, "x")));
     }
 
     @Test
@@ -83,21 +83,21 @@ public class LayoutScannerTest {
             "    z = a",
             "in x + z"
         );
-        assertThat(tokenAt(scanner, 2), equalTo(token(LEFT_CURLY_BRACE, "{")));
+        assertThat(tokenAt(scanner, 2), equalTo(token(OPEN_CURLY, "{")));
         assertThat(tokenAt(scanner, 4), equalTo(token(SEMICOLON, ";")));
-        assertThat(tokenAt(scanner, 1), equalTo(token(IDENTIFIER, "z")));
+        assertThat(tokenAt(scanner, 1), equalTo(token(ID, "z")));
         assertThat(tokenAt(scanner, 3), equalTo(token(SEMICOLON, ";")));
-        assertThat(tokenAt(scanner, 1), equalTo(token(RIGHT_CURLY_BRACE, "}")));
-        assertThat(tokenAt(scanner, 1), equalTo(token(KEYWORD_IN, "in")));
+        assertThat(tokenAt(scanner, 1), equalTo(token(CLOSE_CURLY, "}")));
+        assertThat(tokenAt(scanner, 1), equalTo(token(IN, "in")));
     }
 
     @Test
     public void shouldInsertCurliesAroundLetOnOneLine() {
         Scanner scanner = scan("let z = \\x -> y in z");
-        assertThat(tokenAt(scanner, 2), equalTo(token(LEFT_CURLY_BRACE, "{")));
+        assertThat(tokenAt(scanner, 2), equalTo(token(OPEN_CURLY, "{")));
         assertThat(tokenAt(scanner, 7), equalTo(token(SEMICOLON, ";")));
-        assertThat(tokenAt(scanner, 1), equalTo(token(RIGHT_CURLY_BRACE, "}")));
-        assertThat(tokenAt(scanner, 1), equalTo(token(KEYWORD_IN, "in")));
+        assertThat(tokenAt(scanner, 1), equalTo(token(CLOSE_CURLY, "}")));
+        assertThat(tokenAt(scanner, 1), equalTo(token(IN, "in")));
     }
 
     @Test
@@ -118,13 +118,13 @@ public class LayoutScannerTest {
             "    n = fib (n - 1) + fib (n - 2)",
             "main = ..."
         );
-        assertThat(tokenAt(scanner, 7), equalTo(token(LEFT_CURLY_BRACE, "{")));
+        assertThat(tokenAt(scanner, 7), equalTo(token(OPEN_CURLY, "{")));
         assertThat(tokenAt(scanner, 4), equalTo(token(SEMICOLON, ";")));
         assertThat(tokenAt(scanner, 4), equalTo(token(SEMICOLON, ";")));
         assertThat(tokenAt(scanner, 16), equalTo(token(SEMICOLON, ";")));
-        assertThat(tokenAt(scanner, 1), equalTo(token(RIGHT_CURLY_BRACE, "}")));
+        assertThat(tokenAt(scanner, 1), equalTo(token(CLOSE_CURLY, "}")));
         assertThat(tokenAt(scanner, 1), equalTo(token(SEMICOLON, ";")));
-        assertThat(tokenAt(scanner, 1), equalTo(token(IDENTIFIER, "main")));
+        assertThat(tokenAt(scanner, 1), equalTo(token(ID, "main")));
     }
 
     @Test
@@ -135,12 +135,12 @@ public class LayoutScannerTest {
             "    (-) :: a",
             "    abs :: a"
         );
-        assertThat(tokenAt(scanner, 2), equalTo(token(LEFT_CURLY_BRACE, "{")));
+        assertThat(tokenAt(scanner, 2), equalTo(token(OPEN_CURLY, "{")));
         assertThat(tokenAt(scanner, 6), equalTo(token(SEMICOLON, ";")));
         assertThat(tokenAt(scanner, 6), equalTo(token(SEMICOLON, ";")));
         assertThat(tokenAt(scanner, 4), equalTo(token(SEMICOLON, ";")));
         assertThat(tokenAt(scanner, 1), equalTo(token(SEMICOLON, ";")));
-        assertThat(tokenAt(scanner, 1), equalTo(token(RIGHT_CURLY_BRACE, "}")));
+        assertThat(tokenAt(scanner, 1), equalTo(token(CLOSE_CURLY, "}")));
     }
 
     @Test
@@ -152,11 +152,11 @@ public class LayoutScannerTest {
             "    abs :: c",
             "sub :: d"
         );
-        assertThat(tokenAt(scanner, 2), equalTo(token(LEFT_CURLY_BRACE, "{")));
+        assertThat(tokenAt(scanner, 2), equalTo(token(OPEN_CURLY, "{")));
         assertThat(tokenAt(scanner, 6), equalTo(token(SEMICOLON, ";")));
         assertThat(tokenAt(scanner, 6), equalTo(token(SEMICOLON, ";")));
         assertThat(tokenAt(scanner, 4), equalTo(token(SEMICOLON, ";")));
-        assertThat(tokenAt(scanner, 1), equalTo(token(RIGHT_CURLY_BRACE, "}")));
+        assertThat(tokenAt(scanner, 1), equalTo(token(CLOSE_CURLY, "}")));
         assertThat(tokenAt(scanner, 1), equalTo(token(SEMICOLON, ";")));
     }
 
@@ -168,11 +168,11 @@ public class LayoutScannerTest {
             "      abs :: c",
             "sub :: d"
         );
-        assertThat(tokenAt(scanner, 2), equalTo(token(LEFT_CURLY_BRACE, "{")));
+        assertThat(tokenAt(scanner, 2), equalTo(token(OPEN_CURLY, "{")));
         assertThat(tokenAt(scanner, 6), equalTo(token(SEMICOLON, ";")));
         assertThat(tokenAt(scanner, 6), equalTo(token(SEMICOLON, ";")));
         assertThat(tokenAt(scanner, 4), equalTo(token(SEMICOLON, ";")));
-        assertThat(tokenAt(scanner, 1), equalTo(token(RIGHT_CURLY_BRACE, "}")));
+        assertThat(tokenAt(scanner, 1), equalTo(token(CLOSE_CURLY, "}")));
         assertThat(tokenAt(scanner, 1), equalTo(token(SEMICOLON, ";")));
     }
 
@@ -183,12 +183,12 @@ public class LayoutScannerTest {
             "y = 2;",
             " } in x + y"
         );
-        assertThat(tokenAt(scanner, 2), equalTo(token(LEFT_CURLY_BRACE, "{")));
+        assertThat(tokenAt(scanner, 2), equalTo(token(OPEN_CURLY, "{")));
         assertThat(tokenAt(scanner, 4), equalTo(token(SEMICOLON, ";")));
-        assertThat(tokenAt(scanner, 1), equalTo(token(IDENTIFIER, "y")));
+        assertThat(tokenAt(scanner, 1), equalTo(token(ID, "y")));
         assertThat(tokenAt(scanner, 3), equalTo(token(SEMICOLON, ";")));
-        assertThat(tokenAt(scanner, 1), equalTo(token(RIGHT_CURLY_BRACE, "}")));
-        assertThat(tokenAt(scanner, 1), equalTo(token(KEYWORD_IN, "in")));
+        assertThat(tokenAt(scanner, 1), equalTo(token(CLOSE_CURLY, "}")));
+        assertThat(tokenAt(scanner, 1), equalTo(token(IN, "in")));
     }
 
     @Test
@@ -197,7 +197,7 @@ public class LayoutScannerTest {
             "these are",
             "  together"
         );
-        assertThat(tokenAt(scanner, 3), equalTo(token(IDENTIFIER, "together")));
+        assertThat(tokenAt(scanner, 3), equalTo(token(ID, "together")));
     }
 
     @Test
@@ -208,8 +208,8 @@ public class LayoutScannerTest {
             "  together",
             "this is not"
         );
-        assertThat(tokenAt(scanner, 3), equalTo(token(IDENTIFIER, "all")));
-        assertThat(scanner.nextToken(), equalTo(token(IDENTIFIER, "together")));
+        assertThat(tokenAt(scanner, 3), equalTo(token(ID, "all")));
+        assertThat(scanner.nextToken(), equalTo(token(ID, "together")));
         assertThat(scanner.nextToken(), equalTo(token(SEMICOLON, ";")));
     }
 
@@ -222,15 +222,15 @@ public class LayoutScannerTest {
             "        n = fib (n - 1) + fib (n - 2)",
             "fib 20"
         );
-        assertThat(tokenAt(scanner, 2), equalTo(token(LEFT_CURLY_BRACE, "{")));
-        assertThat(tokenAt(scanner, 7), equalTo(token(LEFT_CURLY_BRACE, "{")));
+        assertThat(tokenAt(scanner, 2), equalTo(token(OPEN_CURLY, "{")));
+        assertThat(tokenAt(scanner, 7), equalTo(token(OPEN_CURLY, "{")));
         assertThat(tokenAt(scanner, 4), equalTo(token(SEMICOLON, ";")));
         assertThat(tokenAt(scanner, 4), equalTo(token(SEMICOLON, ";")));
         assertThat(tokenAt(scanner, 16), equalTo(token(SEMICOLON, ";")));
-        assertThat(tokenAt(scanner, 1), equalTo(token(RIGHT_CURLY_BRACE, "}")));
+        assertThat(tokenAt(scanner, 1), equalTo(token(CLOSE_CURLY, "}")));
         assertThat(tokenAt(scanner, 1), equalTo(token(SEMICOLON, ";")));
-        assertThat(tokenAt(scanner, 1), equalTo(token(RIGHT_CURLY_BRACE, "}")));
-        assertThat(tokenAt(scanner, 1), equalTo(token(KEYWORD_IN, "in")));
+        assertThat(tokenAt(scanner, 1), equalTo(token(CLOSE_CURLY, "}")));
+        assertThat(tokenAt(scanner, 1), equalTo(token(IN, "in")));
     }
 
     private Scanner scan(String... lines) {

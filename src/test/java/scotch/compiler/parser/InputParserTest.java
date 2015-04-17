@@ -172,13 +172,13 @@ public class InputParserTest extends IsolatedCompilerTest {
 
     @Test
     public void shouldThrowException_whenNotBeginningWithModule() {
-        expectParseException("Unexpected IDENTIFIER with value 'length'; wanted IDENTIFIER with value 'module'");
+        expectParseException("Unexpected ID with value 'length'; wanted ID with value 'module'");
         compile("length s = jStrlen s");
     }
 
     @Test
     public void shouldThrowException_whenOperatorIsMissingPrecedence() {
-        expectParseException("Unexpected IDENTIFIER; wanted INT_LITERAL");
+        expectParseException("Unexpected ID; wanted INT");
         compile(
             "module scotch.test",
             "left infix =="
@@ -187,7 +187,7 @@ public class InputParserTest extends IsolatedCompilerTest {
 
     @Test
     public void shouldThrowException_whenOperatorSymbolEnclosedByParensDoesNotContainWord() {
-        expectParseException("Unexpected INT_LITERAL; wanted IDENTIFIER");
+        expectParseException("Unexpected INT; wanted ID");
         compile(
             "module scotch.test",
             "left infix 7 (42)"
@@ -196,7 +196,7 @@ public class InputParserTest extends IsolatedCompilerTest {
 
     @Test
     public void shouldThrowException_whenOperatorSymbolIsNotWord() {
-        expectParseException("Unexpected BOOL_LITERAL; wanted one of [IDENTIFIER, LEFT_PARENTHESIS]");
+        expectParseException("Unexpected BOOL; wanted one of [ID, OPEN_PAREN]");
         compile(
             "module scotch.test",
             "left infix 7 True"
@@ -205,7 +205,7 @@ public class InputParserTest extends IsolatedCompilerTest {
 
     @Test
     public void shouldThrowException_whenOperatorSymbolsNotSeparatedByCommas() {
-        expectParseException("Unexpected IDENTIFIER; wanted SEMICOLON");
+        expectParseException("Unexpected ID; wanted SEMICOLON");
         compile(
             "module scotch.test",
             "left infix 7 + -"
@@ -214,7 +214,7 @@ public class InputParserTest extends IsolatedCompilerTest {
 
     @Test
     public void shouldThrowException_whenSignatureHasStuffBetweenNameAndDoubleColon() {
-        expectParseException("Unexpected SEMICOLON; wanted ASSIGN");
+        expectParseException("Unexpected SEMICOLON; wanted IS");
         compile(
             "module scotch.test",
             "length ; :: String -> Int"
@@ -274,7 +274,7 @@ public class InputParserTest extends IsolatedCompilerTest {
     @Test
     public void shouldNotParseEqualsPatternLiteral() {
         exception.expect(ParseException.class);
-        exception.expectMessage(containsString("wanted IDENTIFIER [test://shouldNotParseEqualsPatternLiteral (2, 11), (2, 12)]"));
+        exception.expectMessage(containsString("wanted ID [test://shouldNotParseEqualsPatternLiteral (2, 11), (2, 12)]"));
         compile(
             "module scotch.test",
             "apply2 = \\1 y z = y z"

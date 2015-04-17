@@ -7,29 +7,29 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static scotch.compiler.scanner.Token.TokenKind.ARROW;
-import static scotch.compiler.scanner.Token.TokenKind.BACKSLASH;
-import static scotch.compiler.scanner.Token.TokenKind.BACKWARD_ARROW;
-import static scotch.compiler.scanner.Token.TokenKind.CHAR_LITERAL;
+import static scotch.compiler.scanner.Token.TokenKind.LAMBDA_SLASH;
+import static scotch.compiler.scanner.Token.TokenKind.DRAW_FROM;
+import static scotch.compiler.scanner.Token.TokenKind.CHAR;
 import static scotch.compiler.scanner.Token.TokenKind.COMMA;
 import static scotch.compiler.scanner.Token.TokenKind.DEFAULT_OPERATOR;
-import static scotch.compiler.scanner.Token.TokenKind.DOUBLE_ARROW;
-import static scotch.compiler.scanner.Token.TokenKind.DOUBLE_COLON;
-import static scotch.compiler.scanner.Token.TokenKind.DOUBLE_LITERAL;
-import static scotch.compiler.scanner.Token.TokenKind.IDENTIFIER;
-import static scotch.compiler.scanner.Token.TokenKind.INT_LITERAL;
-import static scotch.compiler.scanner.Token.TokenKind.KEYWORD_DO;
-import static scotch.compiler.scanner.Token.TokenKind.KEYWORD_IN;
+import static scotch.compiler.scanner.Token.TokenKind.CONTEXT_ARROW;
+import static scotch.compiler.scanner.Token.TokenKind.HAS_TYPE;
+import static scotch.compiler.scanner.Token.TokenKind.DOUBLE;
+import static scotch.compiler.scanner.Token.TokenKind.ID;
+import static scotch.compiler.scanner.Token.TokenKind.INT;
+import static scotch.compiler.scanner.Token.TokenKind.DO;
+import static scotch.compiler.scanner.Token.TokenKind.IN;
 import static scotch.compiler.scanner.Token.TokenKind.KEYWORD_LET;
-import static scotch.compiler.scanner.Token.TokenKind.KEYWORD_MATCH;
-import static scotch.compiler.scanner.Token.TokenKind.KEYWORD_ON;
-import static scotch.compiler.scanner.Token.TokenKind.KEYWORD_WHERE;
-import static scotch.compiler.scanner.Token.TokenKind.LEFT_CURLY_BRACE;
-import static scotch.compiler.scanner.Token.TokenKind.LEFT_SQUARE_BRACE;
+import static scotch.compiler.scanner.Token.TokenKind.MATCH;
+import static scotch.compiler.scanner.Token.TokenKind.ON;
+import static scotch.compiler.scanner.Token.TokenKind.WHERE;
+import static scotch.compiler.scanner.Token.TokenKind.OPEN_CURLY;
+import static scotch.compiler.scanner.Token.TokenKind.OPEN_SQUARE;
 import static scotch.compiler.scanner.Token.TokenKind.NEWLINE;
-import static scotch.compiler.scanner.Token.TokenKind.PIPE;
-import static scotch.compiler.scanner.Token.TokenKind.RIGHT_CURLY_BRACE;
-import static scotch.compiler.scanner.Token.TokenKind.RIGHT_SQUARE_BRACE;
-import static scotch.compiler.scanner.Token.TokenKind.STRING_LITERAL;
+import static scotch.compiler.scanner.Token.TokenKind.ALTERNATIVE;
+import static scotch.compiler.scanner.Token.TokenKind.CLOSE_CURLY;
+import static scotch.compiler.scanner.Token.TokenKind.CLOSE_SQUARE;
+import static scotch.compiler.scanner.Token.TokenKind.STRING;
 import static scotch.compiler.scanner.Token.token;
 import static scotch.compiler.text.SourcePoint.point;
 import static scotch.compiler.text.SourceLocation.source;
@@ -48,17 +48,17 @@ public class DefaultScannerTest {
 
     @Test
     public void dotInParensIsIdentifier() {
-        assertThat(secondFrom("(.)"), equalTo(token(IDENTIFIER, ".")));
+        assertThat(secondFrom("(.)"), equalTo(token(ID, ".")));
     }
 
     @Test
     public void dotPrecededAndFollowedByWhitespaceIsIdentifier() {
-        assertThat(secondFrom("first . second"), equalTo(token(IDENTIFIER, ".")));
+        assertThat(secondFrom("first . second"), equalTo(token(ID, ".")));
     }
 
     @Test
     public void shouldGetArgumentAfterLambdaPrefix() {
-        assertThat(secondFrom("\\x -> y"), equalTo(token(IDENTIFIER, "x",
+        assertThat(secondFrom("\\x -> y"), equalTo(token(ID, "x",
             source("test://shouldGetArgumentAfterLambdaPrefix", point(1, 1, 2), point(2, 1, 3)))));
     }
 
@@ -70,12 +70,12 @@ public class DefaultScannerTest {
 
     @Test
     public void shouldGetAt() {
-        assertThat(firstFrom("@atom"), equalTo(token(IDENTIFIER, "@")));
+        assertThat(firstFrom("@atom"), equalTo(token(ID, "@")));
     }
 
     @Test
     public void shouldGetColon() {
-        assertThat(firstFrom(": test"), equalTo(token(IDENTIFIER, ":")));
+        assertThat(firstFrom(": test"), equalTo(token(ID, ":")));
     }
 
     @Test
@@ -85,75 +85,75 @@ public class DefaultScannerTest {
 
     @Test
     public void shouldGetDouble() {
-        assertThat(firstFrom("123.4"), equalTo(token(DOUBLE_LITERAL, 123.4)));
+        assertThat(firstFrom("123.4"), equalTo(token(DOUBLE, 123.4)));
     }
 
     @Test
     public void shouldGetDoubleArrow() {
-        assertThat(firstFrom("=> (Eq a)"), equalTo(token(DOUBLE_ARROW, "=>")));
+        assertThat(firstFrom("=> (Eq a)"), equalTo(token(CONTEXT_ARROW, "=>")));
     }
 
     @Test
     public void shouldGetDoubleColon() {
-        assertThat(firstFrom(":: signature"), equalTo(token(DOUBLE_COLON, "::")));
+        assertThat(firstFrom(":: signature"), equalTo(token(HAS_TYPE, "::")));
     }
 
     @Test
     public void shouldGetIdentifier() {
-        assertThat(firstFrom("asteroids yo"), equalTo(token(IDENTIFIER, "asteroids",
+        assertThat(firstFrom("asteroids yo"), equalTo(token(ID, "asteroids",
             source("test://shouldGetIdentifier", point(0, 1, 1), point(9, 1, 10)))));
     }
 
     @Test
     public void shouldGetIdentifierForSquare() {
-        assertThat(firstFrom("[]list"), equalTo(token(IDENTIFIER, "[]")));
+        assertThat(firstFrom("[]list"), equalTo(token(ID, "[]")));
     }
 
     @Test
     public void shouldGetIdentifierSuffixedWithQuote() {
-        assertThat(firstFrom("asteroids' again"), equalTo(token(IDENTIFIER, "asteroids'",
+        assertThat(firstFrom("asteroids' again"), equalTo(token(ID, "asteroids'",
             source("test://shouldGetIdentifierSuffixedWithQuote", point(0, 1, 1), point(10, 1, 11)))));
     }
 
     @Test
     public void shouldGetIdentifier_whenNumbersFollowedByName() {
-        assertThat(firstFrom("123four"), equalTo(token(IDENTIFIER, "123four")));
+        assertThat(firstFrom("123four"), equalTo(token(ID, "123four")));
     }
 
     @Test
     public void shouldGetIn() {
-        assertThat(firstFrom("in there"), equalTo(token(KEYWORD_IN, "in")));
+        assertThat(firstFrom("in there"), equalTo(token(IN, "in")));
     }
 
     @Test
     public void shouldGetInt_whenFollowedByDotName() {
-        assertThat(firstFrom("123.four"), equalTo(token(INT_LITERAL, 123)));
+        assertThat(firstFrom("123.four"), equalTo(token(INT, 123)));
     }
 
     @Test
     public void shouldGetInt_whenFollowedByDotNumberName() {
-        assertThat(firstFrom("123.4five"), equalTo(token(INT_LITERAL, 123)));
+        assertThat(firstFrom("123.4five"), equalTo(token(INT, 123)));
     }
 
     @Test
     public void shouldGetLambdaPrefix() {
-        assertThat(secondFrom("asteroids \\x -> boom!"), equalTo(token(BACKSLASH, "\\",
+        assertThat(secondFrom("asteroids \\x -> boom!"), equalTo(token(LAMBDA_SLASH, "\\",
             source("test://shouldGetLambdaPrefix", point(10, 1, 11), point(11, 1, 12)))));
     }
 
     @Test
     public void shouldGetLeftCurly() {
-        assertThat(firstFrom("{ left"), equalTo(token(LEFT_CURLY_BRACE, "{")));
+        assertThat(firstFrom("{ left"), equalTo(token(OPEN_CURLY, "{")));
     }
 
     @Test
     public void shouldGetLeftSquare() {
-        assertThat(firstFrom("[lsquare"), equalTo(token(LEFT_SQUARE_BRACE, "[")));
+        assertThat(firstFrom("[lsquare"), equalTo(token(OPEN_SQUARE, "[")));
     }
 
     @Test
     public void shouldGetMatch() {
-        assertThat(firstFrom("match this"), equalTo(token(KEYWORD_MATCH, "match")));
+        assertThat(firstFrom("match this"), equalTo(token(MATCH, "match")));
     }
 
     @Test
@@ -163,12 +163,12 @@ public class DefaultScannerTest {
 
     @Test
     public void shouldGetOn() {
-        assertThat(firstFrom("on that"), equalTo(token(KEYWORD_ON, "on")));
+        assertThat(firstFrom("on that"), equalTo(token(ON, "on")));
     }
 
     @Test
     public void shouldGetPipe() {
-        assertThat(firstFrom("| BreakfastItem"), equalTo(token(PIPE, "|")));
+        assertThat(firstFrom("| BreakfastItem"), equalTo(token(ALTERNATIVE, "|")));
     }
 
     @Test
@@ -178,27 +178,27 @@ public class DefaultScannerTest {
 
     @Test
     public void shouldGetRightCurly() {
-        assertThat(firstFrom("} right"), equalTo(token(RIGHT_CURLY_BRACE, "}")));
+        assertThat(firstFrom("} right"), equalTo(token(CLOSE_CURLY, "}")));
     }
 
     @Test
     public void shouldGetRightSquare() {
-        assertThat(firstFrom("]rsquare"), equalTo(token(RIGHT_SQUARE_BRACE, "]")));
+        assertThat(firstFrom("]rsquare"), equalTo(token(CLOSE_SQUARE, "]")));
     }
 
     @Test
     public void shouldGetTuple3() {
-        assertThat(firstFrom("(,,)"), equalTo(token(IDENTIFIER, "(,,)")));
+        assertThat(firstFrom("(,,)"), equalTo(token(ID, "(,,)")));
     }
 
     @Test
     public void shouldGetUnit() {
-        assertThat(firstFrom("()"), equalTo(token(IDENTIFIER, "()")));
+        assertThat(firstFrom("()"), equalTo(token(ID, "()")));
     }
 
     @Test
     public void shouldGetWhere() {
-        assertThat(firstFrom("where stuff"), equalTo(token(KEYWORD_WHERE, "where")));
+        assertThat(firstFrom("where stuff"), equalTo(token(WHERE, "where")));
     }
 
     @Test
@@ -209,7 +209,7 @@ public class DefaultScannerTest {
             "  and /* this is ignored */ too",
             "*/ second"
         );
-        assertThat(token, equalTo(token(IDENTIFIER, "second")));
+        assertThat(token, equalTo(token(ID, "second")));
     }
 
     @Test
@@ -221,34 +221,34 @@ public class DefaultScannerTest {
 
     @Test
     public void shouldScanCharLiteral() {
-        assertThat(firstFrom("'a'"), equalTo(token(CHAR_LITERAL, 'a')));
+        assertThat(firstFrom("'a'"), equalTo(token(CHAR, 'a')));
     }
 
     @Test
     public void shouldScanCharLiteralWithEscape() {
-        assertThat(firstFrom("'\\t'"), equalTo(token(CHAR_LITERAL, '\t')));
+        assertThat(firstFrom("'\\t'"), equalTo(token(CHAR, '\t')));
     }
 
     @Test
     public void shouldScanString() {
         Scanner scanner = scan("\"this is a string\"");
-        assertThat(scanner.nextToken(), equalTo(token(STRING_LITERAL, "this is a string")));
+        assertThat(scanner.nextToken(), equalTo(token(STRING, "this is a string")));
     }
 
     @Test
     public void shouldScanStringWithEscape() {
         Scanner scanner = scan("\"this\\tis\\ta\\nstring\"");
-        assertThat(scanner.nextToken(), equalTo(token(STRING_LITERAL, "this\tis\ta\nstring")));
+        assertThat(scanner.nextToken(), equalTo(token(STRING, "this\tis\ta\nstring")));
     }
 
     @Test
     public void shouldScanStringWithHexEscape() {
-        assertThat(firstFrom("\"this should be '\\u0040'\""), equalTo(token(STRING_LITERAL, "this should be '@'")));
+        assertThat(firstFrom("\"this should be '\\u0040'\""), equalTo(token(STRING, "this should be '@'")));
     }
 
     @Test
     public void shouldScanStringWithOctalEscape() {
-        assertThat(firstFrom("\"octal: '\\100'\""), equalTo(token(STRING_LITERAL, "octal: '@'")));
+        assertThat(firstFrom("\"octal: '\\100'\""), equalTo(token(STRING, "octal: '@'")));
     }
 
     @Test
@@ -257,7 +257,7 @@ public class DefaultScannerTest {
             " // this is a comment",
             "rocks"
         );
-        assertThat(token, equalTo(token(IDENTIFIER, "rocks")));
+        assertThat(token, equalTo(token(ID, "rocks")));
     }
 
     @Test
@@ -267,7 +267,7 @@ public class DefaultScannerTest {
             " ignore all this stuff",
             "*/ second"
         );
-        assertThat(token, equalTo(token(IDENTIFIER, "second")));
+        assertThat(token, equalTo(token(ID, "second")));
     }
 
     @Test
@@ -300,12 +300,12 @@ public class DefaultScannerTest {
 
     @Test
     public void shouldGetDo() {
-        assertThat(firstFrom("do things"), is(token(KEYWORD_DO, "do")));
+        assertThat(firstFrom("do things"), is(token(DO, "do")));
     }
 
     @Test
     public void shouldGetBackwardError() {
-        assertThat(secondFrom("thingy <-"), is(token(BACKWARD_ARROW, "<-")));
+        assertThat(secondFrom("thingy <-"), is(token(DRAW_FROM, "<-")));
     }
 
     private Token firstFrom(String... data) {
