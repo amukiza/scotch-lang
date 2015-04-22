@@ -3,11 +3,6 @@ package scotch.compiler.ast;
 public abstract class BaseNodeVisitor<T> implements AstNodeVisitor<T> {
 
     @Override
-    public T visitApplyNode(ApplyNode node) {
-        return visitDefault(node);
-    }
-
-    @Override
     public T visitBoolNode(BoolNode node) {
         return visitDefault(node);
     }

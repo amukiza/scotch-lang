@@ -2,8 +2,6 @@ package scotch.compiler.ast;
 
 public interface AstNodeVisitor<T> {
 
-    T visitApplyNode(ApplyNode node);
-
     T visitBoolNode(BoolNode node);
 
     T visitCaptureArgumentNode(CaptureArgumentNode node);
