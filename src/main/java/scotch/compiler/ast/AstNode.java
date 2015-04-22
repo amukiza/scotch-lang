@@ -4,6 +4,8 @@ import scotch.compiler.text.SourceLocation;
 
 public abstract class AstNode {
 
+    public abstract <T> T accept(AstNodeVisitor<T> visitor);
+
     @Override
     public abstract boolean equals(Object o);
 

@@ -23,4 +23,9 @@ public class InstanceMembersNode extends AstNode {
         this.instanceMembers = ImmutableList.copyOf(instanceMembers);
         this.closeCurly = closeCurly;
     }
+
+    @Override
+    public <T> T accept(AstNodeVisitor<T> visitor) {
+        return visitor.visitInstanceMembersNode(this);
+    }
 }

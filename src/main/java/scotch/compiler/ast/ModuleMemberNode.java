@@ -17,4 +17,9 @@ public class ModuleMemberNode extends AstNode {
     private final SourceLocation sourceLocation;
     private final AstNode        member;
     private final AstNode        terminator;
+
+    @Override
+    public <T> T accept(AstNodeVisitor<T> visitor) {
+        return visitor.visitModuleMemberNode(this);
+    }
 }

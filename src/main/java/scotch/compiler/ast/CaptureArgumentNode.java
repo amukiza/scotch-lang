@@ -16,4 +16,9 @@ public class CaptureArgumentNode extends AstNode {
     @Getter
     private final SourceLocation sourceLocation;
     private final AstNode        identifier;
+
+    @Override
+    public <T> T accept(AstNodeVisitor<T> visitor) {
+        return visitor.visitCaptureArgumentNode(this);
+    }
 }

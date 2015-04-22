@@ -25,4 +25,9 @@ public class DataRecordNode extends AstNode {
         this.fieldsAndCommas = ImmutableList.copyOf(fieldsAndCommas);
         this.closeCurly = closeCurly;
     }
+
+    @Override
+    public <T> T accept(AstNodeVisitor<T> visitor) {
+        return visitor.visitDataRecordNode(this);
+    }
 }

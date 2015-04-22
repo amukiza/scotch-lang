@@ -19,4 +19,9 @@ public class OperatorDefinitionNode extends AstNode {
     private final AstNode        fixity;
     private final AstNode        precedence;
     private final List<AstNode>  operators;
+
+    @Override
+    public <T> T accept(AstNodeVisitor<T> visitor) {
+        return visitor.visitOperatorDefinitionNode(this);
+    }
 }

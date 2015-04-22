@@ -16,4 +16,9 @@ public class TupleFieldMatchNode extends AstNode {
     @Getter
     private final SourceLocation sourceLocation;
     private final AstNode        match;
+
+    @Override
+    public <T> T accept(AstNodeVisitor<T> visitor) {
+        return visitor.visitTupleFieldMatchNode(this);
+    }
 }

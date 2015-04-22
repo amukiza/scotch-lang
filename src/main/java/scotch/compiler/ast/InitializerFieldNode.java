@@ -18,4 +18,9 @@ public class InitializerFieldNode extends AstNode {
     private final AstNode        fieldName;
     private final AstNode        is;
     private final AstNode        value;
+
+    @Override
+    public <T> T accept(AstNodeVisitor<T> visitor) {
+        return visitor.visitInitializerFieldNode(this);
+    }
 }

@@ -25,4 +25,9 @@ public class InitializerNode extends AstNode {
         this.initializerFields = ImmutableList.copyOf(initializerFields);
         this.closeCurly = closeCurly;
     }
+
+    @Override
+    public <T> T accept(AstNodeVisitor<T> visitor) {
+        return visitor.visitInitializerNode(this);
+    }
 }

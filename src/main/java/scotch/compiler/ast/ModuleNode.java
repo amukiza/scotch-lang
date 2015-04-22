@@ -20,4 +20,9 @@ public class ModuleNode extends AstNode {
     private final AstNode        terminator;
     private final AstNode        importStatements;
     private final AstNode        members;
+
+    @Override
+    public <T> T accept(AstNodeVisitor<T> visitor) {
+        return visitor.visitModuleNode(this);
+    }
 }

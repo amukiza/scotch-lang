@@ -18,4 +18,9 @@ public class DataRecordFieldNode extends AstNode {
     private final AstNode        fieldName;
     private final AstNode        hasType;
     private final AstNode        type;
+
+    @Override
+    public <T> T accept(AstNodeVisitor<T> visitor) {
+        return visitor.visitDataRecordFieldNode(this);
+    }
 }

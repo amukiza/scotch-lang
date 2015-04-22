@@ -17,4 +17,9 @@ public class ConstructorArgumentNode extends AstNode {
     private final SourceLocation sourceLocation;
     private final AstNode        constructor;
     private final AstNode        fieldMatches;
+
+    @Override
+    public <T> T accept(AstNodeVisitor<T> visitor) {
+        return visitor.visitConstructorArgumentNode(this);
+    }
 }

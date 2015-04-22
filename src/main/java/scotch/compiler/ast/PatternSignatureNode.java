@@ -23,4 +23,9 @@ public class PatternSignatureNode extends AstNode {
         this.doubleColon = doubleColon;
         this.typeSignature = typeSignature;
     }
+
+    @Override
+    public <T> T accept(AstNodeVisitor<T> visitor) {
+        return visitor.visitPatternSignatureNode(this);
+    }
 }

@@ -23,4 +23,9 @@ public class TupleLiteralNode extends AstNode {
         this.fieldsAndCommas = ImmutableList.copyOf(fieldsAndCommas);
         this.closeParen = closeParen;
     }
+
+    @Override
+    public <T> T accept(AstNodeVisitor<T> visitor) {
+        return visitor.visitTupleLiteralNode(this);
+    }
 }

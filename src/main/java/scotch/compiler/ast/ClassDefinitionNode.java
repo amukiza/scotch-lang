@@ -30,4 +30,9 @@ public class ClassDefinitionNode extends AstNode {
         this.where = where;
         this.classMembers = classMembers;
     }
+
+    @Override
+    public <T> T accept(AstNodeVisitor<T> visitor) {
+        return visitor.visitClassDefinitionNode(this);
+    }
 }

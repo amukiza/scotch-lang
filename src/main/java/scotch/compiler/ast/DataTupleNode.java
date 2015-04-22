@@ -21,4 +21,9 @@ public class DataTupleNode extends AstNode {
         this.name = name;
         this.fields = ImmutableList.copyOf(fields);
     }
+
+    @Override
+    public <T> T accept(AstNodeVisitor<T> visitor) {
+        return visitor.visitDataTupleNode(this);
+    }
 }

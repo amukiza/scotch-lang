@@ -16,4 +16,9 @@ public class PrefixOperatorNode extends AstNode {
     @Getter
     private final SourceLocation sourceLocation;
     private final AstNode        prefix;
+
+    @Override
+    public <T> T accept(AstNodeVisitor<T> visitor) {
+        return visitor.visitPrefixOperatorNode(this);
+    }
 }

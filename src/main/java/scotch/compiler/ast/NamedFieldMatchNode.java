@@ -18,4 +18,9 @@ public class NamedFieldMatchNode extends AstNode {
     private final AstNode        name;
     private final AstNode        equals;
     private final AstNode        patternArgument;
+
+    @Override
+    public <T> T accept(AstNodeVisitor<T> visitor) {
+        return visitor.visitNamedFieldMatchNode(this);
+    }
 }

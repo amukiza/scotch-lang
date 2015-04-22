@@ -19,4 +19,9 @@ public class PatternLiteralNode extends AstNode {
     private final AstNode        patternArguments;
     private final AstNode        arrow;
     private final AstNode        expression;
+
+    @Override
+    public <T> T accept(AstNodeVisitor<T> visitor) {
+        return visitor.visitPatternLiteralNode(this);
+    }
 }

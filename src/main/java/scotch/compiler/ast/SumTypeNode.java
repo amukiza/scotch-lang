@@ -21,4 +21,9 @@ public class SumTypeNode extends AstNode {
         this.name = name;
         this.parameters = ImmutableList.copyOf(parameters);
     }
+
+    @Override
+    public <T> T accept(AstNodeVisitor<T> visitor) {
+        return visitor.visitSumTypeNode(this);
+    }
 }

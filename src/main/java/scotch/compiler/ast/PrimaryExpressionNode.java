@@ -16,4 +16,9 @@ public class PrimaryExpressionNode extends AstNode {
     @Getter
     private final SourceLocation sourceLocation;
     private final AstNode        value;
+
+    @Override
+    public <T> T accept(AstNodeVisitor<T> visitor) {
+        return visitor.visitPrimaryExpressionNode(this);
+    }
 }

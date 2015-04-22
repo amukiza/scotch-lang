@@ -19,4 +19,9 @@ public class UnshuffledArgumentNode extends AstNode {
         this.sourceLocation = sourceLocation;
         this.arguments = ImmutableList.copyOf(arguments);
     }
+
+    @Override
+    public <T> T accept(AstNodeVisitor<T> visitor) {
+        return visitor.visitUnshuffledArgumentNode(this);
+    }
 }

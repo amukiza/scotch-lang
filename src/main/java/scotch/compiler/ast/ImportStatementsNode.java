@@ -19,4 +19,9 @@ public class ImportStatementsNode extends AstNode {
         this.sourceLocation = sourceLocation;
         this.statements = ImmutableList.copyOf(statements);
     }
+
+    @Override
+    public <T> T accept(AstNodeVisitor<T> visitor) {
+        return visitor.visitImportStatementsNode(this);
+    }
 }

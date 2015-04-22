@@ -19,4 +19,9 @@ public class QualifiedNameNode extends AstNode {
         this.sourceLocation = sourceLocation;
         this.dotNames = ImmutableList.copyOf(dotNames);
     }
+
+    @Override
+    public <T> T accept(AstNodeVisitor<T> visitor) {
+        return visitor.visitQualifiedNameNode(this);
+    }
 }

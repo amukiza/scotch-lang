@@ -17,4 +17,9 @@ public class InfixOperatorNode extends AstNode {
     private final SourceLocation sourceLocation;
     private final AstNode        side;
     private final AstNode        infix;
+
+    @Override
+    public <T> T accept(AstNodeVisitor<T> visitor) {
+        return visitor.visitInfixOperatorNode(this);
+    }
 }

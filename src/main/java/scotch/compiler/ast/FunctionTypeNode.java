@@ -18,4 +18,9 @@ public class FunctionTypeNode extends AstNode {
     private final AstNode        argument;
     private final AstNode        arrow;
     private final AstNode        result;
+
+    @Override
+    public <T> T accept(AstNodeVisitor<T> visitor) {
+        return visitor.visitFunctionTypeNode(this);
+    }
 }

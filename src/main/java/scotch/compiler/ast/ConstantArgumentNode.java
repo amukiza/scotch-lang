@@ -16,4 +16,9 @@ public class ConstantArgumentNode extends AstNode {
     @Getter
     private final SourceLocation sourceLocation;
     private final AstNode        constructor;
+
+    @Override
+    public <T> T accept(AstNodeVisitor<T> visitor) {
+        return visitor.visitConstantArgumentNode(this);
+    }
 }

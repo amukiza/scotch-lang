@@ -16,4 +16,9 @@ public class TypeSignatureNode extends AstNode {
     @Getter
     private final SourceLocation sourceLocation;
     private final AstNode        type;
+
+    @Override
+    public <T> T accept(AstNodeVisitor<T> visitor) {
+        return visitor.visitTypeSignatureNode(this);
+    }
 }

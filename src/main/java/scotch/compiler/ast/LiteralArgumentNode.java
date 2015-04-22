@@ -16,4 +16,9 @@ public class LiteralArgumentNode extends AstNode {
     @Getter
     private final SourceLocation sourceLocation;
     private final AstNode        literal;
+
+    @Override
+    public <T> T accept(AstNodeVisitor<T> visitor) {
+        return visitor.visitLiteralArgumentNode(this);
+    }
 }

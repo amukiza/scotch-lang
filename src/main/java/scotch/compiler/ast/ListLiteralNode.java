@@ -22,4 +22,9 @@ public class ListLiteralNode extends AstNode {
         this.elements = elements;
         this.closeSquare = closeSquare;
     }
+
+    @Override
+    public <T> T accept(AstNodeVisitor<T> visitor) {
+        return visitor.visitListLiteralNode(this);
+    }
 }

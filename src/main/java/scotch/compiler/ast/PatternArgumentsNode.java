@@ -19,4 +19,9 @@ public class PatternArgumentsNode extends AstNode {
         this.sourceLocation = sourceLocation;
         this.patternArguments = ImmutableList.copyOf(patternArguments);
     }
+
+    @Override
+    public <T> T accept(AstNodeVisitor<T> visitor) {
+        return visitor.visitPatternArgumentsNode(this);
+    }
 }

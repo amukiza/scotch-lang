@@ -17,4 +17,9 @@ public class ImportStatementNode extends AstNode {
     private final SourceLocation sourceLocation;
     private final AstNode        import_;
     private final AstNode        terminator;
+
+    @Override
+    public <T> T accept(AstNodeVisitor<T> visitor) {
+        return visitor.visitImportStatementNode(this);
+    }
 }

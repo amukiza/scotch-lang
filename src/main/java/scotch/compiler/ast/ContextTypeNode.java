@@ -17,4 +17,9 @@ public class ContextTypeNode extends AstNode {
     private final SourceLocation sourceLocation;
     private final AstNode        context;
     private final AstNode        type;
+
+    @Override
+    public <T> T accept(AstNodeVisitor<T> visitor) {
+        return visitor.visitContextTypeNode(this);
+    }
 }

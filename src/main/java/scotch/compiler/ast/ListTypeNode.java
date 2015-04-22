@@ -18,4 +18,9 @@ public class ListTypeNode extends AstNode {
     private final AstNode        openSquare;
     private final AstNode        type;
     private final AstNode        closeSquare;
+
+    @Override
+    public <T> T accept(AstNodeVisitor<T> visitor) {
+        return visitor.visitListTypeNode(this);
+    }
 }

@@ -19,4 +19,9 @@ public class TupleArgumentNode extends AstNode {
     private final AstNode        openParen;
     private final List<AstNode>  fieldMatches;
     private final AstNode        closeParen;
+
+    @Override
+    public <T> T accept(AstNodeVisitor<T> visitor) {
+        return visitor.visitTupleArgumentNode(this);
+    }
 }

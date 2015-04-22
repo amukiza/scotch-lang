@@ -19,4 +19,9 @@ public class ModuleMembersNode extends AstNode {
         this.sourceLocation = sourceLocation;
         this.moduleMembers = ImmutableList.copyOf(moduleMembers);
     }
+
+    @Override
+    public <T> T accept(AstNodeVisitor<T> visitor) {
+        return visitor.visitModuleMembersNode(this);
+    }
 }

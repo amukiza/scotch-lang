@@ -21,4 +21,9 @@ public class ConditionalNode extends AstNode {
     private final AstNode        trueCase;
     private final AstNode        elseKeyword;
     private final AstNode        falseCase;
+
+    @Override
+    public <T> T accept(AstNodeVisitor<T> visitor) {
+        return visitor.visitConditionalNode(this);
+    }
 }

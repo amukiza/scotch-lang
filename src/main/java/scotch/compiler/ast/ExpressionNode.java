@@ -19,4 +19,9 @@ public class ExpressionNode extends AstNode {
         this.sourceLocation = sourceLocation;
         this.primaryExpressions = ImmutableList.copyOf(primaryExpressions);
     }
+
+    @Override
+    public <T> T accept(AstNodeVisitor<T> visitor) {
+        return visitor.visitExpressionNode(this);
+    }
 }

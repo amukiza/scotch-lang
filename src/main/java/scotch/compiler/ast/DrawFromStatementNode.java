@@ -19,4 +19,9 @@ public class DrawFromStatementNode extends AstNode {
     private final AstNode        drawFrom;
     private final AstNode        expression;
     private final AstNode        terminal;
+
+    @Override
+    public <T> T accept(AstNodeVisitor<T> visitor) {
+        return visitor.visitDrawFromStatementNode(this);
+    }
 }

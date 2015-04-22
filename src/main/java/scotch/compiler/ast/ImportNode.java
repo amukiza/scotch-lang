@@ -17,4 +17,9 @@ public class ImportNode extends AstNode {
     private final SourceLocation sourceLocation;
     private final AstNode        importKeyword;
     private final AstNode        qualifiedName;
+
+    @Override
+    public <T> T accept(AstNodeVisitor<T> visitor) {
+        return visitor.visitImportNode(this);
+    }
 }

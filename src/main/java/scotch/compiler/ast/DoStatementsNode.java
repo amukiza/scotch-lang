@@ -25,4 +25,9 @@ public class DoStatementsNode extends AstNode {
         this.statements = ImmutableList.copyOf(statements);
         this.closeCurly = closeCurly;
     }
+
+    @Override
+    public <T> T accept(AstNodeVisitor<T> visitor) {
+        return visitor.visitDoStatementsNode(this);
+    }
 }

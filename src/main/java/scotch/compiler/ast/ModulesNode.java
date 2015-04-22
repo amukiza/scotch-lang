@@ -24,4 +24,9 @@ public class ModulesNode extends AstNode {
         this.terminators = ImmutableList.copyOf(terminators);
         this.eof = eof;
     }
+
+    @Override
+    public <T> T accept(AstNodeVisitor<T> visitor) {
+        return visitor.visitModulesNode(this);
+    }
 }

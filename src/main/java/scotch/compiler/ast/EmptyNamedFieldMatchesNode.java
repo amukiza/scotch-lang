@@ -17,4 +17,9 @@ public class EmptyNamedFieldMatchesNode extends AstNode {
     private final SourceLocation sourceLocation;
     private final AstNode        openBrace;
     private final AstNode        closeBrace;
+
+    @Override
+    public <T> T accept(AstNodeVisitor<T> visitor) {
+        return visitor.visitEmptyNamedFieldMatchesNode(this);
+    }
 }

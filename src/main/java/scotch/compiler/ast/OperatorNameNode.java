@@ -16,4 +16,9 @@ public class OperatorNameNode extends AstNode {
     @Getter
     private final SourceLocation sourceLocation;
     private final AstNode        operator;
+
+    @Override
+    public <T> T accept(AstNodeVisitor<T> visitor) {
+        return visitor.visitOperatorNameNode(this);
+    }
 }

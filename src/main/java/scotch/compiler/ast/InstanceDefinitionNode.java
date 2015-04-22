@@ -27,4 +27,9 @@ public class InstanceDefinitionNode extends AstNode {
         this.where = where;
         this.instanceMembers = instanceMembers;
     }
+
+    @Override
+    public <T> T accept(AstNodeVisitor<T> visitor) {
+        return visitor.visitInstanceDefinitionNode(this);
+    }
 }

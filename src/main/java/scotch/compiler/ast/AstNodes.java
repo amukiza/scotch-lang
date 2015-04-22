@@ -7,6 +7,10 @@ import scotch.compiler.text.SourceLocation;
 
 public final class AstNodes {
 
+    public static AstNode apply(AstNode function, AstNode argument) {
+        return new ApplyNode(function, argument);
+    }
+
     public static AstNode bool(SourceLocation sourceLocation, AstNode value) {
         return new BoolNode(sourceLocation, value);
     }

@@ -22,4 +22,9 @@ public class ClassMembersNode extends AstNode {
         this.classMembers = classMembers;
         this.closeCurly = closeCurly;
     }
+
+    @Override
+    public <T> T accept(AstNodeVisitor<T> visitor) {
+        return visitor.visitClassMembersNode(this);
+    }
 }

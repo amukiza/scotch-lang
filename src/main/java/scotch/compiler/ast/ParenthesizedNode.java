@@ -18,4 +18,9 @@ public class ParenthesizedNode extends AstNode {
     private final AstNode        openParen;
     private final AstNode        argument;
     private final AstNode        closeParen;
+
+    @Override
+    public <T> T accept(AstNodeVisitor<T> visitor) {
+        return visitor.visitParenthesizedNode(this);
+    }
 }

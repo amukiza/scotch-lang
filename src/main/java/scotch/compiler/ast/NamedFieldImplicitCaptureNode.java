@@ -16,4 +16,9 @@ public class NamedFieldImplicitCaptureNode extends AstNode {
     @Getter
     private final SourceLocation sourceLocation;
     private final AstNode        fieldName;
+
+    @Override
+    public <T> T accept(AstNodeVisitor<T> visitor) {
+        return visitor.visitNamedFieldImplicitCaptureNode(this);
+    }
 }

@@ -18,4 +18,9 @@ public class PatternNode extends AstNode {
     private final AstNode        arguments;
     private final AstNode        is;
     private final AstNode        expression;
+
+    @Override
+    public <T> T accept(AstNodeVisitor<T> visitor) {
+        return visitor.visitPatternNode(this);
+    }
 }

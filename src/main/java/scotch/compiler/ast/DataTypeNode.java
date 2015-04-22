@@ -27,4 +27,9 @@ public class DataTypeNode extends AstNode {
         this.is = is;
         this.members = ImmutableList.copyOf(members);
     }
+
+    @Override
+    public <T> T accept(AstNodeVisitor<T> visitor) {
+        return visitor.visitDataTypeNode(this);
+    }
 }

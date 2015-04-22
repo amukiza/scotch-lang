@@ -25,4 +25,9 @@ public class ContextNode extends AstNode {
         this.closeParen = closeParen;
         this.contextArrow = contextArrow;
     }
+
+    @Override
+    public <T> T accept(AstNodeVisitor<T> visitor) {
+        return visitor.visitContextNode(this);
+    }
 }
