@@ -138,6 +138,11 @@ public abstract class BaseNodeVisitor<T> implements AstNodeVisitor<T> {
     }
 
     @Override
+    public T visitImportScopeNode(ImportScopeNode node) {
+        return visitDefault(node);
+    }
+
+    @Override
     public T visitImportStatementNode(ImportStatementNode node) {
         return visitDefault(node);
     }

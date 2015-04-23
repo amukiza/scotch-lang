@@ -123,12 +123,16 @@ public final class TestUtil {
         return AstNodes.ignoreArgument(NULL_SOURCE, underscore);
     }
 
-    public static AstNode importStmt(AstNode import_, AstNode semicolon) {
-        return AstNodes.importStmt(NULL_SOURCE, import_, semicolon);
+    public static AstNode importScope(AstNode importStatements, AstNode moduleMembers) {
+        return AstNodes.importScope(NULL_SOURCE, importStatements, moduleMembers);
     }
 
-    public static AstNode importStmts(List<AstNode> statements) {
-        return AstNodes.importStmts(NULL_SOURCE, statements);
+    public static AstNode importStatement(AstNode import_, AstNode semicolon) {
+        return AstNodes.importStatement(NULL_SOURCE, import_, semicolon);
+    }
+
+    public static AstNode importStatements(List<AstNode> statements) {
+        return AstNodes.importStatements(NULL_SOURCE, statements);
     }
 
     public static AstNode import_(AstNode importKeyword, AstNode qualifiedName) {
@@ -175,8 +179,8 @@ public final class TestUtil {
         return AstNodes.literalArgument(NULL_SOURCE, literal);
     }
 
-    public static AstNode module(AstNode module, AstNode moduleName, AstNode semicolon, AstNode importStatements, AstNode members) {
-        return AstNodes.module(NULL_SOURCE, module, moduleName, semicolon, importStatements, members);
+    public static AstNode module(AstNode module, AstNode moduleName, AstNode semicolon, AstNode importScope) {
+        return AstNodes.module(NULL_SOURCE, module, moduleName, semicolon, importScope);
     }
 
     public static AstNode moduleMember(AstNode member, AstNode semicolon) {

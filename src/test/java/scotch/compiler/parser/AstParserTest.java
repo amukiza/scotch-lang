@@ -32,8 +32,9 @@ import static scotch.compiler.ast.TestUtil.emptyNamedFields;
 import static scotch.compiler.ast.TestUtil.expression;
 import static scotch.compiler.ast.TestUtil.functionType;
 import static scotch.compiler.ast.TestUtil.ignoreArgument;
-import static scotch.compiler.ast.TestUtil.importStmt;
-import static scotch.compiler.ast.TestUtil.importStmts;
+import static scotch.compiler.ast.TestUtil.importScope;
+import static scotch.compiler.ast.TestUtil.importStatement;
+import static scotch.compiler.ast.TestUtil.importStatements;
 import static scotch.compiler.ast.TestUtil.import_;
 import static scotch.compiler.ast.TestUtil.infixOperator;
 import static scotch.compiler.ast.TestUtil.initializer;
@@ -162,7 +163,7 @@ public class AstParserTest {
     public void shouldParseImportStatement() {
         AstNode import_ = parse("import scotch.data.list\n").parseImportStatement();
         assertThat(import_, is(
-            importStmt(
+            importStatement(
                 import_(
                     terminal(IMPORT, "import"),
                     qualified(asList(
@@ -186,8 +187,8 @@ public class AstParserTest {
             "import scotch.test"
         ).parseImportStatements();
         assertThat(imports, is(
-            importStmts(asList(
-                importStmt(
+            importStatements(asList(
+                importStatement(
                     import_(
                         terminal(IMPORT, "import"),
                         qualified(asList(
@@ -200,7 +201,7 @@ public class AstParserTest {
                     ),
                     terminal(SEMICOLON, ";")
                 ),
-                importStmt(
+                importStatement(
                     import_(
                         terminal(IMPORT, "import"),
                         qualified(asList(
@@ -231,37 +232,39 @@ public class AstParserTest {
                     terminal(ID, "test")
                 )),
                 terminal(SEMICOLON, ";"),
-                importStmts(asList(
-                    importStmt(
-                        import_(
-                            terminal(IMPORT, "import"),
-                            qualified(asList(
-                                terminal(ID, "scotch"),
-                                terminal(DOT, "."),
-                                terminal(ID, "data"),
-                                terminal(DOT, "."),
-                                terminal(ID, "list")
-                            ))
-                        ),
-                        terminal(SEMICOLON, ";")
-                    )
-                )),
-                moduleMembers(asList(
-                    moduleMember(
-                        pattern(
-                            patternArguments(asList(
-                                captureArgument(terminal(ID, "three"))
-                            )),
-                            terminal(IS, "="),
-                            expression(asList(
-                                primary(literal(integer(terminal(INT, 2)))),
-                                primary(reference(qualified(terminal(ID, "+")))),
-                                primary(literal(integer(terminal(INT, 1))))
-                            ))
-                        ),
-                        terminal(SEMICOLON, ";")
-                    )
-                ))
+                importScope(
+                    importStatements(asList(
+                        importStatement(
+                            import_(
+                                terminal(IMPORT, "import"),
+                                qualified(asList(
+                                    terminal(ID, "scotch"),
+                                    terminal(DOT, "."),
+                                    terminal(ID, "data"),
+                                    terminal(DOT, "."),
+                                    terminal(ID, "list")
+                                ))
+                            ),
+                            terminal(SEMICOLON, ";")
+                        )
+                    )),
+                    moduleMembers(asList(
+                        moduleMember(
+                            pattern(
+                                patternArguments(asList(
+                                    captureArgument(terminal(ID, "three"))
+                                )),
+                                terminal(IS, "="),
+                                expression(asList(
+                                    primary(literal(integer(terminal(INT, 2)))),
+                                    primary(reference(qualified(terminal(ID, "+")))),
+                                    primary(literal(integer(terminal(INT, 1))))
+                                ))
+                            ),
+                            terminal(SEMICOLON, ";")
+                        )
+                    ))
+                )
             )
         ));
     }
@@ -1062,15 +1065,19 @@ public class AstParserTest {
                 terminal(MODULE, "module"),
                 qualified(asList(terminal(ID, "a"), terminal(DOT, "."), terminal(ID, "b"), terminal(DOT, "."), terminal(ID, "c"))),
                 terminal(SEMICOLON, ";"),
-                importStmts(emptyList()),
-                moduleMembers(emptyList())
+                importScope(
+                    importStatements(emptyList()),
+                    moduleMembers(emptyList())
+                )
             ),
             module(
                 terminal(MODULE, "module"),
                 qualified(asList(terminal(ID, "d"), terminal(DOT, "."), terminal(ID, "e"), terminal(DOT, "."), terminal(ID, "f"))),
                 terminal(SEMICOLON, ";"),
-                importStmts(emptyList()),
-                moduleMembers(emptyList())
+                importScope(
+                    importStatements(emptyList()),
+                    moduleMembers(emptyList())
+                )
             )
         ));
     }

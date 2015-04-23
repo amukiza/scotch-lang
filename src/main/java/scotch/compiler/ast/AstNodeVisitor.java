@@ -56,6 +56,8 @@ public interface AstNodeVisitor<T> {
 
     T visitImportNode(ImportNode node);
 
+    T visitImportScopeNode(ImportScopeNode node);
+
     T visitImportStatementNode(ImportStatementNode node);
 
     T visitImportStatementsNode(ImportStatementsNode node);

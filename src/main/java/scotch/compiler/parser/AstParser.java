@@ -30,8 +30,9 @@ import static scotch.compiler.ast.AstNodes.emptyNamedFields;
 import static scotch.compiler.ast.AstNodes.expression;
 import static scotch.compiler.ast.AstNodes.functionType;
 import static scotch.compiler.ast.AstNodes.ignoreArgument;
-import static scotch.compiler.ast.AstNodes.importStmt;
-import static scotch.compiler.ast.AstNodes.importStmts;
+import static scotch.compiler.ast.AstNodes.importScope;
+import static scotch.compiler.ast.AstNodes.importStatement;
+import static scotch.compiler.ast.AstNodes.importStatements;
 import static scotch.compiler.ast.AstNodes.import_;
 import static scotch.compiler.ast.AstNodes.infixOperator;
 import static scotch.compiler.ast.AstNodes.initializer;
@@ -227,11 +228,18 @@ public class AstParser {
         return import_(getSourceLocation(), importKeyword, qualifiedName);
     }
 
+    public AstNode parseImportScope() {
+        markPosition();
+        AstNode importStatements = parseImportStatements();
+        AstNode moduleMembers = parseModuleMembers();
+        return importScope(getSourceLocation(), importStatements, moduleMembers);
+    }
+
     public AstNode parseImportStatement() {
         markPosition();
         AstNode import_ = parseImport();
         AstNode terminator = parseTerminator();
-        return importStmt(getSourceLocation(), import_, terminator);
+        return importStatement(getSourceLocation(), import_, terminator);
     }
 
     public AstNode parseImportStatements() {
@@ -240,7 +248,7 @@ public class AstParser {
         while (expects("import")) {
             importStmts.add(parseImportStatement());
         }
-        return importStmts(getSourceLocation(), importStmts);
+        return importStatements(getSourceLocation(), importStmts);
     }
 
     public AstNode parseInstanceDefinition() {
@@ -294,9 +302,8 @@ public class AstParser {
         AstNode module = require("module", MODULE);
         AstNode moduleName = parseQualifiedName();
         AstNode terminator = parseTerminator();
-        AstNode importStatements = parseImportStatements();
-        AstNode moduleMembers = parseModuleMembers();
-        return module(getSourceLocation(), module, moduleName, terminator, importStatements, moduleMembers);
+        AstNode importScope = parseImportScope();
+        return module(getSourceLocation(), module, moduleName, terminator, importScope);
     }
 
     public AstNode parseModuleMember() {
@@ -498,6 +505,10 @@ public class AstParser {
         markPosition();
         AstNode context = parseContextType();
         return typeSignature(getSourceLocation(), context);
+    }
+
+    private SourceLocation currentSourceLocation() {
+        return positions.peek().to(scanner.getPreviousPosition());
     }
 
     private boolean expects(TokenKind tokenKind) {
@@ -1196,9 +1207,5 @@ public class AstParser {
 
     private NamedSourcePoint unmarkPosition() {
         return positions.pop();
-    }
-
-    private SourceLocation currentSourceLocation() {
-        return positions.peek().to(scanner.getPreviousPosition());
     }
 }

@@ -111,11 +111,15 @@ public final class AstNodes {
         return new IgnoreArgumentNode(sourceLocation, underscore);
     }
 
-    public static AstNode importStmt(SourceLocation sourceLocation, AstNode import_, AstNode terminator) {
+    public static AstNode importScope(SourceLocation sourceLocation, AstNode importStatements, AstNode moduleMembers) {
+        return new ImportScopeNode(sourceLocation, importStatements, moduleMembers);
+    }
+
+    public static AstNode importStatement(SourceLocation sourceLocation, AstNode import_, AstNode terminator) {
         return new ImportStatementNode(sourceLocation, import_, terminator);
     }
 
-    public static AstNode importStmts(SourceLocation sourceLocation, List<AstNode> statements) {
+    public static AstNode importStatements(SourceLocation sourceLocation, List<AstNode> statements) {
         return new ImportStatementsNode(sourceLocation, statements);
     }
 
@@ -163,8 +167,8 @@ public final class AstNodes {
         return new LiteralArgumentNode(sourceLocation, literal);
     }
 
-    public static AstNode module(SourceLocation sourceLocation, AstNode module, AstNode moduleName, AstNode terminator, AstNode importStatements, AstNode members) {
-        return new ModuleNode(sourceLocation, module, moduleName, terminator, importStatements, members);
+    public static AstNode module(SourceLocation sourceLocation, AstNode module, AstNode moduleName, AstNode terminator, AstNode importScope) {
+        return new ModuleNode(sourceLocation, module, moduleName, terminator, importScope);
     }
 
     public static AstNode moduleMember(SourceLocation sourceLocation, AstNode member, AstNode terminator) {

@@ -11,17 +11,15 @@ import scotch.compiler.text.SourceLocation;
 @AllArgsConstructor(access = PACKAGE)
 @EqualsAndHashCode(callSuper = false)
 @ToString(exclude = "sourceLocation")
-public class ModuleNode extends AstNode {
+public class ImportScopeNode extends AstNode {
 
     @Getter
     private final SourceLocation sourceLocation;
-    private final AstNode        module;
-    private final AstNode        moduleName;
-    private final AstNode        terminator;
-    private final AstNode        importScope;
+    private final AstNode        importStatements;
+    private final AstNode        moduleMembers;
 
     @Override
     public <T> T accept(AstNodeVisitor<T> visitor) {
-        return visitor.visitModuleNode(this);
+        return visitor.visitImportScopeNode(this);
     }
 }
