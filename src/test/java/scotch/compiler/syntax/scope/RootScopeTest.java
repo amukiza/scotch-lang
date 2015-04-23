@@ -9,10 +9,11 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static scotch.compiler.syntax.definition.Import.moduleImport;
+import static scotch.compiler.syntax.scope.Scope.scope;
+import static scotch.compiler.text.SourceLocation.NULL_SOURCE;
 import static scotch.symbol.Symbol.qualified;
 import static scotch.symbol.Symbol.unqualified;
-import static scotch.compiler.syntax.scope.Scope.scope;
-import static scotch.compiler.util.TestUtil.moduleImport;
 
 import java.util.Optional;
 import org.junit.Before;
@@ -41,8 +42,8 @@ public class RootScopeTest {
     public void setUp() {
         when(resolver.getEntry(any(Symbol.class))).thenReturn(Optional.empty());
         rootScope = scope(symbolGenerator, resolver);
-        module1Scope = rootScope.enterScope("scotch.module1", emptyList());
-        module2Scope = rootScope.enterScope("scotch.module2", asList(moduleImport("scotch.module1")));
+        module1Scope = rootScope.enterScope("scotch.module1");
+        module2Scope = rootScope.enterScope("scotch.module2");
     }
 
     @Test
@@ -53,7 +54,8 @@ public class RootScopeTest {
 
     @Test
     public void shouldDelegateQualifyingSymbolToSiblingModule() {
-        module1Scope.defineValue(qualified("scotch.module1", "fn"), Types.t(1));
+        module1Scope.enterScope(emptyList()).defineValue(qualified("scotch.module1", "fn"), Types.t(1));
+        module2Scope.enterScope(asList(moduleImport(NULL_SOURCE, "scotch.module1")));
         assertThat(module2Scope.qualify(unqualified("fn")), is(Optional.of(qualified("scotch.module1", "fn"))));
     }
 
@@ -75,8 +77,8 @@ public class RootScopeTest {
     }
 
     @Test
-    public void shouldLeavingChildScopeShouldGiveBackRootScope() {
-        assertThat(rootScope.enterScope("scotch.module3", emptyList()).leaveScope(), sameInstance(rootScope));
+    public void leavingChildScopeShouldGiveBackRootScope() {
+        assertThat(rootScope.enterScope("test.module").leaveScope(), sameInstance(rootScope));
     }
 
     @Test(expected = IllegalStateException.class)

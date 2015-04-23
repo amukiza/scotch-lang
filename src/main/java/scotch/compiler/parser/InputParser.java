@@ -7,35 +7,35 @@ import static java.util.Arrays.stream;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
+import static scotch.compiler.scanner.Token.TokenKind.ALTERNATIVE;
 import static scotch.compiler.scanner.Token.TokenKind.ARROW;
-import static scotch.compiler.scanner.Token.TokenKind.IS;
-import static scotch.compiler.scanner.Token.TokenKind.LAMBDA_SLASH;
-import static scotch.compiler.scanner.Token.TokenKind.DRAW_FROM;
 import static scotch.compiler.scanner.Token.TokenKind.BOOL;
 import static scotch.compiler.scanner.Token.TokenKind.CHAR;
-import static scotch.compiler.scanner.Token.TokenKind.COMMA;
-import static scotch.compiler.scanner.Token.TokenKind.DEFAULT_OPERATOR;
-import static scotch.compiler.scanner.Token.TokenKind.DOT;
-import static scotch.compiler.scanner.Token.TokenKind.CONTEXT_ARROW;
-import static scotch.compiler.scanner.Token.TokenKind.HAS_TYPE;
-import static scotch.compiler.scanner.Token.TokenKind.DOUBLE;
-import static scotch.compiler.scanner.Token.TokenKind.EOF;
-import static scotch.compiler.scanner.Token.TokenKind.ID;
-import static scotch.compiler.scanner.Token.TokenKind.INT;
-import static scotch.compiler.scanner.Token.TokenKind.DO;
-import static scotch.compiler.scanner.Token.TokenKind.ELSE;
-import static scotch.compiler.scanner.Token.TokenKind.IF;
-import static scotch.compiler.scanner.Token.TokenKind.THEN;
-import static scotch.compiler.scanner.Token.TokenKind.WHERE;
-import static scotch.compiler.scanner.Token.TokenKind.OPEN_CURLY;
-import static scotch.compiler.scanner.Token.TokenKind.OPEN_PAREN;
-import static scotch.compiler.scanner.Token.TokenKind.OPEN_SQUARE;
-import static scotch.compiler.scanner.Token.TokenKind.ALTERNATIVE;
 import static scotch.compiler.scanner.Token.TokenKind.CLOSE_CURLY;
 import static scotch.compiler.scanner.Token.TokenKind.CLOSE_PAREN;
 import static scotch.compiler.scanner.Token.TokenKind.CLOSE_SQUARE;
+import static scotch.compiler.scanner.Token.TokenKind.COMMA;
+import static scotch.compiler.scanner.Token.TokenKind.CONTEXT_ARROW;
+import static scotch.compiler.scanner.Token.TokenKind.DEFAULT_OPERATOR;
+import static scotch.compiler.scanner.Token.TokenKind.DO;
+import static scotch.compiler.scanner.Token.TokenKind.DOT;
+import static scotch.compiler.scanner.Token.TokenKind.DOUBLE;
+import static scotch.compiler.scanner.Token.TokenKind.DRAW_FROM;
+import static scotch.compiler.scanner.Token.TokenKind.ELSE;
+import static scotch.compiler.scanner.Token.TokenKind.EOF;
+import static scotch.compiler.scanner.Token.TokenKind.HAS_TYPE;
+import static scotch.compiler.scanner.Token.TokenKind.ID;
+import static scotch.compiler.scanner.Token.TokenKind.IF;
+import static scotch.compiler.scanner.Token.TokenKind.INT;
+import static scotch.compiler.scanner.Token.TokenKind.IS;
+import static scotch.compiler.scanner.Token.TokenKind.LAMBDA_SLASH;
+import static scotch.compiler.scanner.Token.TokenKind.OPEN_CURLY;
+import static scotch.compiler.scanner.Token.TokenKind.OPEN_PAREN;
+import static scotch.compiler.scanner.Token.TokenKind.OPEN_SQUARE;
 import static scotch.compiler.scanner.Token.TokenKind.SEMICOLON;
 import static scotch.compiler.scanner.Token.TokenKind.STRING;
+import static scotch.compiler.scanner.Token.TokenKind.THEN;
+import static scotch.compiler.scanner.Token.TokenKind.WHERE;
 import static scotch.compiler.syntax.definition.DefinitionEntry.entry;
 import static scotch.compiler.syntax.definition.DefinitionGraph.createGraph;
 import static scotch.compiler.syntax.pattern.ComplexMatchBuilder.complexMatchBuilder;
@@ -81,6 +81,7 @@ import scotch.compiler.syntax.definition.Definition;
 import scotch.compiler.syntax.definition.DefinitionEntry;
 import scotch.compiler.syntax.definition.DefinitionGraph;
 import scotch.compiler.syntax.definition.Import;
+import scotch.compiler.syntax.definition.ImportBlock;
 import scotch.compiler.syntax.definition.ModuleDefinition;
 import scotch.compiler.syntax.definition.ModuleImport;
 import scotch.compiler.syntax.definition.OperatorDefinition;
@@ -743,12 +744,16 @@ public class InputParser {
         currentModule = parseQualifiedName();
         requireTerminator();
         List<Import> imports = parseImports();
-        return scoped(imports, () -> definition(
+        return scoped(currentModule, () -> definition(
             ModuleDefinition.builder(),
-            builder -> builder
+            module -> module
                 .withSymbol(currentModule)
-                .withImports(imports)
-                .withDefinitions(parseModuleDefinitions())
+                .withImportScope(scoped(imports, () -> definition(
+                    ImportBlock.builder(),
+                    importScope -> importScope.withSymbol(reserveSymbol())
+                        .withImports(imports)
+                        .withDefinitions(parseModuleDefinitions())
+                )))
         ));
     }
 
@@ -1261,9 +1266,18 @@ public class InputParser {
         return scoped(Optional.empty(), supplier);
     }
 
+    private <T> T scoped(String moduleName, Supplier<T> supplier) {
+        scopes.push(scope().enterScope(moduleName));
+        try {
+            return supplier.get();
+        } finally {
+            scopes.pop();
+        }
+    }
+
     private <T> T scoped(Optional<List<Import>> optionalImports, Supplier<T> supplier) {
         scopes.push(optionalImports
-            .map(imports -> scope().enterScope(currentModule, imports))
+            .map(imports -> scope().enterScope(imports))
             .orElseGet(scope()::enterScope));
         try {
             return supplier.get();

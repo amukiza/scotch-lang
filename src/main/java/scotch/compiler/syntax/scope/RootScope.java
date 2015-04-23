@@ -1,15 +1,10 @@
 package scotch.compiler.syntax.scope;
 
-import static scotch.compiler.syntax.definition.Import.moduleImport;
-import static scotch.compiler.text.SourceLocation.NULL_SOURCE;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import com.google.common.collect.ImmutableList;
-import scotch.compiler.syntax.definition.Import;
 import scotch.compiler.syntax.pattern.PatternCase;
 import scotch.compiler.syntax.reference.ClassReference;
 import scotch.compiler.syntax.reference.ValueReference;
@@ -84,24 +79,8 @@ public class RootScope extends Scope {
     }
 
     @Override
-    public Scope enterScope() {
-        throw new IllegalStateException();
-    }
-
-    @Override
-    public Scope enterScope(String moduleName, List<Import> imports) {
-        Scope scope = scope(this, new DefaultTypeScope(symbolGenerator, resolver), resolver, symbolGenerator, moduleName, ImmutableList.<Import>builder()
-            .add(moduleImport(NULL_SOURCE, "scotch.lang"))
-            .add(moduleImport(NULL_SOURCE, "scotch.data.bool"))
-            .add(moduleImport(NULL_SOURCE, "scotch.data.char"))
-            .add(moduleImport(NULL_SOURCE, "scotch.data.double"))
-            .add(moduleImport(NULL_SOURCE, "scotch.data.int"))
-            .add(moduleImport(NULL_SOURCE, "scotch.data.list"))
-            .add(moduleImport(NULL_SOURCE, "scotch.data.num"))
-            .add(moduleImport(NULL_SOURCE, "scotch.data.string"))
-            .add(moduleImport(NULL_SOURCE, "scotch.control.monad"))
-            .addAll(imports)
-            .build());
+    public Scope enterScope(String moduleName) {
+        Scope scope = new ModuleScope(this, new DefaultTypeScope(symbolGenerator, resolver), resolver, symbolGenerator, moduleName);
         children.put(moduleName, scope);
         return scope;
     }

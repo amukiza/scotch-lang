@@ -299,11 +299,11 @@ public class AstParser {
 
     public AstNode parseModule() {
         markPosition();
-        AstNode module = require("module", MODULE);
+        AstNode moduleKeyword = require("module", MODULE);
         AstNode moduleName = parseQualifiedName();
         AstNode terminator = parseTerminator();
         AstNode importScope = parseImportScope();
-        return module(getSourceLocation(), module, moduleName, terminator, importScope);
+        return module(getSourceLocation(), moduleKeyword, moduleName, terminator, importScope);
     }
 
     public AstNode parseModuleMember() {

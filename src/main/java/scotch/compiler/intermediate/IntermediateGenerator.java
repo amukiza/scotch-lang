@@ -1,5 +1,6 @@
 package scotch.compiler.intermediate;
 
+import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static scotch.compiler.intermediate.Intermediates.data;
 import static scotch.compiler.intermediate.Intermediates.module;
@@ -37,6 +38,7 @@ public class IntermediateGenerator {
     private final List<IntermediateDefinition> definitions;
     private final Deque<Scope>                 scopes;
     private final List<String>                 references;
+    private       IntermediateModule           currentModule;
 
     public IntermediateGenerator(DefinitionGraph graph) {
         this.graph = graph;
@@ -66,8 +68,16 @@ public class IntermediateGenerator {
         return Optional.of(dataRef(symbol));
     }
 
-    public DefinitionReference defineModule(String symbol, List<DefinitionReference> references) {
-        definitions.add(module(symbol, references));
+    public DefinitionReference defineMembers(List<DefinitionReference> definitions) {
+        currentModule = currentModule.append(definitions);
+        return currentModule.getReference();
+    }
+
+    public DefinitionReference defineModule(String symbol, Runnable importScopeRunner) {
+        currentModule = module(symbol, emptyList());
+        importScopeRunner.run();
+        definitions.add(currentModule);
+        currentModule = null;
         return moduleRef(symbol);
     }
 

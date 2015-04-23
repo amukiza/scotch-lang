@@ -1,7 +1,7 @@
 package scotch.compiler.syntax.definition;
 
-import static java.util.stream.Collectors.toList;
 import static scotch.compiler.syntax.builder.BuilderUtil.require;
+import static scotch.compiler.syntax.definition.Definitions.module;
 import static scotch.compiler.syntax.reference.DefinitionReference.moduleRef;
 import static scotch.util.StringUtil.stringify;
 
@@ -31,24 +31,22 @@ public class ModuleDefinition extends Definition {
 
     private final SourceLocation            sourceLocation;
     private final String                    symbol;
-    private final List<Import>              imports;
-    private final List<DefinitionReference> definitions;
+    private final List<DefinitionReference> importScopes;
 
-    ModuleDefinition(SourceLocation sourceLocation, String symbol, List<Import> imports, List<DefinitionReference> definitions) {
+    ModuleDefinition(SourceLocation sourceLocation, String symbol, List<DefinitionReference> importScopes) {
         this.sourceLocation = sourceLocation;
         this.symbol = symbol;
-        this.imports = ImmutableList.copyOf(imports);
-        this.definitions = ImmutableList.copyOf(definitions);
+        this.importScopes = ImmutableList.copyOf(importScopes);
     }
 
     @Override
     public Definition accumulateDependencies(DependencyAccumulator state) {
-        return state.scoped(this, () -> withDefinitions(state.accumulateDependencies(definitions)));
+        return state.scoped(this, () -> withImportScopes(state.accumulateDependencies(importScopes)));
     }
 
     @Override
     public Definition accumulateNames(NameAccumulator state) {
-        return state.scoped(this, () -> withDefinitions(state.accumulateNames(definitions)));
+        return state.scoped(this, () -> withImportScopes(state.accumulateNames(importScopes)));
     }
 
     @Override
@@ -58,20 +56,14 @@ public class ModuleDefinition extends Definition {
 
     @Override
     public Definition defineOperators(OperatorAccumulator state) {
-        return state.scoped(this, () -> withDefinitions(state.defineDefinitionOperators(definitions)));
+        return state.scoped(this, () -> withImportScopes(state.defineDefinitionOperators(importScopes)));
     }
 
     @Override
     public Optional<DefinitionReference> generateIntermediateCode(IntermediateGenerator generator) {
-        return generator.scoped(this, () -> generator.defineModule(symbol, definitions.stream()
-            .map(generator::generateIntermediateCode)
-            .filter(Optional::isPresent)
-            .map(Optional::get)
-            .collect(toList())));
-    }
-
-    public List<Import> getImports() {
-        return imports;
+        return generator.scoped(this,
+            () -> generator.defineModule(symbol,
+                () -> importScopes.forEach(generator::generateIntermediateCode)));
     }
 
     @Override
@@ -86,20 +78,20 @@ public class ModuleDefinition extends Definition {
 
     @Override
     public Optional<Definition> parsePrecedence(PrecedenceParser state) {
-        return Optional.of(state.scoped(this, () -> withDefinitions(new ArrayList<DefinitionReference>() {{
-            addAll(state.mapOptional(definitions, Definition::parsePrecedence));
+        return Optional.of(state.scoped(this, () -> withImportScopes(new ArrayList<DefinitionReference>() {{
+            addAll(state.mapOptional(importScopes, Definition::parsePrecedence));
             addAll(state.processPatterns());
         }})));
     }
 
     @Override
     public Definition qualifyNames(ScopedNameQualifier state) {
-        return state.scoped(this, () -> withDefinitions(state.qualifyDefinitionNames(definitions)));
+        return state.scoped(this, () -> withImportScopes(state.qualifyDefinitionNames(importScopes)));
     }
 
     @Override
     public Definition reducePatterns(PatternAnalyzer state) {
-        return state.scoped(this, () -> withDefinitions(state.reducePatterns(definitions)));
+        return state.scoped(this, () -> withImportScopes(state.reducePatterns(importScopes)));
     }
 
     @Override
@@ -107,41 +99,31 @@ public class ModuleDefinition extends Definition {
         return stringify(this) + "(" + symbol + ")";
     }
 
-    public ModuleDefinition withDefinitions(List<DefinitionReference> definitions) {
-        return new ModuleDefinition(sourceLocation, symbol, imports, definitions);
+    public ModuleDefinition withImportScopes(List<DefinitionReference> importScopes) {
+        return new ModuleDefinition(sourceLocation, symbol, importScopes);
     }
 
     public static class Builder implements SyntaxBuilder<ModuleDefinition> {
 
-        private Optional<String>                    symbol;
-        private Optional<List<Import>>              imports;
-        private Optional<List<DefinitionReference>> definitions;
-        private Optional<SourceLocation>            sourceLocation;
+        private final List<DefinitionReference> importScopes   = new ArrayList<>();
+        private       Optional<String>          symbol         = Optional.empty();
+        private       Optional<SourceLocation>  sourceLocation = Optional.empty();
 
         private Builder() {
-            symbol = Optional.empty();
-            imports = Optional.empty();
-            definitions = Optional.empty();
-            sourceLocation = Optional.empty();
+            // intentionally empty
         }
 
         @Override
         public ModuleDefinition build() {
-            return Definitions.module(
+            return module(
                 require(sourceLocation, "Source location"),
                 require(symbol, "Module symbol"),
-                require(imports, "Imports are required"),
-                require(definitions, "Member definitions")
+                importScopes
             );
         }
 
-        public Builder withDefinitions(List<DefinitionReference> definitions) {
-            this.definitions = Optional.of(definitions);
-            return this;
-        }
-
-        public Builder withImports(List<Import> imports) {
-            this.imports = Optional.of(imports);
+        public Builder withImportScope(DefinitionReference importScope) {
+            importScopes.add(importScope);
             return this;
         }
 

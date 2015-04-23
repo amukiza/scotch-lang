@@ -2,6 +2,7 @@ package scotch.compiler.intermediate;
 
 import static scotch.compiler.syntax.reference.DefinitionReference.moduleRef;
 
+import java.util.ArrayList;
 import java.util.List;
 import com.google.common.collect.ImmutableList;
 import lombok.EqualsAndHashCode;
@@ -19,6 +20,13 @@ public class IntermediateModule extends IntermediateDefinition {
     public IntermediateModule(String symbol, List<DefinitionReference> definitions) {
         this.symbol = symbol;
         this.definitions = ImmutableList.copyOf(definitions);
+    }
+
+    public IntermediateModule append(List<DefinitionReference> newDefinitions) {
+        return new IntermediateModule(symbol, new ArrayList<DefinitionReference>() {{
+            addAll(definitions);
+            addAll(newDefinitions);
+        }});
     }
 
     @Override

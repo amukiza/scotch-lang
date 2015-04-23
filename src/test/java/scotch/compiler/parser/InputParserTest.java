@@ -83,8 +83,8 @@ public class InputParserTest extends IsolatedCompilerTest {
         shouldHaveClass("scotch.data.eq.Eq", asList(var("a")), asList(
             signatureRef("scotch.data.eq.(==)"),
             signatureRef("scotch.data.eq.(/=)"),
-            scopeRef("scotch.data.eq.(#0)"),
-            scopeRef("scotch.data.eq.(#1)")
+            scopeRef("scotch.data.eq.(#1)"),
+            scopeRef("scotch.data.eq.(#2)")
         ));
     }
 
@@ -158,7 +158,7 @@ public class InputParserTest extends IsolatedCompilerTest {
             "length s = jStrlen s"
         );
         shouldHavePattern(
-            "scotch.test.(#0)",
+            "scotch.test.(#1)",
             asList(capture("length", t(0)), capture("s", t(1))),
             unshuffled(id("jStrlen", t(2)), id("s", t(3)))
         );
@@ -430,7 +430,7 @@ public class InputParserTest extends IsolatedCompilerTest {
             "}"
         );
         shouldHaveValue("scotch.test.Toast", fn(
-            "scotch.test.(#0)",
+            "scotch.test.(#1)",
             asList(arg("type", sum("Bread")), arg("butter", sum("Verbool")), arg("jam", sum("Verbool"))),
             construct("scotch.test.Toast", sum("scotch.test.Toast"), asList(
                 id("type", sum("Bread")),
@@ -459,7 +459,7 @@ public class InputParserTest extends IsolatedCompilerTest {
             "data Maybe a = Nothing | Just a"
         );
         shouldHaveValue("scotch.test.Just", fn(
-            "scotch.test.(#0)",
+            "scotch.test.(#1)",
             asList(arg("_0", var("a"))),
             construct("scotch.test.Just", sum("scotch.test.Maybe", var("a")), asList(
                 id("_0", var("a"))))));
@@ -634,7 +634,7 @@ public class InputParserTest extends IsolatedCompilerTest {
             "module scotch.test",
             "second (_, b) = b"
         );
-        shouldHavePattern("scotch.test.(#0)",
+        shouldHavePattern("scotch.test.(#1)",
             asList(capture("second", t(0)), struct("scotch.data.tuple.(,)", t(5), asList(
                 field("_0", t(6), ignore(t(2))),
                 field("_1", t(7), capture("b", t(4)))))),
@@ -648,7 +648,7 @@ public class InputParserTest extends IsolatedCompilerTest {
             "module scotch.test",
             "tail (_:xs) = xs"
         );
-        shouldHavePattern("scotch.test.(#0)",
+        shouldHavePattern("scotch.test.(#1)",
             asList(capture("tail", t(0)), unshuffledMatch(t(1), ignore(t(2)), equal(id(":", t(3))), capture("xs", t(4)))),
             unshuffled(id("xs", t(6))));
     }
@@ -659,7 +659,7 @@ public class InputParserTest extends IsolatedCompilerTest {
             "module scotch.test",
             "second (_, (b)) = b"
         );
-        shouldHavePattern("scotch.test.(#0)",
+        shouldHavePattern("scotch.test.(#1)",
             asList(capture("second", t(0)), struct("scotch.data.tuple.(,)", t(7), asList(
                 field("_0", t(8), ignore(t(2))),
                 field("_1", t(9), capture("b", t(5)))))),
@@ -673,7 +673,7 @@ public class InputParserTest extends IsolatedCompilerTest {
             "module scotch.test",
             "secondSecond (_, (_, b)) = b"
         );
-        shouldHavePattern("scotch.test.(#0)",
+        shouldHavePattern("scotch.test.(#1)",
             asList(capture("secondSecond", t(0)), struct("scotch.data.tuple.(,)", t(11), asList(
                 field("_0", t(12), ignore(t(2))),
                 field("_1", t(13), struct("scotch.data.tuple.(,)", t(8), asList(
@@ -691,7 +691,7 @@ public class InputParserTest extends IsolatedCompilerTest {
             "isBurned? Toast { burnLevel = b } = b > 3"
         );
         shouldNotHaveErrors();
-        shouldHavePattern("scotch.test.(#1)",
+        shouldHavePattern("scotch.test.(#2)",
             asList(
                 capture("isBurned?", t(0)),
                 struct("Toast", t(1), asList(
@@ -710,7 +710,7 @@ public class InputParserTest extends IsolatedCompilerTest {
             "isBurned? Toast { burnLevel } = burnLevel > 3"
         );
         shouldNotHaveErrors();
-        shouldHavePattern("scotch.test.(#1)",
+        shouldHavePattern("scotch.test.(#2)",
             asList(
                 capture("isBurned?", t(0)),
                 struct("Toast", t(1), asList(
@@ -728,7 +728,7 @@ public class InputParserTest extends IsolatedCompilerTest {
             "data Person { name :: (String, String) }",
             "firstName Person { name = (fn, _) } = fn"
         );
-        shouldHavePattern("scotch.test.(#1)",
+        shouldHavePattern("scotch.test.(#2)",
             asList(
                 capture("firstName", t(0)),
                 struct("Person", t(1), asList(
@@ -747,7 +747,7 @@ public class InputParserTest extends IsolatedCompilerTest {
             "module scotch.test",
             "empty? [] = True"
         );
-        shouldHavePattern("scotch.test.(#0)",
+        shouldHavePattern("scotch.test.(#1)",
             asList(capture("empty?", t(0)), equal(id("[]", t(1)))),
             unshuffled(literal(true)));
     }

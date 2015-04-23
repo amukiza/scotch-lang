@@ -16,8 +16,8 @@ public class Definitions {
         return new ClassDefinition(sourceLocation, symbol, arguments, members);
     }
 
-    public static ModuleDefinition module(SourceLocation sourceLocation, String symbol, List<Import> imports, List<DefinitionReference> definitions) {
-        return new ModuleDefinition(sourceLocation, symbol, imports, definitions);
+    public static ModuleDefinition module(SourceLocation sourceLocation, String symbol, List<DefinitionReference> importScopes) {
+        return new ModuleDefinition(sourceLocation, symbol, importScopes);
     }
 
     public static OperatorDefinition operatorDef(SourceLocation sourceLocation, Symbol symbol, Fixity fixity, int precedence) {

@@ -34,7 +34,7 @@ public abstract class Scope implements TypeScope {
     }
 
     public static ModuleScope scope(Scope parent, TypeScope types, SymbolResolver resolver, SymbolGenerator symbolGenerator, String moduleName, List<Import> imports) {
-        return new ModuleScope(parent, types, resolver, symbolGenerator, moduleName, imports);
+        return new ModuleScope(parent, types, resolver, symbolGenerator, moduleName);
     }
 
     public static ChildScope scope(Scope parent, TypeScope types, SymbolResolver resolver, SymbolGenerator symbolGenerator, String moduleName) {
@@ -74,9 +74,17 @@ public abstract class Scope implements TypeScope {
 
     public abstract void defineValue(Symbol symbol, Type type);
 
-    public abstract Scope enterScope();
+    public Scope enterScope() {
+        throw new IllegalStateException();
+    }
 
-    public abstract Scope enterScope(String moduleName, List<Import> imports);
+    public Scope enterScope(List<Import> imports) {
+        throw new IllegalStateException();
+    }
+
+    public Scope enterScope(String moduleName) {
+        throw new IllegalStateException();
+    }
 
     public List<String> getCaptures() {
         throw new IllegalStateException();
@@ -109,6 +117,10 @@ public abstract class Scope implements TypeScope {
     }
 
     public abstract Optional<Type> getRawValue(Symbol symbol);
+
+    public Optional<SymbolEntry> getSiblingEntry(Symbol symbol) {
+        throw new IllegalStateException();
+    }
 
     public abstract Optional<Type> getSignature(Symbol symbol);
 

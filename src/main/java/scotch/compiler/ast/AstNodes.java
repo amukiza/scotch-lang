@@ -1,5 +1,7 @@
 package scotch.compiler.ast;
 
+import static java.util.Arrays.asList;
+
 import java.util.List;
 import java.util.Optional;
 import scotch.compiler.scanner.Token;
@@ -167,8 +169,8 @@ public final class AstNodes {
         return new LiteralArgumentNode(sourceLocation, literal);
     }
 
-    public static AstNode module(SourceLocation sourceLocation, AstNode module, AstNode moduleName, AstNode terminator, AstNode importScope) {
-        return new ModuleNode(sourceLocation, module, moduleName, terminator, importScope);
+    public static AstNode module(SourceLocation sourceLocation, AstNode moduleKeyword, AstNode moduleName, AstNode terminator, AstNode importScope) {
+        return new ModuleNode(sourceLocation, moduleKeyword, moduleName, terminator, asList(importScope));
     }
 
     public static AstNode moduleMember(SourceLocation sourceLocation, AstNode member, AstNode terminator) {

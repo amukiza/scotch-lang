@@ -10,7 +10,6 @@ import java.util.Optional;
 import java.util.Set;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import scotch.compiler.syntax.definition.Import;
 import scotch.compiler.syntax.reference.ValueReference;
 import scotch.symbol.Operator;
 import scotch.symbol.Symbol;
@@ -58,11 +57,6 @@ public class ChildScope extends BlockScope {
         ChildScope child = scope(this, types, resolver, symbolGenerator, moduleName);
         children.add(child);
         return child;
-    }
-
-    @Override
-    public Scope enterScope(String moduleName, List<Import> imports) {
-        throw new IllegalStateException();
     }
 
     @Override

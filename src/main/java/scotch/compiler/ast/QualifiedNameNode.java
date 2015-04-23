@@ -11,9 +11,8 @@ import scotch.compiler.text.SourceLocation;
 @ToString(exclude = "sourceLocation")
 public class QualifiedNameNode extends AstNode {
 
-    @Getter
-    private final SourceLocation sourceLocation;
-    private final List<AstNode>  dotNames;
+    @Getter private final SourceLocation sourceLocation;
+    @Getter private final List<AstNode>  dotNames;
 
     QualifiedNameNode(SourceLocation sourceLocation, List<AstNode> dotNames) {
         this.sourceLocation = sourceLocation;

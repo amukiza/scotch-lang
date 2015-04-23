@@ -4,6 +4,7 @@ import static lombok.AccessLevel.PACKAGE;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.ToString;
 import scotch.compiler.scanner.Token;
 import scotch.compiler.text.SourceLocation;
@@ -13,6 +14,7 @@ import scotch.compiler.text.SourceLocation;
 @ToString
 public class TerminalNode extends AstNode {
 
+    @Getter
     private final Token token;
 
     @Override

@@ -110,7 +110,7 @@ public final class Intermediates {
         return new IntermediateLiteral(value);
     }
 
-    public static IntermediateDefinition module(String symbol, List<DefinitionReference> definitions) {
+    public static IntermediateModule module(String symbol, List<DefinitionReference> definitions) {
         return new IntermediateModule(symbol, definitions);
     }
 
