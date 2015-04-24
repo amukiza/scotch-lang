@@ -482,6 +482,18 @@ public class BytecodeGeneratorTest {
         assertThat(startsWithTwo, is(false));
     }
 
+    @Test
+    public void shouldGetBool() {
+        boolean fiveIsTrue = exec(
+            "module scotch.test",
+            "",
+            "five? :: Int -> Bool",
+            "five? n = n == 5",
+            "run = five? 5"
+        );
+        assertThat(fiveIsTrue, is(true));
+    }
+
     @SuppressWarnings("unchecked")
     private <A> A exec(String... lines) {
         try {
