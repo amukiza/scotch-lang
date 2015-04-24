@@ -1,4 +1,4 @@
-package scotch.data.show;
+package scotch.text.show;
 
 import static java.util.Arrays.asList;
 import static scotch.runtime.RuntimeSupport.callable;
@@ -13,7 +13,7 @@ import scotch.symbol.TypeParameters;
 import scotch.symbol.type.Type;
 
 @SuppressWarnings("unused")
-@TypeInstance(typeClass = "scotch.data.show.Show")
+@TypeInstance(typeClass = "scotch.text.show.Show")
 public class ShowInt implements Show<Integer> {
 
     private static final Callable<ShowInt> INSTANCE = callable(ShowInt::new);

@@ -272,7 +272,7 @@ public class BytecodeGeneratorTest {
     public void shouldCompileShow() {
         String result = exec(
             "module scotch.test",
-            "import scotch.data.show",
+            "import scotch.text.show",
             "import scotch.java",
 
             "instance Show Int where",
@@ -524,6 +524,74 @@ public class BytecodeGeneratorTest {
             "run = (\\(_, b) -> b) (1, 2)"
         );
         assertThat(second, is(2));
+    }
+
+    @Test
+    public void shouldTestEqualityBetweenDoubles() {
+        boolean equal = exec(
+            "module scotch.test",
+            "run = 2.2 == 2.2"
+        );
+        assertThat(equal, is(true));
+    }
+
+    @Test
+    public void shouldAddDoubles() {
+        double value = exec(
+            "module scotch.test",
+            "run = 2.2 + 2.2"
+        );
+        assertThat(value, is(4.4));
+    }
+
+    @Test
+    public void shouldCompareDoubles() {
+        boolean greaterThan = exec(
+            "module scotch.test",
+            "run = 2.2 > 2.3"
+        );
+        assertThat(greaterThan, is(false));
+    }
+
+    @Test
+    public void shouldConcatenateStrings() {
+        String result = exec(
+            "module scotch.test",
+            "hello = \"Hello\"",
+            "world = \"World\"",
+            "run = hello ++ \" \" ++ world ++ \"!\""
+        );
+        assertThat(result, is("Hello World!"));
+    }
+
+    @Test
+    public void shouldShowDouble() {
+        String result = exec(
+            "module scotch.test",
+            "import scotch.text.show",
+            "run = \"value: \" ++ show 2.2"
+        );
+        assertThat(result, is("value: 2.2"));
+    }
+
+    @Test
+    public void shouldShowInt() {
+        String result = exec(
+            "module scotch.test",
+            "import scotch.text.show",
+            "run = \"value: \" ++ show 2"
+        );
+        assertThat(result, is("value: 2"));
+    }
+
+    @Test
+    public void shouldShowList() {
+        String result = exec(
+            "module scotch.test",
+            "import scotch.text.show",
+            "run = \"value: \" ++ show [1, 2, 3]"
+        );
+        assertThat(result, is("value: [1, 2, 3]"));
     }
 
     @SuppressWarnings("unchecked")

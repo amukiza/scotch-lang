@@ -1,4 +1,4 @@
-package scotch.data.show;
+package scotch.text.show;
 
 import static java.util.Arrays.asList;
 import static scotch.symbol.type.Types.fn;
@@ -29,7 +29,7 @@ public interface Show<A> {
 
     @ValueType(forMember = "show")
     static Type show$type() {
-        return fn(var("a", asList("scotch.data.show.Show")), sum("scotch.data.string.String"));
+        return fn(var("a", asList("scotch.text.show.Show")), sum("scotch.data.string.String"));
     }
 
     @Member("show")

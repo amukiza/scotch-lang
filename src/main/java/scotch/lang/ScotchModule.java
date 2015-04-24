@@ -5,7 +5,7 @@ import static scotch.runtime.RuntimeSupport.callable;
 import static scotch.symbol.type.Types.fn;
 import static scotch.symbol.type.Types.var;
 
-import scotch.data.string.StringSum;
+import scotch.data.string.String_;
 import scotch.runtime.Applicable;
 import scotch.runtime.RaisedException;
 import scotch.symbol.Module;
@@ -113,6 +113,6 @@ public class ScotchModule {
 
     @ValueType(forMember = "raise")
     public static Type raise$type() {
-        return fn(StringSum.TYPE, var("a"));
+        return fn(String_.TYPE, var("a"));
     }
 }
