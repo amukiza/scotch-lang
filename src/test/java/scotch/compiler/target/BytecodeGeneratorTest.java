@@ -24,6 +24,7 @@ import scotch.data.maybe.Maybe;
 import scotch.data.tuple.Tuple2;
 import scotch.data.tuple.Tuple3;
 import scotch.runtime.Callable;
+import scotch.runtime.RaisedException;
 
 public class BytecodeGeneratorTest {
 
@@ -492,6 +493,14 @@ public class BytecodeGeneratorTest {
             "run = five? 5"
         );
         assertThat(fiveIsTrue, is(true));
+    }
+
+    @Test(expected = RaisedException.class)
+    public void shouldRaiseError() {
+        exec(
+            "module scotch.test",
+            "run = raise \"Oops!\""
+        );
     }
 
     @SuppressWarnings("unchecked")

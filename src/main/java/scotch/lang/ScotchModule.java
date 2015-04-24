@@ -1,8 +1,19 @@
 package scotch.lang;
 
+import static scotch.runtime.RuntimeSupport.applicable;
+import static scotch.runtime.RuntimeSupport.callable;
+import static scotch.symbol.type.Types.fn;
+import static scotch.symbol.type.Types.var;
+
+import scotch.data.string.StringSum;
+import scotch.runtime.Applicable;
+import scotch.runtime.RaisedException;
 import scotch.symbol.Module;
 import scotch.symbol.ReExportMember;
 import scotch.symbol.ReExportModule;
+import scotch.symbol.Value;
+import scotch.symbol.ValueType;
+import scotch.symbol.type.Type;
 
 @SuppressWarnings("unused")
 @Module(reExports = {
@@ -93,4 +104,15 @@ import scotch.symbol.ReExportModule;
 })
 public class ScotchModule {
 
+    @Value(memberName = "raise")
+    public static <A> Applicable<String, A> raise() {
+        return applicable(message -> callable(() -> {
+            throw new RaisedException(message.call());
+        }));
+    }
+
+    @ValueType(forMember = "raise")
+    public static Type raise$type() {
+        return fn(StringSum.TYPE, var("a"));
+    }
 }
