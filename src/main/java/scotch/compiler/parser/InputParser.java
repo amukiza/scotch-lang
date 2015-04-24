@@ -704,30 +704,12 @@ public class InputParser {
         });
     }
 
-    private Optional<PatternMatch> parseLiteralMatch(boolean required) {
-        PatternMatch match = null;
-        if (expectsIgnoreMatch()) {
-            match = parseIgnoreMatch();
-        } else if (expectsWord()) {
-            match = parseCaptureMatch();
-        } else if (required) {
-            throw unexpected(ID);
-        }
-        return Optional.ofNullable(match);
-    }
-
     private Optional<PatternMatch> parseMatch(boolean required) {
         PatternMatch match = null;
         if (expectsIgnoreMatch()) {
             match = parseIgnoreMatch();
         } else if (expectsWord()) {
-            if (expectsAt(1, OPEN_CURLY)) {
-                match = parseStructMatch();
-            } else if (symbol(peekAt(0).getValueAs(String.class)).isConstructorName()) {
-                match = node(EqualMatch.builder(), builder -> builder.withValue(parseWordReference()));
-            } else {
-                match = parseCaptureMatch();
-            }
+            match = parseWordMatch();
         } else if (expectsLiteral()) {
             match = node(EqualMatch.builder(), builder -> builder.withValue(parseLiteral()));
         } else if (expects(OPEN_PAREN)) {
@@ -736,6 +718,18 @@ public class InputParser {
             throw unexpected(ID);
         }
         return Optional.ofNullable(match);
+    }
+
+    private PatternMatch parseWordMatch() {
+        PatternMatch match;
+        if (expectsAt(1, OPEN_CURLY)) {
+            match = parseStructMatch();
+        } else if (symbol(peekAt(0).getValueAs(String.class)).isConstructorName()) {
+            match = node(EqualMatch.builder(), builder -> builder.withValue(parseWordReference()));
+        } else {
+            match = parseCaptureMatch();
+        }
+        return match;
     }
 
     @SuppressWarnings("unchecked")
@@ -828,10 +822,6 @@ public class InputParser {
         }
     }
 
-    private Optional<PatternMatch> parseOptionalLiteralMatch() {
-        return parseLiteralMatch(false);
-    }
-
     private Optional<PatternMatch> parseOptionalMatch() {
         return parseMatch(false);
     }
@@ -878,11 +868,11 @@ public class InputParser {
 
     private List<PatternMatch> parsePatternLiteralMatches() {
         List<PatternMatch> matches = new ArrayList<>();
-        matches.add(parseRequiredLiteralMatch());
-        Optional<PatternMatch> match = parseOptionalLiteralMatch();
+        matches.add(parseRequiredMatch());
+        Optional<PatternMatch> match = parseOptionalMatch();
         while (match.isPresent()) {
             matches.add(match.get());
-            match = parseOptionalLiteralMatch();
+            match = parseOptionalMatch();
         }
         return matches;
     }
@@ -930,10 +920,6 @@ public class InputParser {
             parts.add(requireWord());
         }
         return join(".", parts);
-    }
-
-    private PatternMatch parseRequiredLiteralMatch() {
-        return parseLiteralMatch(true).get();
     }
 
     private PatternMatch parseRequiredMatch() {

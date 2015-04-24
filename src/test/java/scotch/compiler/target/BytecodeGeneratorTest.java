@@ -503,6 +503,29 @@ public class BytecodeGeneratorTest {
         );
     }
 
+    @Test
+    public void shouldDestructureWithLiteralFunction() {
+        int pimples = exec(
+            "module scotch.test",
+            "",
+            "data Texture = Soft | Crunchy",
+            "data Pickle { kind :: Texture, pimples :: Int }",
+            "",
+            "pimples = \\Pickle { pimples = p } -> p",
+            "run = pimples Pickle { kind = Crunchy, pimples = 23 }"
+        );
+        assertThat(pimples, is(23));
+    }
+
+    @Test
+    public void shouldDestructureTupleWithLiteralFunction() {
+        int second = exec(
+            "module scotch.test",
+            "run = (\\(_, b) -> b) (1, 2)"
+        );
+        assertThat(second, is(2));
+    }
+
     @SuppressWarnings("unchecked")
     private <A> A exec(String... lines) {
         try {

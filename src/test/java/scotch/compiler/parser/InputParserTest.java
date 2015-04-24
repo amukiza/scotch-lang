@@ -272,16 +272,6 @@ public class InputParserTest extends IsolatedCompilerTest {
     }
 
     @Test
-    public void shouldNotParseEqualsPatternLiteral() {
-        exception.expect(ParseException.class);
-        exception.expectMessage(containsString("wanted ID [test://shouldNotParseEqualsPatternLiteral (2, 11), (2, 12)]"));
-        compile(
-            "module scotch.test",
-            "apply2 = \\1 y z = y z"
-        );
-    }
-
-    @Test
     public void shouldParseIgnoredPatternLiteral() {
         compile(
             "module scotch.test",
