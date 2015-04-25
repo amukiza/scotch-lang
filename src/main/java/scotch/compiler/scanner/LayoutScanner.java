@@ -227,7 +227,7 @@ public final class LayoutScanner implements Scanner {
             case DO:
                 enterLayout();
                 return;
-            case KEYWORD_LET:
+            case LET:
                 if (in(SCAN_LET) && currentColumn() == currentLetIndent()) {
                     advance();
                     layout();

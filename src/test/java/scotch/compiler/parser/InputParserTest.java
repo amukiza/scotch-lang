@@ -214,7 +214,7 @@ public class InputParserTest extends IsolatedCompilerTest {
 
     @Test
     public void shouldThrowException_whenSignatureHasStuffBetweenNameAndDoubleColon() {
-        expectParseException("Unexpected SEMICOLON; wanted IS");
+        expectParseException("Unexpected SEMICOLON; wanted EQUALS");
         compile(
             "module scotch.test",
             "length ; :: String -> Int"

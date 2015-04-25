@@ -75,7 +75,7 @@ import static scotch.compiler.ast.AstNodes.typeContext;
 import static scotch.compiler.ast.AstNodes.typeSignature;
 import static scotch.compiler.ast.AstNodes.unshuffledArgument;
 import static scotch.compiler.ast.AstNodes.variableType;
-import static scotch.compiler.scanner.Token.TokenKind.ALTERNATIVE;
+import static scotch.compiler.scanner.Token.TokenKind.PIPE;
 import static scotch.compiler.scanner.Token.TokenKind.ARROW;
 import static scotch.compiler.scanner.Token.TokenKind.BOOL;
 import static scotch.compiler.scanner.Token.TokenKind.CHAR;
@@ -84,23 +84,23 @@ import static scotch.compiler.scanner.Token.TokenKind.CLOSE_CURLY;
 import static scotch.compiler.scanner.Token.TokenKind.CLOSE_PAREN;
 import static scotch.compiler.scanner.Token.TokenKind.CLOSE_SQUARE;
 import static scotch.compiler.scanner.Token.TokenKind.COMMA;
-import static scotch.compiler.scanner.Token.TokenKind.CONTEXT_ARROW;
+import static scotch.compiler.scanner.Token.TokenKind.DOUBLE_ARROW;
 import static scotch.compiler.scanner.Token.TokenKind.DATA;
 import static scotch.compiler.scanner.Token.TokenKind.DO;
 import static scotch.compiler.scanner.Token.TokenKind.DOT;
 import static scotch.compiler.scanner.Token.TokenKind.DOUBLE;
-import static scotch.compiler.scanner.Token.TokenKind.DRAW_FROM;
+import static scotch.compiler.scanner.Token.TokenKind.BACKWARDS_ARROW;
 import static scotch.compiler.scanner.Token.TokenKind.ELSE;
 import static scotch.compiler.scanner.Token.TokenKind.EOF;
-import static scotch.compiler.scanner.Token.TokenKind.HAS_TYPE;
+import static scotch.compiler.scanner.Token.TokenKind.DOUBLE_COLON;
 import static scotch.compiler.scanner.Token.TokenKind.ID;
 import static scotch.compiler.scanner.Token.TokenKind.IF;
 import static scotch.compiler.scanner.Token.TokenKind.IMPORT;
 import static scotch.compiler.scanner.Token.TokenKind.INFIX;
 import static scotch.compiler.scanner.Token.TokenKind.INSTANCE;
 import static scotch.compiler.scanner.Token.TokenKind.INT;
-import static scotch.compiler.scanner.Token.TokenKind.IS;
-import static scotch.compiler.scanner.Token.TokenKind.LAMBDA_SLASH;
+import static scotch.compiler.scanner.Token.TokenKind.EQUALS;
+import static scotch.compiler.scanner.Token.TokenKind.BACKSLASH;
 import static scotch.compiler.scanner.Token.TokenKind.LEFT;
 import static scotch.compiler.scanner.Token.TokenKind.MODULE;
 import static scotch.compiler.scanner.Token.TokenKind.OPEN_CURLY;
@@ -193,10 +193,10 @@ public class AstParser {
         while (expectsVariableType()) {
             parameters.add(parseVariableType());
         }
-        AstNode assign = parse(IS);
+        AstNode assign = parse(EQUALS);
         List<AstNode> members = new ArrayList<>(asList(parseDataMember()));
-        while (expects(ALTERNATIVE)) {
-            members.add(parse(ALTERNATIVE));
+        while (expects(PIPE)) {
+            members.add(parse(PIPE));
             members.add(parseDataMember());
         }
         return dataType(getSourceLocation(), data, name, parameters, assign, members);
@@ -373,7 +373,7 @@ public class AstParser {
     public AstNode parsePattern() {
         markPosition();
         AstNode patternArguments = parsePatternArguments();
-        AstNode assign = parse(IS);
+        AstNode assign = parse(EQUALS);
         AstNode expression = parseExpression();
         return pattern(getSourceLocation(), patternArguments, assign, expression);
     }
@@ -411,7 +411,7 @@ public class AstParser {
                 patternNames.add(parseComma());
                 patternNames.add(parsePatternName());
             }
-            AstNode doubleColon = parse(HAS_TYPE);
+            AstNode doubleColon = parse(DOUBLE_COLON);
             AstNode typeSignature = parseTypeSignature();
             return patternSignature(getSourceLocation(), patternNames, doubleColon, typeSignature);
         } else {
@@ -422,7 +422,7 @@ public class AstParser {
     public AstNode parsePrimary() {
         markPosition();
         AstNode expression;
-        if (expects(LAMBDA_SLASH)) {
+        if (expects(BACKSLASH)) {
             expression = parsePatternLiteral();
         } else if (expects(IF)) {
             expression = parseConditional();
@@ -560,7 +560,7 @@ public class AstParser {
         while (true) {
             if (expectsAt(offset, SEMICOLON)) {
                 return false;
-            } else if (expectsAt(offset, DRAW_FROM)) {
+            } else if (expectsAt(offset, BACKWARDS_ARROW)) {
                 return true;
             }
             offset++;
@@ -591,8 +591,8 @@ public class AstParser {
     }
 
     private boolean expectsPatternSignature() {
-        return expects(OPEN_PAREN) && expectsAt(1, ID) && expectsAt(2, CLOSE_PAREN) && (expectsAt(3, HAS_TYPE) || expectsAt(3, COMMA))
-            || expectsName() && (expectsAt(1, HAS_TYPE) || expectsAt(1, COMMA));
+        return expects(OPEN_PAREN) && expectsAt(1, ID) && expectsAt(2, CLOSE_PAREN) && (expectsAt(3, DOUBLE_COLON) || expectsAt(3, COMMA))
+            || expectsName() && (expectsAt(1, DOUBLE_COLON) || expectsAt(1, COMMA));
     }
 
     private boolean expectsPrimary() {
@@ -733,7 +733,7 @@ public class AstParser {
             typeContexts.add(parseTypeContext());
         }
         AstNode closeParen = parse(CLOSE_PAREN);
-        AstNode contextArrow = parse(CONTEXT_ARROW);
+        AstNode contextArrow = parse(DOUBLE_ARROW);
         return context(getSourceLocation(), openParen, typeContexts, closeParen, contextArrow);
     }
 
@@ -741,7 +741,7 @@ public class AstParser {
         if (expects(OPEN_PAREN)) {
             int offset = 0;
             while (!expectsAt(offset, SEMICOLON)) {
-                if (expectsAt(offset, CLOSE_PAREN) && expectsAt(offset + 1, CONTEXT_ARROW)) {
+                if (expectsAt(offset, CLOSE_PAREN) && expectsAt(offset + 1, DOUBLE_ARROW)) {
                     return parseContextType_();
                 } else {
                     offset++;
@@ -785,7 +785,7 @@ public class AstParser {
     private AstNode parseDataRecordField() {
         markPosition();
         AstNode name = parseName();
-        AstNode hasType = parse(HAS_TYPE);
+        AstNode hasType = parse(DOUBLE_COLON);
         AstNode type = parseType();
         return dataRecordField(getSourceLocation(), name, hasType, type);
     }
@@ -826,7 +826,7 @@ public class AstParser {
     private AstNode parseDrawFromStatement() {
         markPosition();
         AstNode patternArguments = parsePatternArguments();
-        AstNode drawFrom = parse(DRAW_FROM);
+        AstNode drawFrom = parse(BACKWARDS_ARROW);
         AstNode expression = parseExpression();
         AstNode terminal = parseTerminator();
         return drawFromStatement(getSourceLocation(), patternArguments, drawFrom, expression, terminal);
@@ -848,7 +848,7 @@ public class AstParser {
     private AstNode parseInitializerField() {
         markPosition();
         AstNode field = parseName();
-        AstNode is = parse(IS);
+        AstNode is = parse(EQUALS);
         AstNode value = parseExpression();
         return initializerField(getSourceLocation(), field, is, value);
     }
@@ -927,8 +927,8 @@ public class AstParser {
     private AstNode parseNamedFieldMatch() {
         markPosition();
         AstNode name = parseName();
-        if (expects(IS)) {
-            AstNode equals = parse(IS);
+        if (expects(EQUALS)) {
+            AstNode equals = parse(EQUALS);
             AstNode match = parseComplexArgument();
             return namedFieldMatch(getSourceLocation(), name, equals, match);
         } else {
@@ -1006,7 +1006,7 @@ public class AstParser {
 
     private AstNode parsePatternLiteral() {
         markPosition();
-        AstNode lambdaSlash = parse(LAMBDA_SLASH);
+        AstNode lambdaSlash = parse(BACKSLASH);
         AstNode patternArguments = parseLambdaArguments();
         AstNode arrow = parse(ARROW);
         AstNode expression = parseExpression();

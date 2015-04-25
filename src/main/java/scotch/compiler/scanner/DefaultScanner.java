@@ -15,16 +15,16 @@ import static scotch.compiler.scanner.DefaultScanner.State.SCAN_COMMENT;
 import static scotch.compiler.scanner.DefaultScanner.State.SCAN_DEFAULT;
 import static scotch.compiler.scanner.DefaultScanner.State.SCAN_STRING;
 import static scotch.compiler.scanner.Token.TokenKind.ARROW;
-import static scotch.compiler.scanner.Token.TokenKind.IS;
-import static scotch.compiler.scanner.Token.TokenKind.LAMBDA_SLASH;
-import static scotch.compiler.scanner.Token.TokenKind.DRAW_FROM;
+import static scotch.compiler.scanner.Token.TokenKind.EQUALS;
+import static scotch.compiler.scanner.Token.TokenKind.BACKSLASH;
+import static scotch.compiler.scanner.Token.TokenKind.BACKWARDS_ARROW;
 import static scotch.compiler.scanner.Token.TokenKind.BOOL;
 import static scotch.compiler.scanner.Token.TokenKind.CHAR;
 import static scotch.compiler.scanner.Token.TokenKind.COMMA;
 import static scotch.compiler.scanner.Token.TokenKind.DEFAULT_OPERATOR;
 import static scotch.compiler.scanner.Token.TokenKind.DOT;
-import static scotch.compiler.scanner.Token.TokenKind.CONTEXT_ARROW;
-import static scotch.compiler.scanner.Token.TokenKind.HAS_TYPE;
+import static scotch.compiler.scanner.Token.TokenKind.DOUBLE_ARROW;
+import static scotch.compiler.scanner.Token.TokenKind.DOUBLE_COLON;
 import static scotch.compiler.scanner.Token.TokenKind.DOUBLE;
 import static scotch.compiler.scanner.Token.TokenKind.EOF;
 import static scotch.compiler.scanner.Token.TokenKind.ID;
@@ -33,7 +33,7 @@ import static scotch.compiler.scanner.Token.TokenKind.DO;
 import static scotch.compiler.scanner.Token.TokenKind.ELSE;
 import static scotch.compiler.scanner.Token.TokenKind.IF;
 import static scotch.compiler.scanner.Token.TokenKind.IN;
-import static scotch.compiler.scanner.Token.TokenKind.KEYWORD_LET;
+import static scotch.compiler.scanner.Token.TokenKind.LET;
 import static scotch.compiler.scanner.Token.TokenKind.MATCH;
 import static scotch.compiler.scanner.Token.TokenKind.ON;
 import static scotch.compiler.scanner.Token.TokenKind.THEN;
@@ -42,7 +42,7 @@ import static scotch.compiler.scanner.Token.TokenKind.OPEN_CURLY;
 import static scotch.compiler.scanner.Token.TokenKind.OPEN_PAREN;
 import static scotch.compiler.scanner.Token.TokenKind.OPEN_SQUARE;
 import static scotch.compiler.scanner.Token.TokenKind.NEWLINE;
-import static scotch.compiler.scanner.Token.TokenKind.ALTERNATIVE;
+import static scotch.compiler.scanner.Token.TokenKind.PIPE;
 import static scotch.compiler.scanner.Token.TokenKind.CLOSE_CURLY;
 import static scotch.compiler.scanner.Token.TokenKind.CLOSE_PAREN;
 import static scotch.compiler.scanner.Token.TokenKind.CLOSE_SQUARE;
@@ -82,10 +82,10 @@ public final class DefaultScanner implements Scanner {
 
     private static final Map<String, Acceptor> dictionary = ImmutableMap.<String, Acceptor>builder()
         .put("->", take(ARROW))
-        .put("<-", take(DRAW_FROM))
-        .put("=>", take(CONTEXT_ARROW))
-        .put("=", take(IS))
-        .put("let", take(KEYWORD_LET))
+        .put("<-", take(BACKWARDS_ARROW))
+        .put("=>", take(DOUBLE_ARROW))
+        .put("=", take(EQUALS))
+        .put("let", take(LET))
         .put("in", take(IN))
         .put("False", takeBool())
         .put("True", takeBool())
@@ -304,10 +304,10 @@ public final class DefaultScanner implements Scanner {
                 scanQuotedWord();
             } else if (isBackslash(peek())) {
                 read();
-                accept(LAMBDA_SLASH);
+                accept(BACKSLASH);
             } else if (peek() == '|' && !isLetterOrDigit(peekAt(1)) && !isSymbol(peekAt(1))) {
                 read();
-                accept(ALTERNATIVE);
+                accept(PIPE);
             } else if (peek() == -1) {
                 read();
                 accept(EOF);
@@ -351,7 +351,7 @@ public final class DefaultScanner implements Scanner {
                 read();
                 if (peek() == ':') {
                     read();
-                    accept(HAS_TYPE);
+                    accept(DOUBLE_COLON);
                 } else {
                     accept(ID);
                 }

@@ -7,7 +7,7 @@ import static java.util.Arrays.stream;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-import static scotch.compiler.scanner.Token.TokenKind.ALTERNATIVE;
+import static scotch.compiler.scanner.Token.TokenKind.PIPE;
 import static scotch.compiler.scanner.Token.TokenKind.ARROW;
 import static scotch.compiler.scanner.Token.TokenKind.BOOL;
 import static scotch.compiler.scanner.Token.TokenKind.CHAR;
@@ -15,20 +15,20 @@ import static scotch.compiler.scanner.Token.TokenKind.CLOSE_CURLY;
 import static scotch.compiler.scanner.Token.TokenKind.CLOSE_PAREN;
 import static scotch.compiler.scanner.Token.TokenKind.CLOSE_SQUARE;
 import static scotch.compiler.scanner.Token.TokenKind.COMMA;
-import static scotch.compiler.scanner.Token.TokenKind.CONTEXT_ARROW;
+import static scotch.compiler.scanner.Token.TokenKind.DOUBLE_ARROW;
 import static scotch.compiler.scanner.Token.TokenKind.DEFAULT_OPERATOR;
 import static scotch.compiler.scanner.Token.TokenKind.DO;
 import static scotch.compiler.scanner.Token.TokenKind.DOT;
 import static scotch.compiler.scanner.Token.TokenKind.DOUBLE;
-import static scotch.compiler.scanner.Token.TokenKind.DRAW_FROM;
+import static scotch.compiler.scanner.Token.TokenKind.BACKWARDS_ARROW;
 import static scotch.compiler.scanner.Token.TokenKind.ELSE;
 import static scotch.compiler.scanner.Token.TokenKind.EOF;
-import static scotch.compiler.scanner.Token.TokenKind.HAS_TYPE;
+import static scotch.compiler.scanner.Token.TokenKind.DOUBLE_COLON;
 import static scotch.compiler.scanner.Token.TokenKind.ID;
 import static scotch.compiler.scanner.Token.TokenKind.IF;
 import static scotch.compiler.scanner.Token.TokenKind.INT;
-import static scotch.compiler.scanner.Token.TokenKind.IS;
-import static scotch.compiler.scanner.Token.TokenKind.LAMBDA_SLASH;
+import static scotch.compiler.scanner.Token.TokenKind.EQUALS;
+import static scotch.compiler.scanner.Token.TokenKind.BACKSLASH;
 import static scotch.compiler.scanner.Token.TokenKind.OPEN_CURLY;
 import static scotch.compiler.scanner.Token.TokenKind.OPEN_PAREN;
 import static scotch.compiler.scanner.Token.TokenKind.OPEN_SQUARE;
@@ -259,7 +259,7 @@ public class InputParser {
             if (expectsAt(offset, ID)) {
                 if (expectsAt(offset + 1, COMMA)) {
                     offset += 2;
-                } else if (expectsAt(offset + 1, HAS_TYPE)) {
+                } else if (expectsAt(offset + 1, DOUBLE_COLON)) {
                     return true;
                 } else {
                     break;
@@ -267,7 +267,7 @@ public class InputParser {
             } else if (expectsAt(offset, OPEN_PAREN) && expectsAt(offset + 1, ID) && expectsAt(offset + 2, CLOSE_PAREN)) {
                 if (expectsAt(offset + 3, COMMA)) {
                     offset += 4;
-                } else if (expectsAt(offset + 3, HAS_TYPE)) {
+                } else if (expectsAt(offset + 3, DOUBLE_COLON)) {
                     return true;
                 } else {
                     break;
@@ -440,7 +440,7 @@ public class InputParser {
             parseConstraint(constraints);
         }
         require(CLOSE_PAREN);
-        require(CONTEXT_ARROW);
+        require(DOUBLE_ARROW);
         return constraints.entrySet().stream()
             .collect(toMap(Entry::getKey, entry -> var(entry.getKey(), entry.getValue())));
     }
@@ -490,7 +490,7 @@ public class InputParser {
             List<Type> parameters = new ArrayList<>();
             Symbol symbol = qualify(requireWord());
             builder.withSymbol(symbol);
-            while (!expects(IS) && !expects(OPEN_CURLY)) {
+            while (!expects(EQUALS) && !expects(OPEN_CURLY)) {
                 Type parameter = parseType(constraints);
                 builder.addParameter(parameter);
                 parameters.add(parameter);
@@ -499,9 +499,9 @@ public class InputParser {
             if (expects(OPEN_CURLY)) {
                 constructors.add(parseDataConstructor(ordinal, symbol, constraints));
             } else {
-                require(IS);
+                require(EQUALS);
                 constructors.add(parseDataConstructor(ordinal, symbol, constraints));
-                while (expects(ALTERNATIVE)) {
+                while (expects(PIPE)) {
                     nextToken();
                     constructors.add(parseDataConstructor(ordinal, symbol, constraints));
                 }
@@ -537,14 +537,14 @@ public class InputParser {
     }
 
     private void parseDoExpression(List<DoExpression> expressions) {
-        if (expectsWord() && expectsAt(1, DRAW_FROM)) {
+        if (expectsWord() && expectsAt(1, BACKWARDS_ARROW)) {
             expressions.add(scoped(() -> node(bindExpression(),
                 bind -> definition(ScopeDefinition.builder(), scope -> {
                     Symbol symbol = reserveSymbol();
                     scope.withSymbol(symbol);
                     bind.withSymbol(symbol);
                     bind.withArgument(parseArgument());
-                    require(DRAW_FROM);
+                    require(BACKWARDS_ARROW);
                     bind.withValue(parseExpression());
                     requireTerminator();
                     if (!expects(CLOSE_CURLY)) {
@@ -598,7 +598,7 @@ public class InputParser {
     private InitializerField parseField() {
         return node(InitializerField.builder(), builder -> {
             builder.withName(requireWord());
-            require(IS);
+            require(EQUALS);
             builder.withValue(parseExpression().collapse());
         });
     }
@@ -607,7 +607,7 @@ public class InputParser {
         return node(StructField.builder(), builder -> {
             builder.withFieldName(requireWord());
             builder.withType(reserveType());
-            if (expects(IS)) {
+            if (expects(EQUALS)) {
                 nextToken();
                 builder.withPatternMatch(parseRequiredMatch());
             } else {
@@ -776,7 +776,7 @@ public class InputParser {
             builder
                 .withOrdinal(ordinal.getAndIncrement())
                 .withName(requireWord());
-            require(HAS_TYPE);
+            require(DOUBLE_COLON);
             builder.withType(parseType(constraints));
         });
     }
@@ -843,7 +843,7 @@ public class InputParser {
                                 patternCaseScope -> named(reserveSymbol(), patternSymbol -> {
                                     patternCaseScope.withSymbol(patternSymbol);
                                     patternCaseBuilder.withSymbol(patternSymbol);
-                                    require(LAMBDA_SLASH);
+                                    require(BACKSLASH);
                                     AtomicInteger counter = new AtomicInteger();
                                     List<PatternMatch> matches = parsePatternLiteralMatches();
                                     List<Argument> arguments = matches.stream()
@@ -900,7 +900,7 @@ public class InputParser {
             value = parseTupleOrParenthetical();
         } else if (expects(OPEN_SQUARE)) {
             value = parseList();
-        } else if (expects(LAMBDA_SLASH)) {
+        } else if (expects(BACKSLASH)) {
             value = parsePatternLiteral();
         } else if (expects(DO)) {
             value = parseDoStatement();
@@ -946,7 +946,7 @@ public class InputParser {
         if (expects(OPEN_PAREN)) {
             int offset = 0;
             while (!peekAt(offset).is(SEMICOLON)) {
-                if (peekAt(offset).is(CLOSE_PAREN) && peekAt(offset + 1).is(CONTEXT_ARROW)) {
+                if (peekAt(offset).is(CLOSE_PAREN) && peekAt(offset + 1).is(DOUBLE_ARROW)) {
                     return parseConstraints();
                 } else {
                     offset++;
@@ -1095,18 +1095,18 @@ public class InputParser {
     }
 
     private DefinitionReference parseValueDefinition() {
-        if (expectsAt(1, IS)) {
+        if (expectsAt(1, EQUALS)) {
             return scoped(() -> definition(ValueDefinition.builder(),
                 builder -> named(qualify(requireMemberName()),
                     symbol -> {
                         builder.withSymbol(symbol);
-                        require(IS);
+                        require(EQUALS);
                         builder.withBody(parseExpression());
                     })));
         } else {
             return scoped(() -> definition(UnshuffledDefinition.builder(), builder -> {
                 builder.withMatches(parsePatternMatches());
-                require(IS);
+                require(EQUALS);
                 builder.withSymbol(reserveSymbol())
                     .withBody(parseExpression());
             }));
@@ -1114,7 +1114,7 @@ public class InputParser {
     }
 
     private Type parseValueSignature() {
-        require(HAS_TYPE);
+        require(DOUBLE_COLON);
         return parseType(parseSignatureConstraints());
     }
 

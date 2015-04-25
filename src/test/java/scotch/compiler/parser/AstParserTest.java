@@ -77,7 +77,7 @@ import static scotch.compiler.ast.TestUtil.typeContext;
 import static scotch.compiler.ast.TestUtil.typeSignature;
 import static scotch.compiler.ast.TestUtil.unshuffledArgument;
 import static scotch.compiler.ast.TestUtil.variableType;
-import static scotch.compiler.scanner.Token.TokenKind.ALTERNATIVE;
+import static scotch.compiler.scanner.Token.TokenKind.PIPE;
 import static scotch.compiler.scanner.Token.TokenKind.ARROW;
 import static scotch.compiler.scanner.Token.TokenKind.BOOL;
 import static scotch.compiler.scanner.Token.TokenKind.CHAR;
@@ -86,22 +86,22 @@ import static scotch.compiler.scanner.Token.TokenKind.CLOSE_CURLY;
 import static scotch.compiler.scanner.Token.TokenKind.CLOSE_PAREN;
 import static scotch.compiler.scanner.Token.TokenKind.CLOSE_SQUARE;
 import static scotch.compiler.scanner.Token.TokenKind.COMMA;
-import static scotch.compiler.scanner.Token.TokenKind.CONTEXT_ARROW;
+import static scotch.compiler.scanner.Token.TokenKind.DOUBLE_ARROW;
 import static scotch.compiler.scanner.Token.TokenKind.DATA;
 import static scotch.compiler.scanner.Token.TokenKind.DO;
 import static scotch.compiler.scanner.Token.TokenKind.DOT;
 import static scotch.compiler.scanner.Token.TokenKind.DOUBLE;
-import static scotch.compiler.scanner.Token.TokenKind.DRAW_FROM;
+import static scotch.compiler.scanner.Token.TokenKind.BACKWARDS_ARROW;
 import static scotch.compiler.scanner.Token.TokenKind.ELSE;
-import static scotch.compiler.scanner.Token.TokenKind.HAS_TYPE;
+import static scotch.compiler.scanner.Token.TokenKind.DOUBLE_COLON;
 import static scotch.compiler.scanner.Token.TokenKind.ID;
 import static scotch.compiler.scanner.Token.TokenKind.IF;
 import static scotch.compiler.scanner.Token.TokenKind.IMPORT;
 import static scotch.compiler.scanner.Token.TokenKind.INFIX;
 import static scotch.compiler.scanner.Token.TokenKind.INSTANCE;
 import static scotch.compiler.scanner.Token.TokenKind.INT;
-import static scotch.compiler.scanner.Token.TokenKind.IS;
-import static scotch.compiler.scanner.Token.TokenKind.LAMBDA_SLASH;
+import static scotch.compiler.scanner.Token.TokenKind.EQUALS;
+import static scotch.compiler.scanner.Token.TokenKind.BACKSLASH;
 import static scotch.compiler.scanner.Token.TokenKind.LEFT;
 import static scotch.compiler.scanner.Token.TokenKind.MODULE;
 import static scotch.compiler.scanner.Token.TokenKind.OPEN_CURLY;
@@ -254,7 +254,7 @@ public class AstParserTest {
                                 patternArguments(asList(
                                     captureArgument(terminal(ID, "three"))
                                 )),
-                                terminal(IS, "="),
+                                terminal(EQUALS, "="),
                                 expression(asList(
                                     primary(literal(integer(terminal(INT, 2)))),
                                     primary(reference(qualified(terminal(ID, "+")))),
@@ -299,9 +299,9 @@ public class AstParserTest {
                     namedFieldMatches(
                         terminal(OPEN_CURLY, "{"),
                         asList(
-                            namedFieldMatch(terminal(ID, "left"), terminal(IS, "="), captureArgument(terminal(ID, "l"))),
+                            namedFieldMatch(terminal(ID, "left"), terminal(EQUALS, "="), captureArgument(terminal(ID, "l"))),
                             terminal(COMMA, ","),
-                            namedFieldMatch(terminal(ID, "right"), terminal(IS, "="), captureArgument(terminal(ID, "r")))
+                            namedFieldMatch(terminal(ID, "right"), terminal(EQUALS, "="), captureArgument(terminal(ID, "r")))
                         ),
                         terminal(CLOSE_CURLY, "}")
                     )
@@ -320,9 +320,9 @@ public class AstParserTest {
                     namedFieldMatches(
                         terminal(OPEN_CURLY, "{"),
                         asList(
-                            namedFieldMatch(terminal(ID, "left"), terminal(IS, "="), captureArgument(terminal(ID, "l"))),
+                            namedFieldMatch(terminal(ID, "left"), terminal(EQUALS, "="), captureArgument(terminal(ID, "l"))),
                             terminal(COMMA, ","),
-                            namedFieldMatch(terminal(ID, "right"), terminal(IS, "="), captureArgument(terminal(ID, "r"))),
+                            namedFieldMatch(terminal(ID, "right"), terminal(EQUALS, "="), captureArgument(terminal(ID, "r"))),
                             terminal(COMMA, ",")
                         ),
                         terminal(CLOSE_CURLY, "}")
@@ -360,7 +360,7 @@ public class AstParserTest {
                         asList(
                             namedFieldImplicitCapture(terminal(ID, "left")),
                             terminal(COMMA, ","),
-                            namedFieldMatch(terminal(ID, "right"), terminal(IS, "="), literalArgument(literal(integer(terminal(INT, 0)))))
+                            namedFieldMatch(terminal(ID, "right"), terminal(EQUALS, "="), literalArgument(literal(integer(terminal(INT, 0)))))
                         ),
                         terminal(CLOSE_CURLY, "}")
                     )
@@ -409,7 +409,7 @@ public class AstParserTest {
                 patternArguments(asList(
                     captureArgument(terminal(ID, "three"))
                 )),
-                terminal(IS, "="),
+                terminal(EQUALS, "="),
                 expression(asList(
                     primary(literal(integer(terminal(INT, 2)))),
                     primary(reference(qualified(terminal(ID, "+")))),
@@ -471,7 +471,7 @@ public class AstParserTest {
                     namedFieldMatches(
                         terminal(OPEN_CURLY, "{"),
                         asList(
-                            namedFieldMatch(terminal(ID, "left"), terminal(IS, "="), unshuffledArgument(asList(
+                            namedFieldMatch(terminal(ID, "left"), terminal(EQUALS, "="), unshuffledArgument(asList(
                                 constantArgument(qualified(terminal(ID, "Node"))),
                                 ignoreArgument(terminal(UNDERSCORE, "_")),
                                 captureArgument(terminal(ID, "l")),
@@ -573,7 +573,7 @@ public class AstParserTest {
                         terminal(CLOSE_PAREN, ")")
                     ))
                 ),
-                terminal(HAS_TYPE, "::"),
+                terminal(DOUBLE_COLON, "::"),
                 typeSignature(
                     functionType(
                         parenthesized(
@@ -615,7 +615,7 @@ public class AstParserTest {
                         terminal(CLOSE_PAREN, ")")
                     ))
                 ),
-                terminal(HAS_TYPE, "::"),
+                terminal(DOUBLE_COLON, "::"),
                 typeSignature(
                     functionType(
                         variableType(terminal(ID, "a")),
@@ -722,7 +722,7 @@ public class AstParserTest {
                             typeContext(qualified(terminal(ID, "Eq")), variableType(terminal(ID, "a")))
                         ),
                         terminal(CLOSE_PAREN, ")"),
-                        terminal(CONTEXT_ARROW, "=>")
+                        terminal(DOUBLE_ARROW, "=>")
                     ),
                     functionType(
                         variableType(terminal(ID, "a")),
@@ -767,12 +767,12 @@ public class AstParserTest {
             dataType(
                 terminal(DATA, "data"),
                 terminal(ID, "Color"),
-                terminal(IS, "="),
+                terminal(EQUALS, "="),
                 asList(
                     dataConstant(terminal(ID, "Red")),
-                    terminal(ALTERNATIVE, "|"),
+                    terminal(PIPE, "|"),
                     dataConstant(terminal(ID, "Green")),
-                    terminal(ALTERNATIVE, "|"),
+                    terminal(PIPE, "|"),
                     dataConstant(terminal(ID, "Blue"))
                 )
             )
@@ -786,10 +786,10 @@ public class AstParserTest {
             dataType(
                 terminal(DATA, "data"),
                 terminal(ID, "IntTree"),
-                terminal(IS, "="),
+                terminal(EQUALS, "="),
                 asList(
                     dataConstant(terminal(ID, "Nil")),
-                    terminal(ALTERNATIVE, "|"),
+                    terminal(PIPE, "|"),
                     dataTuple(terminal(ID, "Node"), asList(
                         dataTupleField(sumType(qualified(terminal(ID, "Int")))),
                         dataTupleField(sumType(qualified(terminal(ID, "IntTree")))),
@@ -812,19 +812,19 @@ public class AstParserTest {
             dataType(
                 terminal(DATA, "data"),
                 terminal(ID, "IntTree"),
-                terminal(IS, "="),
+                terminal(EQUALS, "="),
                 asList(
                     dataConstant(terminal(ID, "Nil")),
-                    terminal(ALTERNATIVE, "|"),
+                    terminal(PIPE, "|"),
                     dataRecord(
                         terminal(ID, "Node"),
                         terminal(OPEN_CURLY, "{"),
                         asList(
-                            dataRecordField(terminal(ID, "value"), terminal(HAS_TYPE, "::"), sumType(qualified(terminal(ID, "Int")))),
+                            dataRecordField(terminal(ID, "value"), terminal(DOUBLE_COLON, "::"), sumType(qualified(terminal(ID, "Int")))),
                             terminal(COMMA, ","),
-                            dataRecordField(terminal(ID, "left"), terminal(HAS_TYPE, "::"), sumType(qualified(terminal(ID, "IntTree")))),
+                            dataRecordField(terminal(ID, "left"), terminal(DOUBLE_COLON, "::"), sumType(qualified(terminal(ID, "IntTree")))),
                             terminal(COMMA, ","),
-                            dataRecordField(terminal(ID, "right"), terminal(HAS_TYPE, "::"), sumType(qualified(terminal(ID, "IntTree"))))
+                            dataRecordField(terminal(ID, "right"), terminal(DOUBLE_COLON, "::"), sumType(qualified(terminal(ID, "IntTree"))))
                         ),
                         terminal(CLOSE_CURLY, "}")
                     )
@@ -844,10 +844,10 @@ public class AstParserTest {
                     variableType(terminal(ID, "a")),
                     variableType(terminal(ID, "b"))
                 ),
-                terminal(IS, "="),
+                terminal(EQUALS, "="),
                 asList(
                     dataConstant(terminal(ID, "Nil")),
-                    terminal(ALTERNATIVE, "|"),
+                    terminal(PIPE, "|"),
                     dataTuple(terminal(ID, "Node"), asList(
                         dataTupleField(variableType(terminal(ID, "a"))),
                         dataTupleField(variableType(terminal(ID, "b"))),
@@ -904,7 +904,7 @@ public class AstParserTest {
                                     terminal(CLOSE_PAREN, ")")
                                 ))
                             ),
-                            terminal(HAS_TYPE, "::"),
+                            terminal(DOUBLE_COLON, "::"),
                             typeSignature(
                                 functionType(
                                     variableType(terminal(ID, "a")),
@@ -924,7 +924,7 @@ public class AstParserTest {
                                 captureArgument(terminal(ID, "==")),
                                 captureArgument(terminal(ID, "b"))
                             )),
-                            terminal(IS, "="),
+                            terminal(EQUALS, "="),
                             expression(asList(
                                 primary(reference(qualified(terminal(ID, "a")))),
                                 primary(reference(qualified(terminal(ID, "/=")))),
@@ -938,7 +938,7 @@ public class AstParserTest {
                                 captureArgument(terminal(ID, "/=")),
                                 captureArgument(terminal(ID, "b"))
                             )),
-                            terminal(IS, "="),
+                            terminal(EQUALS, "="),
                             expression(asList(
                                 primary(reference(qualified(terminal(ID, "a")))),
                                 primary(reference(qualified(terminal(ID, "==")))),
@@ -967,7 +967,7 @@ public class AstParserTest {
                     terminal(OPEN_PAREN, "("),
                     asList(typeContext(qualified(terminal(ID, "Eq")), variableType(terminal(ID, "a")))),
                     terminal(CLOSE_PAREN, ")"),
-                    terminal(CONTEXT_ARROW, "=>")
+                    terminal(DOUBLE_ARROW, "=>")
                 ),
                 terminal(ID, "Num"),
                 asList(classArgument(terminal(ID, "a"))),
@@ -989,7 +989,7 @@ public class AstParserTest {
                                     terminal(CLOSE_PAREN, ")")
                                 ))
                             ),
-                            terminal(HAS_TYPE, "::"),
+                            terminal(DOUBLE_COLON, "::"),
                             typeSignature(
                                 functionType(
                                     variableType(terminal(ID, "a")),
@@ -1034,7 +1034,7 @@ public class AstParserTest {
                                     terminal(CLOSE_PAREN, ")")
                                 )
                             )),
-                            terminal(IS, "="),
+                            terminal(EQUALS, "="),
                             expression(asList(
                                 primary(reference(qualified(terminal(ID, "intEq?"))))
                             ))
@@ -1153,7 +1153,7 @@ public class AstParserTest {
                 patternArguments(asList(
                     captureArgument(terminal(ID, "printed"))
                 )),
-                terminal(IS, "="),
+                terminal(EQUALS, "="),
                 expression(asList(
                     primary(
                         doStatements(
@@ -1196,7 +1196,7 @@ public class AstParserTest {
                 patternArguments(asList(
                     captureArgument(terminal(ID, "pingpong"))
                 )),
-                terminal(IS, "="),
+                terminal(EQUALS, "="),
                 expression(asList(
                     primary(
                         doStatements(
@@ -1207,7 +1207,7 @@ public class AstParserTest {
                                     patternArguments(asList(
                                         captureArgument(terminal(ID, "ping"))
                                     )),
-                                    terminal(DRAW_FROM, "<-"),
+                                    terminal(BACKWARDS_ARROW, "<-"),
                                     expression(asList(primary(reference(qualified(terminal(ID, "readln")))))),
                                     terminal(SEMICOLON, ";")
                                 ),
@@ -1358,7 +1358,7 @@ public class AstParserTest {
         assertThat(conditional, is(
             pattern(
                 patternArguments(asList(captureArgument(terminal(ID, "value")))),
-                terminal(IS, "="),
+                terminal(EQUALS, "="),
                 expression(asList(
                     primary(
                         conditional(
@@ -1405,7 +1405,7 @@ public class AstParserTest {
             expression(asList(
                 primary(
                     patternLiteral(
-                        terminal(LAMBDA_SLASH, "\\"),
+                        terminal(BACKSLASH, "\\"),
                         patternArguments(asList(
                             captureArgument(terminal(ID, "a"))
                         )),
@@ -1424,7 +1424,7 @@ public class AstParserTest {
             expression(asList(
                 primary(
                     patternLiteral(
-                        terminal(LAMBDA_SLASH, "\\"),
+                        terminal(BACKSLASH, "\\"),
                         patternArguments(asList(
                             tupleArgument(
                                 terminal(OPEN_PAREN, "("),
@@ -1480,12 +1480,12 @@ public class AstParserTest {
                 dataType(
                     terminal(DATA, "data"),
                     terminal(ID, "Color"),
-                    terminal(IS, "="),
+                    terminal(EQUALS, "="),
                     asList(
                         dataConstant(terminal(ID, "Red")),
-                        terminal(ALTERNATIVE, "|"),
+                        terminal(PIPE, "|"),
                         dataConstant(terminal(ID, "Green")),
-                        terminal(ALTERNATIVE, "|"),
+                        terminal(PIPE, "|"),
                         dataConstant(terminal(ID, "Blue"))
                     )
                 ),
@@ -1507,7 +1507,7 @@ public class AstParserTest {
                             terminal(CLOSE_PAREN, ")")
                         ))
                     ),
-                    terminal(HAS_TYPE, "::"),
+                    terminal(DOUBLE_COLON, "::"),
                     typeSignature(
                         functionType(
                             parenthesized(
@@ -1557,7 +1557,7 @@ public class AstParserTest {
                                         terminal(CLOSE_PAREN, ")")
                                     )
                                 )),
-                                terminal(IS, "="),
+                                terminal(EQUALS, "="),
                                 expression(asList(
                                     primary(reference(qualified(terminal(ID, "intEq?"))))
                                 ))
@@ -1597,7 +1597,7 @@ public class AstParserTest {
                                         terminal(CLOSE_PAREN, ")")
                                     ))
                                 ),
-                                terminal(HAS_TYPE, "::"),
+                                terminal(DOUBLE_COLON, "::"),
                                 typeSignature(
                                     functionType(
                                         variableType(terminal(ID, "a")),
@@ -1633,9 +1633,9 @@ public class AstParserTest {
                     reference(qualified(terminal(ID, "Entry"))),
                     terminal(OPEN_CURLY, "{"),
                     asList(
-                        initializerField(terminal(ID, "key"), terminal(IS, "="), expression(asList(primary(literal(string(terminal(STRING, "bananas"))))))),
+                        initializerField(terminal(ID, "key"), terminal(EQUALS, "="), expression(asList(primary(literal(string(terminal(STRING, "bananas"))))))),
                         terminal(COMMA, ","),
-                        initializerField(terminal(ID, "value"), terminal(IS, "="), expression(asList(primary(literal(string(terminal(STRING, "oranges"))))))),
+                        initializerField(terminal(ID, "value"), terminal(EQUALS, "="), expression(asList(primary(literal(string(terminal(STRING, "oranges"))))))),
                         terminal(COMMA, ",")
                     ),
                     terminal(CLOSE_CURLY, "}")))

@@ -7,26 +7,26 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static scotch.compiler.scanner.Token.TokenKind.ARROW;
-import static scotch.compiler.scanner.Token.TokenKind.LAMBDA_SLASH;
-import static scotch.compiler.scanner.Token.TokenKind.DRAW_FROM;
+import static scotch.compiler.scanner.Token.TokenKind.BACKSLASH;
+import static scotch.compiler.scanner.Token.TokenKind.BACKWARDS_ARROW;
 import static scotch.compiler.scanner.Token.TokenKind.CHAR;
 import static scotch.compiler.scanner.Token.TokenKind.COMMA;
 import static scotch.compiler.scanner.Token.TokenKind.DEFAULT_OPERATOR;
-import static scotch.compiler.scanner.Token.TokenKind.CONTEXT_ARROW;
-import static scotch.compiler.scanner.Token.TokenKind.HAS_TYPE;
+import static scotch.compiler.scanner.Token.TokenKind.DOUBLE_ARROW;
+import static scotch.compiler.scanner.Token.TokenKind.DOUBLE_COLON;
 import static scotch.compiler.scanner.Token.TokenKind.DOUBLE;
 import static scotch.compiler.scanner.Token.TokenKind.ID;
 import static scotch.compiler.scanner.Token.TokenKind.INT;
 import static scotch.compiler.scanner.Token.TokenKind.DO;
 import static scotch.compiler.scanner.Token.TokenKind.IN;
-import static scotch.compiler.scanner.Token.TokenKind.KEYWORD_LET;
+import static scotch.compiler.scanner.Token.TokenKind.LET;
 import static scotch.compiler.scanner.Token.TokenKind.MATCH;
 import static scotch.compiler.scanner.Token.TokenKind.ON;
 import static scotch.compiler.scanner.Token.TokenKind.WHERE;
 import static scotch.compiler.scanner.Token.TokenKind.OPEN_CURLY;
 import static scotch.compiler.scanner.Token.TokenKind.OPEN_SQUARE;
 import static scotch.compiler.scanner.Token.TokenKind.NEWLINE;
-import static scotch.compiler.scanner.Token.TokenKind.ALTERNATIVE;
+import static scotch.compiler.scanner.Token.TokenKind.PIPE;
 import static scotch.compiler.scanner.Token.TokenKind.CLOSE_CURLY;
 import static scotch.compiler.scanner.Token.TokenKind.CLOSE_SQUARE;
 import static scotch.compiler.scanner.Token.TokenKind.STRING;
@@ -90,12 +90,12 @@ public class DefaultScannerTest {
 
     @Test
     public void shouldGetDoubleArrow() {
-        assertThat(firstFrom("=> (Eq a)"), equalTo(token(CONTEXT_ARROW, "=>")));
+        assertThat(firstFrom("=> (Eq a)"), equalTo(token(DOUBLE_ARROW, "=>")));
     }
 
     @Test
     public void shouldGetDoubleColon() {
-        assertThat(firstFrom(":: signature"), equalTo(token(HAS_TYPE, "::")));
+        assertThat(firstFrom(":: signature"), equalTo(token(DOUBLE_COLON, "::")));
     }
 
     @Test
@@ -137,7 +137,7 @@ public class DefaultScannerTest {
 
     @Test
     public void shouldGetLambdaPrefix() {
-        assertThat(secondFrom("asteroids \\x -> boom!"), equalTo(token(LAMBDA_SLASH, "\\",
+        assertThat(secondFrom("asteroids \\x -> boom!"), equalTo(token(BACKSLASH, "\\",
             source("test://shouldGetLambdaPrefix", point(10, 1, 11), point(11, 1, 12)))));
     }
 
@@ -168,7 +168,7 @@ public class DefaultScannerTest {
 
     @Test
     public void shouldGetPipe() {
-        assertThat(firstFrom("| BreakfastItem"), equalTo(token(ALTERNATIVE, "|")));
+        assertThat(firstFrom("| BreakfastItem"), equalTo(token(PIPE, "|")));
     }
 
     @Test
@@ -295,7 +295,7 @@ public class DefaultScannerTest {
 
     @Test
     public void shouldGetLet() {
-        assertThat(firstFrom("let"), is(token(KEYWORD_LET, "let")));
+        assertThat(firstFrom("let"), is(token(LET, "let")));
     }
 
     @Test
@@ -305,7 +305,7 @@ public class DefaultScannerTest {
 
     @Test
     public void shouldGetBackwardError() {
-        assertThat(secondFrom("thingy <-"), is(token(DRAW_FROM, "<-")));
+        assertThat(secondFrom("thingy <-"), is(token(BACKWARDS_ARROW, "<-")));
     }
 
     private Token firstFrom(String... data) {
