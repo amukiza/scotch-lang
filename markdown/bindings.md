@@ -135,7 +135,7 @@ public abstract class Maybe<Something> {
 		}
 	}
 
-	// ------------------------ Supporting Values ----------------------------- //
+	// ------------------------ Supporting Methods ---------------------------- //
 
 	// static field to hold the singleton instance of the constant Nothing
 	private static final Callable<Nothing> NOTHING = callable(Nothing::new);

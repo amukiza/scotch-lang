@@ -1,7 +1,6 @@
 # Quickstart
 
-Scotch is still in early development, so it's very feature light. At the very least
-you can get a good feel for what it's capable of.
+Scotch is still in early development, so it's very feature light.
 
 To date, all that the compiler is capable of doing is single-file compilation.
 It will run a `main` function defined within the file, and print the result to
@@ -17,7 +16,9 @@ current state in development.
 
 ### Quickstart Install For Linux And OS X
 
-Scotch can be installed with one command on Linux and OS X. Copy and paste the below into a terminal session and the script will complete the last round of distilling.
+Scotch can be installed with one command on Linux and OS X. Copy and paste the
+below into a terminal session and the script will complete the last round of
+distilling.
 
 ```
 $ sh <(curl -s https://raw.githubusercontent.com/lmcgrath/scotch-lang/master/quickstart.sh)
@@ -73,20 +74,21 @@ main = Hello World!
 
 ## Running 2 + 2
 
-In order to do things that are more complicated, many different imports are required.
+In order to do things that are more complicated, many different imports are
+required.
 
 A simple operation, 2 + 2, requires an import:
 
 ```
 // hello.scotch
 module hello
-import scotch.data.num
 
 main = 2 + 2
 ```
 
 The module `scotch.data.num` brings in numeric operations `+`, `-`, `*` and a few
-others that allow basic arithmetic. If you run this module you'll see the following:
+others that allow basic arithmetic. If you run this module you'll see the
+following:
 
 ```
 $ scotch -m hello
@@ -104,11 +106,6 @@ new `Maybe`. Take the following example:
 ```
 // maybe/numbers.scotch
 module maybe.numbers
-import scotch.control.monad
-import scotch.control.int
-import scotch.data.function
-import scotch.data.maybe
-import scotch.data.num
 
 actuallyNumber = Just 1
 actuallyAnotherNumber = Just 2
@@ -138,12 +135,6 @@ us back `Nothing`?
 ```
 // maybe/numbers.scotch
 module maybe.numbers
-import scotch.control.monad
-import scotch.control.int
-import scotch.data.function
-import scotch.data.maybe
-import scotch.data.num
-import scotch.data.ord
 
 actuallyNumber = Just 3
 probablyPositive n =
