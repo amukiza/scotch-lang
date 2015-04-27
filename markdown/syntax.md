@@ -136,6 +136,9 @@ triple y = multiply 3
 
 // invoking triple with 4 gives 12
 triple 4
+
+// multiplying 3 by 4 gives 12
+multiply 3 4
 ```
 
 The above code can be expressed using the following JavaScript:
@@ -153,7 +156,28 @@ var triple = multiply(3);
 
 // invoking triple gives 12
 triple(4)
+
+// multiplying 3 by 4 gives 12
+multiply(3)(4)
 ```
+
+### Returning From Functions
+
+Because function bodies are always single expressions, the result of those
+expressions is returned implicitly. As such, there is no `return` keyword.
+
+There is a function called `return` which works to inject a value into a monadic
+type:
+
+```
+// signature
+return :: a -> m a
+
+// implementation for Maybe
+return x = Just x
+```
+
+See [Monads explained with pictures](http://adit.io/posts/2013-04-17-functors,_applicatives,_and_monads_in_pictures.html) for more details.
 
 ### Function Type Signatures
 
