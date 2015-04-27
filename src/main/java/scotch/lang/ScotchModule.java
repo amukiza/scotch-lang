@@ -22,12 +22,14 @@ import scotch.symbol.type.Type;
     }),
     @ReExportModule(moduleName = "scotch.data.bool", members = {
         @ReExportMember(memberName = "Bool"),
+        @ReExportMember(memberName = "&&"),
     }),
     @ReExportModule(moduleName = "scotch.data.char", members = {
         @ReExportMember(memberName = "Char"),
     }),
     @ReExportModule(moduleName = "scotch.data.string", members = {
         @ReExportMember(memberName = "String"),
+        @ReExportMember(memberName = "++"),
     }),
     @ReExportModule(moduleName = "scotch.data.double", members = {
         @ReExportMember(memberName = "Double"),

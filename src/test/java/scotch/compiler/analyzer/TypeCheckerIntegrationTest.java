@@ -56,6 +56,7 @@ public class TypeCheckerIntegrationTest extends CompilerTest<ClassLoaderResolver
     public void shouldDetermineTypeOfSuccessfulChainedMaybe() {
         compile(
             "module scotch.test",
+            "import scotch.data.num", // TODO should not require import
             "",
             "addedStuff = do",
             "    x <- Just 3",
@@ -70,6 +71,7 @@ public class TypeCheckerIntegrationTest extends CompilerTest<ClassLoaderResolver
     public void shouldDetermineTypeOfFailedChainedMaybe() {
         compile(
             "module scotch.test",
+            "import scotch.data.num", // TODO should not require import
             "",
             "addedStuff = do",
             "    x <- Just 3",

@@ -36,14 +36,6 @@ public class ModuleScope extends BlockScope {
     public Scope enterScope(List<Import> imports) {
         ImportScope scope = new ImportScope(this, new DefaultTypeScope(symbolGenerator, resolver), resolver, symbolGenerator, moduleName, ImmutableList.<Import>builder()
             .add(moduleImport(NULL_SOURCE, "scotch.lang"))
-            .add(moduleImport(NULL_SOURCE, "scotch.data.bool"))
-            .add(moduleImport(NULL_SOURCE, "scotch.data.char"))
-            .add(moduleImport(NULL_SOURCE, "scotch.data.double"))
-            .add(moduleImport(NULL_SOURCE, "scotch.data.int"))
-            .add(moduleImport(NULL_SOURCE, "scotch.data.list"))
-            .add(moduleImport(NULL_SOURCE, "scotch.data.num"))
-            .add(moduleImport(NULL_SOURCE, "scotch.data.string"))
-            .add(moduleImport(NULL_SOURCE, "scotch.control.monad"))
             .addAll(imports)
             .build());
         importScopes.add(scope);
@@ -85,11 +77,16 @@ public class ModuleScope extends BlockScope {
 
     @Override
     public Optional<Symbol> qualify(Symbol symbol) {
-        return importScopes.stream()
+        Optional<Symbol> optionalSymbol = importScopes.stream()
             .map(importScope -> importScope.qualify_(symbol))
             .filter(Optional::isPresent)
             .map(Optional::get)
             .findFirst();
+        if (optionalSymbol.isPresent()) {
+            return optionalSymbol;
+        } else {
+            return parent.qualify(symbol);
+        }
     }
 
     @Override

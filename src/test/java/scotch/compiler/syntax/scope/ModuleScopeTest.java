@@ -9,6 +9,7 @@ import static org.junit.rules.ExpectedException.none;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static scotch.compiler.syntax.scope.Scope.scope;
 import static scotch.compiler.util.TestUtil.intType;
@@ -49,6 +50,7 @@ public class ModuleScopeTest {
         SymbolGenerator symbolGenerator = new DefaultSymbolGenerator();
         moduleScope = scope(rootScope, new DefaultTypeScope(symbolGenerator, resolver), resolver, symbolGenerator, moduleName, asList(import_));
         when(rootScope.enterScope(anyListOf(Import.class))).thenReturn(moduleScope);
+        when(rootScope.qualify(any(Symbol.class))).thenReturn(Optional.empty());
         when(import_.qualify(any(String.class), any(SymbolResolver.class))).thenReturn(Optional.empty());
     }
 
@@ -116,5 +118,12 @@ public class ModuleScopeTest {
     public void shouldThrow_whenGettingContext() {
         exception.expect(IllegalStateException.class);
         moduleScope.getContext(intType());
+    }
+
+    @Test
+    public void shouldDelegateQualifiedSymbolsToRoot() {
+        Symbol symbol = qualified("scotch.external", "fn");
+        moduleScope.qualify(symbol);
+        verify(rootScope).qualify(symbol);
     }
 }

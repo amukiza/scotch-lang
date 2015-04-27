@@ -98,6 +98,7 @@ public class PrecedenceParserTest extends IsolatedCompilerTest {
     public void shouldParsePrecedenceOfConstructorOperator() {
         compile(
             "module scotch.test",
+            "import scotch.data.list",
             "tail (_:xs) = xs"
         );
         shouldNotHaveErrors();
@@ -115,6 +116,7 @@ public class PrecedenceParserTest extends IsolatedCompilerTest {
     public void shouldParsePrecedenceOfNestedConstructorOperator() {
         compile(
             "module scotch.test",
+            "import scotch.data.list",
             "secondTail (_:_:xs) = xs"
         );
         shouldNotHaveErrors();

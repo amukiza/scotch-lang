@@ -83,6 +83,7 @@ public class BytecodeGeneratorTest {
     public void shouldPassNamedFunctionAsArgument() {
         int result = exec(
             "module scotch.test",
+            "import scotch.data.num", // TODO should not require import
             "fn a b c d = d a b c",
             "run = fn 1 2 3 add3",
             "add3 x y z = x + y + z"
@@ -94,6 +95,7 @@ public class BytecodeGeneratorTest {
     public void shouldPassAnonymousFunctionAsArgument() {
         int result = exec(
             "module scotch.test",
+            "import scotch.data.num", // TODO should not require import
             "fn a b c d = d a b c",
             "run = fn 1 2 3 (\\x y z -> x + y + z)"
         );
