@@ -5,7 +5,6 @@ import static java.util.regex.Pattern.compile;
 import static java.util.stream.Collectors.toList;
 import static scotch.symbol.Symbol.getPackageName;
 import static scotch.symbol.Symbol.getPackagePath;
-import static scotch.symbol.Symbol.qualified;
 import static scotch.symbol.Symbol.toJavaName;
 
 import java.io.File;
@@ -18,7 +17,6 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -57,7 +55,7 @@ public class ClassLoaderResolver extends URLClassLoader implements SymbolResolve
     private final Map<List<TypeParameterDescriptor>, Set<TypeInstanceDescriptor>>              typeInstancesByArguments;
     private final Map<String, Set<TypeInstanceDescriptor>>                                     typeInstancesByModule;
     private final Map<String, Set<Class<?>>>                                                   definedClasses;
-    private final Map<String, Map<String, String>>                                             reExports;
+    private final ReExportMap                                                                  reExports;
 
     public ClassLoaderResolver(Optional<File> optionalOutputPath, ClassLoader parent) {
         this(optionalOutputPath, new URL[0], parent);
@@ -74,7 +72,7 @@ public class ClassLoaderResolver extends URLClassLoader implements SymbolResolve
         this.typeInstancesByArguments = new HashMap<>();
         this.typeInstancesByModule = new HashMap<>();
         this.definedClasses = new HashMap<>();
-        this.reExports = new HashMap<>();
+        this.reExports = new ReExportMap();
     }
 
     public Class<?> define(GeneratedClass generatedClass) {
@@ -111,11 +109,7 @@ public class ClassLoaderResolver extends URLClassLoader implements SymbolResolve
             return symbol.accept(new SymbolVisitor<Optional<SymbolEntry>>() {
                 @Override
                 public Optional<SymbolEntry> visit(QualifiedSymbol symbol) {
-                    if (reExports.containsKey(symbol.getModuleName()) && reExports.get(symbol.getModuleName()).containsKey(symbol.getMemberName())) {
-                        return getEntry(qualified(reExports.get(symbol.getModuleName()).get(symbol.getMemberName()), symbol.getMemberName()));
-                    } else {
-                        return Optional.empty();
-                    }
+                    return reExports.qualify(symbol).flatMap(ClassLoaderResolver.this::getEntry);
                 }
 
                 @Override
@@ -167,7 +161,7 @@ public class ClassLoaderResolver extends URLClassLoader implements SymbolResolve
     }
 
     private void processScan(String moduleName, ScanResult scan) {
-        reExports.computeIfAbsent(moduleName, k -> new LinkedHashMap<>()).putAll(scan.getReExports());
+        reExports.addReExports(moduleName, scan.getReExports());
         scan.getEntries().forEach(entry -> namedSymbols.put(entry.getSymbol(), entry));
         scan.getInstances().forEach(typeInstance -> {
             typeInstances
