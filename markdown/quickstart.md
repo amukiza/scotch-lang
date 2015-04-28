@@ -82,6 +82,7 @@ A simple operation, 2 + 2, requires an import:
 ```
 // hello.scotch
 module hello
+import scotch.data.num
 
 main = 2 + 2
 ```
@@ -106,6 +107,7 @@ new `Maybe`. Take the following example:
 ```
 // maybe/numbers.scotch
 module maybe.numbers
+import scotch.data.num
 
 actuallyNumber = Just 1
 actuallyAnotherNumber = Just 2
@@ -135,6 +137,7 @@ us back `Nothing`?
 ```
 // maybe/numbers.scotch
 module maybe.numbers
+import scotch.data.num
 
 actuallyNumber = Just 3
 probablyPositive n =
