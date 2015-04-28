@@ -4,7 +4,7 @@
 
 SCOTCH_LANG=scotch-lang
 SCOTCH_WORKSPACE=scotch-workspace
-SCOTCH_URL=git@github.com:lmcgrath/scotch-lang.git
+SCOTCH_URL=https://github.com/lmcgrath/scotch-lang.git
 DISTRIBUTIONS_DIR=build/distributions
 GIT=$(which git) > /dev/null
 if [ $? -ne 0 ]; then
